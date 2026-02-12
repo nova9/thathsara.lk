@@ -1,0 +1,57 @@
+---
+import themeCss from "@/styles/giscus-theme.css?raw";
+
+const repo = import.meta.env.PUBLIC_GISCUS_REPO;
+const repoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
+const category = import.meta.env.PUBLIC_GISCUS_CATEGORY;
+const categoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
+
+const theme = `data:text/css;base64,${Buffer.from(themeCss).toString("base64")}`;
+---
+
+<div class="giscus-container" data-repo={repo} data-repo-id={repoId} data-category={category} data-category-id={categoryId} data-theme={theme}>
+  {
+    repo && repoId ? (
+      <script>
+        document.addEventListener("astro:page-load", () => {
+          const container = document.querySelector(".giscus-container");
+          if (!container || container.querySelector("iframe.giscus-frame")) return;
+
+          const repo = container.getAttribute("data-repo");
+          if (!repo) return;
+
+          container.innerHTML = ""; // Clear existing giscus elements before appending
+
+          const script = document.createElement("script");
+          script.src = "https://giscus.app/client.js";
+          script.setAttribute("data-repo", repo);
+          script.setAttribute("data-repo-id", container.getAttribute("data-repo-id") || "");
+          script.setAttribute("data-category", container.getAttribute("data-category") || "");
+          script.setAttribute("data-category-id", container.getAttribute("data-category-id") || "");
+          script.setAttribute("data-mapping", "url");
+          script.setAttribute("data-strict", "0");
+          script.setAttribute("data-reactions-enabled", "1");
+          script.setAttribute("data-emit-metadata", "0");
+          script.setAttribute("data-input-position", "bottom");
+          script.setAttribute("data-theme", container.getAttribute("data-theme") || "");
+          script.setAttribute("data-lang", "en");
+          script.setAttribute("data-loading", "lazy");
+          script.setAttribute("crossorigin", "anonymous");
+          script.async = true;
+
+          container.appendChild(script);
+        });
+      </script>
+    ) : (
+      <p>Please configure Giscus environment variables to enable comments.</p>
+    )
+  }
+</div>
+
+<style lang="scss">
+  .giscus-container {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px dashed var(--color-border, #ccc);
+  }
+</style>

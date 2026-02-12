@@ -1,0 +1,34 @@
+---
+import { siteConfig } from "@/lib/site";
+---
+
+<div class="main">
+  <a href="/">{siteConfig.title}</a>
+  <span class="subtitle">{siteConfig.subtitle}</span>
+</div>
+
+<style lang="scss">
+  .main {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    a {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      color: var(--color-text, #333);
+      &:hover {
+        color: var(--color-primary, #dc143c);
+      }
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      font-weight: normal;
+      color: var(--color-text-muted, #666);
+      opacity: 0.8;
+      margin-top: 0.15rem;
+    }
+  }
+</style>

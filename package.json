@@ -1,0 +1,27 @@
+{
+  "name": "thathsara-lk-astro",
+  "version": "2.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "download": "node --env-file=.env scripts/download.js",
+    "video": "node scripts/download-video.js",
+    "purge-cache": "node --env-file=.env scripts/purge-cloudflare-cache.js"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.3",
+    "@astrojs/sitemap": "^3.7.2",
+    "astro": "^6.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "listr2": "^10.2.1",
+    "music-metadata": "^11.12.3",
+    "node-id3": "^0.2.9",
+    "pagefind": "^1.4.0",
+    "sass": "^1.98.0"
+  }
+}

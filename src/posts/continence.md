@@ -1,0 +1,17 @@
+---
+title: A Forgotten Mechanism
+tags: [continence, self-control, philosophy]
+date: 2026-02-20
+---
+
+Continence seem to do somthing strange to the mind and the body. It's very observable to the practitioner. Totally weird. Very unexpected and unexplainable. Some say "Favoured by God". I'm not sure one way or the other though.
+
+After like two weeks of continence, You can feel the energy in your body. It's kind of an uneasy feeling where it won't let you rest. Like you are bored but you can't do anything about it. Remember how it was like when you were a child. It's the same. Ejaculation is the easiest way to relieve that unease. But it's never worth it. There should be a way to channel that energy. We'll see. I do have some ideas.
+
+I think ejaculation is like short circuiting an electrical circuit. It releases all the energy at once, which can be satisfying in the moment but ultimately leaves you feeling drained and unfulfilled.
+
+We have forgotten what this circuit is for. We are unable to keep the system running without short circuiting it. All the mystical and spiritual traditions seem to point to this purpose of the circuit.
+
+Buddhism and Hinduism has all these practices to achieve various things. Like meditation, yoga, and tantra. But they don't seem to work for most people. Because the fucking battery is dead. Or drained to almost nothing. A computer won't do anything if there is no power source just because you press buttons.
+
+Some say this sexual energy travels up the spine to the brain. Let's see. Have we forgotten something as a species? Are those powers buddhism talk about real? Could people fly? Was Mahabharata real? Did billions die? I don't know. Are we really having amnesia? It's very interesting to think about. Are all these homehow connected? I do have a feeling that we have lost or forgotten something.

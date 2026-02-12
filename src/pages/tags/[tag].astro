@@ -1,0 +1,46 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getVisiblePosts, toDateLabel } from "@/lib/utils";
+
+export async function getStaticPaths() {
+  const allPosts = await getVisiblePosts();
+  const uniqueTags = [
+    ...new Set(allPosts.map((post) => post.data.tags || []).flat()),
+  ];
+
+  return uniqueTags.map((tag) => {
+    const filteredPosts = allPosts.filter((post) =>
+      post.data.tags?.includes(tag),
+    );
+    return {
+      params: { tag },
+      props: { posts: filteredPosts },
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<BaseLayout title={`Posts tagged with #${tag}`}>
+  <h1 class="page-title">Posts tagged with <i>#{tag}</i></h1>
+
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li
+          class="post"
+          style={
+            post.data.accentColor
+              ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
+              : undefined
+          }
+        >
+          <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+          <span class="meta">{toDateLabel(post.data.date)}</span>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>

@@ -1,0 +1,154 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getVisiblePosts, toDateLabel } from "@/lib/utils";
+
+const posts = (await getVisiblePosts()).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Posts">
+  <h1 class="page-title">All Posts</h1>
+
+  <section class="post-search" aria-label="Search posts">
+    <input
+      id="post-search-input"
+      type="search"
+      placeholder="Search posts..."
+      autocomplete="off"
+      data-search-input
+    />
+    <p class="search-status" data-search-status></p>
+    <ul class="search-results" data-search-results></ul>
+  </section>
+
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li
+          class="post"
+          style={
+            post.data.accentColor
+              ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
+              : undefined
+          }
+        >
+          <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+          <span class="meta"> {toDateLabel(post.data.date)}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <script is:inline>
+    let pagefindModule;
+
+    function initSearch() {
+      const searchInput = document.querySelector("[data-search-input]");
+      const searchStatus = document.querySelector("[data-search-status]");
+      const searchResults = document.querySelector("[data-search-results]");
+      let debounceTimer;
+
+      // Ensure we don't bind multiple listeners if this runs multiple times
+      if (searchInput && !searchInput.dataset.initialized) {
+        searchInput.dataset.initialized = "true";
+
+        function clearSearchResults() {
+          if (searchResults) {
+            searchResults.innerHTML = "";
+          }
+        }
+
+        async function ensurePagefind() {
+          if (pagefindModule) return pagefindModule;
+
+          try {
+            pagefindModule = await import("/pagefind/pagefind.js");
+            return pagefindModule;
+          } catch {
+            if (searchStatus) {
+              searchStatus.textContent =
+                "Search index not found. Please ensure the site is built and the search index is generated.";
+            }
+            return null;
+          }
+        }
+
+        function renderResult(item) {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          const excerpt = document.createElement("p");
+
+          link.href = item.url;
+          link.textContent = item.meta?.title ?? item.url;
+
+          excerpt.className = "meta";
+          excerpt.textContent = item.excerpt
+            ? item.excerpt
+                .replace(/<[^>]+>/g, " ")
+                .replace(/\s+/g, " ")
+                .trim()
+            : "";
+
+          li.append(link);
+          if (excerpt.textContent) {
+            li.append(excerpt);
+          }
+          return li;
+        }
+
+        async function runSearch(query) {
+          const term = query.trim();
+
+          clearSearchResults();
+          if (!term) {
+            if (searchStatus) {
+              searchStatus.textContent = "";
+            }
+            return;
+          }
+
+          if (searchStatus) {
+            searchStatus.textContent = "Searching...";
+          }
+
+          const mod = await ensurePagefind();
+          if (!mod) return;
+
+          const search = await mod.search(term);
+          if (!search.results.length) {
+            if (searchStatus) {
+              searchStatus.textContent = "No matching posts found.";
+            }
+            return;
+          }
+
+          const topMatches = search.results.slice(0, 8);
+          const hydrated = await Promise.all(
+            topMatches.map((entry) => entry.data()),
+          );
+
+          hydrated.forEach((item) => {
+            if (searchResults) {
+              searchResults.append(renderResult(item));
+            }
+          });
+
+          if (searchStatus) {
+            searchStatus.textContent = `${search.results.length} result(s) found.`;
+          }
+        }
+
+        searchInput.addEventListener("input", (event) => {
+          const target = event.target;
+          const value = target instanceof HTMLInputElement ? target.value : "";
+          window.clearTimeout(debounceTimer);
+          debounceTimer = window.setTimeout(() => runSearch(value), 150);
+        });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initSearch);
+    document.addEventListener("astro:page-load", initSearch);
+  </script>
+</BaseLayout>

@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getVisiblePosts } from "@/lib/utils";
+
+const posts = await getVisiblePosts();
+const tags = [...new Set(posts.map((post) => post.data.tags || []).flat())];
+---
+
+<BaseLayout title="Tags">
+  <h1 class="page-title">Tags</h1>
+  <div
+    class="tags-container"
+    style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;"
+  >
+    {
+      tags.map((tag) => (
+        <a
+          class="tag"
+          href={`/tags/${tag}/`}
+          style="padding: 0.4rem 0.8rem; background: var(--color-border, rgba(128, 128, 128, 0.2)); border-radius: 6px; text-decoration: none; font-size: 0.9em; transition: opacity 0.2s;"
+        >
+          #{tag}
+        </a>
+      ))
+    }
+  </div>
+</BaseLayout>

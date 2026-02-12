@@ -1,0 +1,16 @@
+/* Dark theme CSS variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #d4d4d8;
+    /* Light gray / Neutral */
+    --color-border: #3f3f46;
+    /* Medium-dark gray */
+    --color-text: #e5e5e5;
+    --color-text-muted: #a3a3a3;
+    --color-text-meta: #737373;
+    --color-background: #121212;
+    /* Neutral dark gray / black background */
+    --color-background-code: #1e1e1e;
+    --color-background-pre: #1e1e1e;
+  }
+}

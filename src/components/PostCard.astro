@@ -1,0 +1,25 @@
+---
+import { getSummary, toDateLabel } from "../lib/utils.js";
+const { post } = Astro.props;
+---
+
+<section
+  class={`list-item ${post.data.featured ? "featured" : ""}`}
+  style={post.data.accentColor
+    ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
+    : undefined}
+>
+  <h1 class="title">
+    <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+  </h1>
+  <time>
+    {toDateLabel(post.data.date)}
+    {
+      post.data.updatedDate && (
+        <> · Updated {toDateLabel(post.data.updatedDate)}</>
+      )
+    }
+  </time>
+  <p>{post.data.excerpt ?? getSummary(post.body)}</p>
+  <a class="readmore" href={`/posts/${post.id}/`}> Read more &rarr;&nbsp; </a>
+</section>

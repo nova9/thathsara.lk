@@ -1,0 +1,65 @@
+---
+// Use PUBLIC_START_TIME (or START_TIME) from .env, fallback to current time if missing
+const startTime =
+  import.meta.env.PUBLIC_START_TIME ||
+  import.meta.env.START_TIME ||
+  new Date().toISOString();
+---
+
+<span class="retro-time" id="time-counter" data-start={startTime}>00:00:00</span
+>
+
+<script>
+  let interval: ReturnType<typeof setInterval> | undefined;
+
+  function updateTime() {
+    const counterEl = document.getElementById("time-counter");
+    if (!counterEl) return;
+
+    // Parse the start time and calculate elapsed seconds
+    const startStr =
+      counterEl.getAttribute("data-start") || new Date().toISOString();
+    const start = new Date(startStr).getTime();
+    const diff = Math.max(0, Math.floor((Date.now() - start) / 1000));
+
+    // Format to DD:HH:MM:SS
+    const days = Math.floor(diff / 86400)
+      .toString()
+      .padStart(2, "0");
+    const hours = Math.floor((diff % 86400) / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((diff % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (diff % 60).toString().padStart(2, "0");
+
+    counterEl.innerText = `${days}:${hours}:${minutes}:${seconds}`;
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    updateTime();
+    interval = setInterval(updateTime, 1000);
+  });
+
+  document.addEventListener("astro:before-swap", () => {
+    if (interval) clearInterval(interval);
+  });
+</script>
+
+<style lang="scss">
+  .retro-time {
+    margin: 1rem auto;
+    display: inline;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.8rem;
+    color: var(--color-text);
+    letter-spacing: 0.15em;
+    opacity: 0.8;
+
+    &:hover {
+      opacity: 1;
+      color: var(--color-primary);
+    }
+  }
+</style>

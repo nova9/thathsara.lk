@@ -1,0 +1,271 @@
+---
+import { siteConfig } from "@/lib/site";
+import MenuIcon from "@/components/icons/MenuIcon.astro";
+import CogIcon from "@/components/icons/CogIcon.astro";
+import HeaderBrand from "@/components/HeaderBrand.astro";
+
+const menu = [
+  { name: "Home", href: "/" },
+  { name: "Posts", href: "/posts/" },
+  { name: "Tags", href: "/tags/" },
+  { name: "About", href: "/about/" },
+  { name: "Thoughts", href: "/thoughts/" },
+  { name: "Settings", href: "/settings/", icon: "cog", showText: false },
+];
+
+const iconMap: Record<string, any> = {
+  cog: CogIcon,
+};
+---
+
+<header>
+  <HeaderBrand />
+  <button
+    id="menu-toggle"
+    aria-label="Toggle menu"
+    aria-expanded="false"
+    class="menu-toggle"
+  >
+    <MenuIcon class="menu-icon" />
+  </button>
+  <nav id="main-nav">
+    {
+      menu.map((item) => {
+        const IconComponent = item.icon ? iconMap[item.icon] : null;
+        const showText = item.showText !== false;
+
+        return (
+          <a
+            href={item.href}
+            aria-label={!showText ? item.name : undefined}
+            class:list={["nav-item", { "icon-only": !showText }]}
+            data-icon={item.icon}
+          >
+            {IconComponent && <IconComponent class="nav-icon" />}
+            {showText && <span>{item.name}</span>}
+          </a>
+        );
+      })
+    }
+  </nav>
+</header>
+
+<script>
+  function setupMenuToggle() {
+    const toggle = document.getElementById("menu-toggle");
+    const nav = document.getElementById("main-nav");
+    if (toggle && nav) {
+      toggle.addEventListener("click", () => {
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!isExpanded));
+        nav.classList.toggle("is-open");
+      });
+    }
+  }
+  document.addEventListener("astro:page-load", setupMenuToggle);
+</script>
+
+<style lang="scss">
+  @use "../styles/breakpoints" as bp;
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-block: 1em;
+    line-height: 2.5em;
+    padding: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 12px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-background) 75%, transparent),
+      color-mix(in srgb, var(--color-background) 70%, transparent)
+    );
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--color-border) 30%, transparent);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+
+    .menu-toggle {
+      display: none; // Hidden on desktop
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--color-text);
+      cursor: pointer;
+      padding: 0.25rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+
+      @media (hover: hover) {
+        &:hover {
+          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+        }
+      }
+
+      @media (hover: none) {
+        &:active {
+          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+        }
+      }
+
+      :global(svg) {
+        display: block;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+
+      .nav-item {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--color-text);
+        transition: all 0.3s ease;
+        font-weight: 500;
+
+        &:hover {
+          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+          color: var(--color-primary);
+        }
+
+        &.icon-only {
+          padding: 0.5rem;
+          :global(.nav-icon) {
+            width: 1.25em;
+            height: 1.25em;
+          }
+        }
+      }
+
+      a {
+        text-decoration: none;
+        color: var(--color-text, #333);
+        font-weight: 500;
+        position: relative;
+        transition: color 0.3s ease;
+
+        &:hover,
+        &:focus {
+          color: var(--color-primary, #dc143c);
+        }
+      }
+    }
+  }
+
+  @media (max-width: bp.$bp-mobile-max) {
+    header {
+      .menu-toggle {
+        display: flex;
+      }
+
+      #main-nav {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 1rem;
+        text-align: center;
+        animation: descend 0.3s ease-in-out;
+        border: 1px solid
+          color-mix(in srgb, var(--color-border) 30%, transparent);
+        border-radius: 12px;
+
+        &.is-open {
+          display: flex;
+        }
+
+        .nav-item {
+          width: 100%;
+          justify-content: center;
+          position: relative;
+          padding: 0.75rem;
+          font-size: 1.1rem;
+          border-radius: 8px; /* Slight pill shape for hover effect */
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+
+          &::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-bottom: 1px solid
+              color-mix(in srgb, var(--color-border) 30%, transparent);
+          }
+
+          &:last-child::after {
+            display: none;
+          }
+
+          &:first-child::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+          }
+
+          @media (hover: hover) {
+            &:hover {
+              background: color-mix(
+                in srgb,
+                var(--color-accent) 15%,
+                transparent
+              );
+            }
+          }
+
+          &:active {
+            background: color-mix(
+              in srgb,
+              var(--color-primary) 15%,
+              transparent
+            );
+          }
+        }
+      }
+    }
+  }
+
+  @media (min-width: bp.$bp-mobile-max) {
+    header {
+      .menu-toggle {
+        display: none;
+      }
+
+      #main-nav {
+        display: flex !important;
+      }
+    }
+  }
+
+  @keyframes descend {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

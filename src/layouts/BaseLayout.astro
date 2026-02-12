@@ -1,0 +1,191 @@
+---
+import { siteConfig } from "@/lib/site";
+import packageJson from "../../package.json";
+import "../styles/main.scss";
+import "../styles/dark.scss";
+import { toDateLabel } from "@/lib/utils";
+import GitHubIcon from "@/components/icons/GitHubIcon.astro";
+import Navigation from "@/components/Navigation.astro";
+import MusicPlayer from "@/components/MusicPlayer.astro";
+import RetroCounter from "@/components/RetroCounter.astro";
+import { ClientRouter } from "astro:transitions";
+
+interface Props {
+  title?: string;
+  description?: string;
+  accentColor?: string;
+  image?: string;
+}
+
+const { title, description, accentColor, image = "/favicon.svg" } = Astro.props;
+const pageTitle = title
+  ? `${title} - ${siteConfig.title}`
+  : `${siteConfig.title} | Home`;
+const pageDescription = description ?? siteConfig.description;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL(image, Astro.url);
+const lastUpdatedDate = toDateLabel(new Date());
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Global Metadata -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Absolute path so that google search can find it -->
+    <link rel="icon" type="image/svg+xml" href={new URL('/favicon.svg', Astro.url)} /> 
+    <link rel="icon" type="image/png" sizes="48x48" href={new URL('/favicon.png', Astro.url)} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Primary Meta Tags -->
+    <title>{pageTitle}</title>
+    <meta name="title" content={pageTitle} />
+    <meta name="description" content={pageDescription} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={socialImageURL} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={pageDescription} />
+    <meta property="twitter:image" content={socialImageURL} />
+
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    {
+      import.meta.env.PROD && (
+        <>
+        <link rel="preconnect" href="https://api-gateway.umami.dev" />
+
+        <script is:inline>
+          document.addEventListener('astro:page-load', () => {
+            if (document.querySelector('script[data-website-id]')) return;
+
+            const script = document.createElement('script');
+            script.src = "https://cloud.umami.is/script.js";  
+            script.async = true; 
+            script.setAttribute('data-website-id', 'd1647069-5a04-45c8-b5ca-18a0ffa9410c');
+            script.setAttribute('data-domains', 'thathsara.lk'); // Umami native domain filtering
+            document.head.appendChild(script);
+          }, { once: true });
+        </script>
+        </>
+      )
+    }
+
+    <ClientRouter />
+    <style is:global>
+      html.is-loading body::before,
+      html.is-loaded body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        background-color: var(--color-primary, #dc143c);
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      html.is-loading body::before {
+        animation: route-loading 10s ease-out forwards;
+        opacity: 1;
+      }
+
+      html.is-loaded body::before {
+        animation: route-loaded 0.4s ease-out forwards;
+      }
+
+      @keyframes route-loading {
+        0% { width: 0%; }
+        10% { width: 20%; }
+        50% { width: 50%; }
+        100% { width: 80%; }
+      }
+
+      @keyframes route-loaded {
+        0% { width: 80%; opacity: 1; }
+        50% { width: 100%; opacity: 1; }
+        100% { width: 100%; opacity: 0; }
+      }
+    </style>
+    <script is:inline>
+      document.addEventListener('astro:before-preparation', () => {
+        document.documentElement.classList.add('is-loading');
+        document.documentElement.classList.remove('is-loaded');
+      });
+      document.addEventListener('astro:page-load', () => {
+        if (document.documentElement.classList.contains('is-loading')) {
+          document.documentElement.classList.remove('is-loading');
+          document.documentElement.classList.add('is-loaded');
+          setTimeout(() => {
+            document.documentElement.classList.remove('is-loaded');
+          }, 400);
+        }
+      });
+    </script>
+  </head>
+  <body
+    style={accentColor
+      ? `--color-primary: ${accentColor}; --color-border: ${accentColor};`
+      : undefined}
+  >
+    <div class="content">
+      <Navigation />
+
+      <slot />
+
+      <footer>
+        <div class="footer-links">
+          {
+            siteConfig.social.map((social, index) => (
+              <>
+                <a class="soc" href={social.url} rel="me" title={social.name}>
+                  {social.name === "GitHub" && <GitHubIcon class="soc-icon" />}
+                  <span>{social.name}</span>
+                </a>
+                {index < siteConfig.social.length - 1 && (
+                  <span class="divider">•</span>
+                )}
+              </>
+            ))
+          }
+        </div>
+        <div class="footer-info">
+          {lastUpdatedDate} &bull;
+          {siteConfig.copyright} &bull;
+          <a target="_blank" href="https://astro.build">Built with Astro</a> &bull;
+          <span class="version" title="Website Version">v{packageJson.version}</span>
+        </div>
+        <div style="display: flex; justify-content: center; width: 100%; margin-top: 1rem;">
+          <RetroCounter />
+        </div>
+      </footer>
+    </div>
+
+    <MusicPlayer />
+  </body>
+</html>

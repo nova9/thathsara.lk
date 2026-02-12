@@ -1,0 +1,66 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import TagIcon from "@/components/icons/TagIcon.astro";
+import Giscus from "@/components/Giscus.astro";
+import { getSummary, getVisiblePosts, toDateLabel } from "@/lib/utils";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getVisiblePosts();
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const tags = post.data.tags ?? [];
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={getSummary(post.body)}
+  accentColor={post.data.accentColor}
+>
+  <main>
+    <article
+      style={post.data.accentColor
+        ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
+        : undefined}
+    >
+      <div class="title">
+        <h1 class="title">{post.data.title}</h1>
+        <div class="meta">
+          Posted on {toDateLabel(post.data.date)}
+          {
+            post.data.updatedDate && (
+              <> · Updated on {toDateLabel(post.data.updatedDate)}</>
+            )
+          }
+        </div>
+      </div>
+
+      <Content />
+
+      {
+        tags.length > 0 && (
+          <div class="post-tags">
+            <nav class="nav tags">
+              <ul class="tags">
+                {tags.map((tag) => (
+                  <li>
+                    <TagIcon style="color: var(--color-primary)" />
+                    <a href={`/tags/${tag}/`}>{tag}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        )
+      }
+
+      <!-- <Giscus /> -->
+    </article>
+  </main>
+</BaseLayout>
