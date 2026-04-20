@@ -4,11 +4,11 @@ import packageJson from "../../package.json";
 import "../styles/main.scss";
 import "../styles/dark.scss";
 import { toDateLabel } from "@/lib/utils";
-import GitHubIcon from "@/components/icons/GitHubIcon.astro";
 import Navigation from "@/components/Navigation.astro";
 import MusicPlayer from "@/components/MusicPlayer.astro";
 import RetroCounter from "@/components/RetroCounter.astro";
 import { ClientRouter } from "astro:transitions";
+import Socials from "@/components/Socials.astro";
 
 interface Props {
   title?: string;
@@ -159,21 +159,7 @@ const lastUpdatedDate = toDateLabel(new Date());
       <slot />
 
       <footer>
-        <div class="footer-links">
-          {
-            siteConfig.social.map((social, index) => (
-              <>
-                <a class="soc" href={social.url} rel="me" title={social.name}>
-                  {social.name === "GitHub" && <GitHubIcon class="soc-icon" />}
-                  <span>{social.name}</span>
-                </a>
-                {index < siteConfig.social.length - 1 && (
-                  <span class="divider">•</span>
-                )}
-              </>
-            ))
-          }
-        </div>
+        <Socials />
         <div class="footer-info">
           {lastUpdatedDate} &bull;
           {siteConfig.copyright} &bull;
