@@ -7,9 +7,9 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
-    "download": "node --env-file=.env scripts/download.js",
-    "video": "node scripts/download-video.js",
-    "purge-cache": "node --env-file=.env scripts/purge-cloudflare-cache.js"
+    "download": "node --env-file=.env npm-run/download.js",
+    "video": "node npm-run/download-video.js",
+    "purge-cache": "node --env-file=.env npm-run/purge-cloudflare-cache.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.3",
