@@ -1,7 +1,17 @@
 /**
  * Script to purge Cloudflare cache
- * Requires CLOUDFLARE_ZONE_ID and CLOUDFLARE_API_TOKEN in the environment or a .env file.
+ * Requires CLOUDFLARE_ZONE_ID and CLOUDFLARE_API_TOKEN in the environment or .env file.
  */
+
+import fs from "node:fs";
+import path from "node:path";
+import dotenv from "dotenv";
+
+const envPath = path.resolve(process.cwd(), ".env");
+
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 const zoneId = process.env.CLOUDFLARE_ZONE_ID;
 const apiToken = process.env.CLOUDFLARE_API_TOKEN;
