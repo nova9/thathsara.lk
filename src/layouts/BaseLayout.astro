@@ -23,7 +23,31 @@ const pageTitle = title
   : `${siteConfig.title} | Home`;
 const pageDescription = description ?? siteConfig.description;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const socialImageURL = new URL(image, Astro.url);
+const siteURL = Astro.site ? new URL("/", Astro.site) : new URL("/", canonicalURL);
+const socialImageURL = new URL(image, siteURL);
+const themeColor = accentColor ?? "#dc143c";
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${siteURL}#website`,
+      url: siteURL.toString(),
+      name: siteConfig.title,
+      description: siteConfig.description,
+      inLanguage: "en",
+      publisher: {
+        "@id": `${siteURL}#person`,
+      },
+    },
+    {
+      "@type": "Person",
+      "@id": `${siteURL}#person`,
+      name: siteConfig.title,
+      url: siteURL.toString(),
+    },
+  ],
+};
 const lastUpdatedDate = toDateLabel(new Date());
 ---
 
@@ -44,20 +68,28 @@ const lastUpdatedDate = toDateLabel(new Date());
     <title>{pageTitle}</title>
     <meta name="title" content={pageTitle} />
     <meta name="description" content={pageDescription} />
+    <meta name="author" content={siteConfig.title} />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content={themeColor} />
+    <link rel="apple-touch-icon" href={new URL('/favicon.png', siteURL)} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:image" content={socialImageURL} />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={pageTitle} />
     <meta property="twitter:description" content={pageDescription} />
     <meta property="twitter:image" content={socialImageURL} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
     <!-- Preconnect for Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
