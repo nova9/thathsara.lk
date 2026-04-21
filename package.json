@@ -1,6 +1,6 @@
 {
   "name": "thathsara-lk-astro",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,7 +22,6 @@
     "music-metadata": "^11.12.3",
     "node-id3": "^0.2.9",
     "pagefind": "^1.4.0",
-    "sass": "^1.98.0",
-    "dotenv": "^17.4.2"
+    "sass": "^1.98.0"
   }
 }

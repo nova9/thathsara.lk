@@ -2,15 +2,9 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostCard from "@/components/PostCard.astro";
 import { siteConfig } from "@/lib/site";
-import { getVisiblePosts } from "@/lib/utils";
+import { getAllPosts } from "@/lib/utils";
 
-const posts = (await getVisiblePosts())
-  .sort((a, b) => {
-    if (a.data.featured && !b.data.featured) return -1;
-    if (!a.data.featured && b.data.featured) return 1;
-    return b.data.date.valueOf() - a.data.date.valueOf();
-  })
-  .slice(0, 10);
+const posts = await getAllPosts();
 ---
 
 <BaseLayout title="Home" description={siteConfig.description}>

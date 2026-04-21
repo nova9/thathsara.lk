@@ -2,6 +2,8 @@
 title: A Forgotten Mechanism
 tags: [continence, self-control, philosophy]
 date: 2026-02-20
+updatedDate: 2026-04-20
+accentColor: "#d31212"
 ---
 
 Continence seem to do somthing strange to the mind and the body. It's very observable to the practitioner. Totally weird. Very unexpected and unexplainable. Some say "Favoured by God". I'm not sure one way or the other though.
@@ -15,3 +17,5 @@ We have forgotten what this circuit is for. We are unable to keep the system run
 Buddhism and Hinduism has all these practices to achieve various things. Like meditation, yoga, and tantra. But they don't seem to work for most people. Because the fucking battery is dead. Or drained to almost nothing. A computer won't do anything if there is no power source just because you press buttons.
 
 Some say this sexual energy travels up the spine to the brain. Let's see. Have we forgotten something as a species? Are those powers buddhism talk about real? Could people fly? Was Mahabharata real? Did billions die? I don't know. Are we really having amnesia? It's very interesting to think about. Are all these homehow connected? I do have a feeling that we have lost or forgotten something.
+
+<div style="position:relative;padding-top:56.25%;"><iframe src="https://player.mediadelivery.net/embed/641370/6b4afe91-1c42-45d9-9153-60f3fa2500b1?autoplay=false&loop=true&muted=false&preload=false&responsive=true" loading="lazy" style="border:0;position:absolute;top:0;height:100%;width:100%;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;" allowfullscreen="true"></iframe></div>
