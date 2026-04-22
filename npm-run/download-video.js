@@ -119,6 +119,18 @@ async function runYtDlp(downloadUrl) {
   return { filePath, thumbPath };
 }
 
+async function probeStreams(filePath) {
+  const result = await runCommand("ffprobe", [
+    "-v", "quiet",
+    "-print_format", "json",
+    "-show_streams",
+    filePath,
+  ]);
+  if (result.code !== 0) throw new Error("ffprobe failed: " + result.stderr);
+  const { streams } = JSON.parse(result.stdout);
+  return { hasAudio: streams.some((s) => s.codec_type === "audio") };
+}
+
 async function generateVideoDashManifest(filePath) {
   const { name } = parse(filePath);
   const dashDir = join(outputDir, "dash", name);
@@ -126,71 +138,44 @@ async function generateVideoDashManifest(filePath) {
 
   mkdirSync(dashDir, { recursive: true });
 
+  const { hasAudio } = await probeStreams(filePath);
+
   const args = [
     "-y",
-    "-i",
-    filePath,
-    // Generate 3 video streams (1080p, 720p, 480p) and 1 audio stream
-    "-map",
-    "0:v:0",
-    "-map",
-    "0:v:0",
-    "-map",
-    "0:v:0",
-    "-map",
-    "0:a:0?",
+    "-i", filePath,
+    "-map", "0:v:0",
+    "-map", "0:v:0",
+    "-map", "0:v:0",
+    ...(hasAudio ? ["-map", "0:a:0"] : []),
 
-    // 1080p
-    "-s:v:0",
-    "1920x1080",
-    "-c:v:0",
-    "libx264",
-    "-b:v:0",
-    "3000k",
-    "-profile:v:0",
-    "main",
+    // 1080p — scale preserves aspect ratio (works for portrait and landscape)
+    "-filter:v:0", "scale=-2:1080",
+    "-c:v:0", "libx264",
+    "-b:v:0", "3000k",
+    "-profile:v:0", "main",
 
     // 720p
-    "-s:v:1",
-    "1280x720",
-    "-c:v:1",
-    "libx264",
-    "-b:v:1",
-    "1500k",
-    "-profile:v:1",
-    "main",
+    "-filter:v:1", "scale=-2:720",
+    "-c:v:1", "libx264",
+    "-b:v:1", "1500k",
+    "-profile:v:1", "main",
 
     // 480p
-    "-s:v:2",
-    "854x480",
-    "-c:v:2",
-    "libx264",
-    "-b:v:2",
-    "800k",
-    "-profile:v:2",
-    "main",
+    "-filter:v:2", "scale=-2:480",
+    "-c:v:2", "libx264",
+    "-b:v:2", "800k",
+    "-profile:v:2", "main",
 
-    // Audio
-    "-c:a",
-    "aac",
-    "-b:a",
-    "128k",
+    ...(hasAudio ? ["-c:a", "aac", "-b:a", "128k"] : []),
 
     // DASH options
-    "-f",
-    "dash",
-    "-seg_duration",
-    "4",
-    "-use_template",
-    "1",
-    "-use_timeline",
-    "1",
-    "-init_seg_name",
-    "init-$RepresentationID$.m4s",
-    "-media_seg_name",
-    "chunk-$RepresentationID$-$Number%05d$.m4s",
-    "-adaptation_sets",
-    "id=0,streams=v id=1,streams=a",
+    "-f", "dash",
+    "-seg_duration", "4",
+    "-use_template", "1",
+    "-use_timeline", "1",
+    "-init_seg_name", "init-$RepresentationID$.m4s",
+    "-media_seg_name", "chunk-$RepresentationID$-$Number%05d$.m4s",
+    "-adaptation_sets", hasAudio ? "id=0,streams=v id=1,streams=a" : "id=0,streams=v",
     manifestPath,
   ];
 
