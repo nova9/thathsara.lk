@@ -119,6 +119,10 @@ async function runYtDlp(downloadUrl) {
   return { filePath, thumbPath };
 }
 
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
 async function probeStreams(filePath) {
   const result = await runCommand("ffprobe", [
     "-v", "quiet",
@@ -128,7 +132,14 @@ async function probeStreams(filePath) {
   ]);
   if (result.code !== 0) throw new Error("ffprobe failed: " + result.stderr);
   const { streams } = JSON.parse(result.stdout);
-  return { hasAudio: streams.some((s) => s.codec_type === "audio") };
+  const videoStream = streams.find((s) => s.codec_type === "video");
+  const w = videoStream?.width ?? 0;
+  const h = videoStream?.height ?? 0;
+  const g = w && h ? gcd(w, h) : 1;
+  return {
+    hasAudio: streams.some((s) => s.codec_type === "audio"),
+    dar: `${w / g}/${h / g}`,
+  };
 }
 
 async function generateVideoDashManifest(filePath) {
@@ -138,7 +149,7 @@ async function generateVideoDashManifest(filePath) {
 
   mkdirSync(dashDir, { recursive: true });
 
-  const { hasAudio } = await probeStreams(filePath);
+  const { hasAudio, dar } = await probeStreams(filePath);
 
   const args = [
     "-y",
@@ -148,20 +159,20 @@ async function generateVideoDashManifest(filePath) {
     "-map", "0:v:0",
     ...(hasAudio ? ["-map", "0:a:0"] : []),
 
-    // 1080p — scale preserves aspect ratio (works for portrait and landscape)
-    "-filter:v:0", "scale=-2:1080",
+    // 1080p — setdar normalises rounded pixel dims to the same display AR across streams
+    "-filter:v:0", `scale=-2:1080,setdar=${dar}`,
     "-c:v:0", "libx264",
     "-b:v:0", "3000k",
     "-profile:v:0", "main",
 
     // 720p
-    "-filter:v:1", "scale=-2:720",
+    "-filter:v:1", `scale=-2:720,setdar=${dar}`,
     "-c:v:1", "libx264",
     "-b:v:1", "1500k",
     "-profile:v:1", "main",
 
     // 480p
-    "-filter:v:2", "scale=-2:480",
+    "-filter:v:2", `scale=-2:480,setdar=${dar}`,
     "-c:v:2", "libx264",
     "-b:v:2", "800k",
     "-profile:v:2", "main",
