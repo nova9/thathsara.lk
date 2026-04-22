@@ -681,6 +681,12 @@ const id = Math.random().toString(36).substring(2, 11);
         return;
       }
 
+      const lockedHeight = this.getBoundingClientRect().height;
+      if (lockedHeight > 0) {
+        this.style.height = lockedHeight + "px";
+        this.video.addEventListener("playing", () => { this.style.height = ""; }, { once: true });
+      }
+
       try {
         const shakaLib = await this.getShaka();
         shakaLib.polyfill.installAll();
