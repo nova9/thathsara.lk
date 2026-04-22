@@ -1,6 +1,6 @@
 {
   "name": "thathsara-lk-astro",
-  "version": "2.1.5",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "download": "node --env-file=.env npm-run/download.js",
     "video": "node npm-run/download-video.js",
+    "mov-to-mp4": "node npm-run/mov-to-mp4.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js"
   },
   "dependencies": {

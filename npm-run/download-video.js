@@ -227,9 +227,35 @@ const tasks = new Listr(
               title: "Format path",
               skip: () => isUrl,
               task: async () => {
-                if (!existsSync(sourceFile))
-                  throw new Error(`File not found: ${sourceFile}`);
-                sourceFile = toSnakeCaseFilePath(Object.assign(sourceFile));
+                if (!existsSync(sourceFile)) {
+                  const match = [".mp4", ".mkv", ".webm", ".mov"].map(ext => sourceFile + ext).find(existsSync);
+                  if (!match) throw new Error(`File not found: ${sourceFile}`);
+                  sourceFile = match;
+                }
+                sourceFile = toSnakeCaseFilePath(sourceFile);
+              },
+            },
+            {
+              title: "Transcode for editing",
+              skip: () => !isUrl,
+              task: async () => {
+                const { dir, name, ext } = parse(sourceFile);
+                const editPath = join(dir, `${name}_edit${ext}`);
+                const result = await runCommand("ffmpeg", [
+                  "-y",
+                  "-i", sourceFile,
+                  "-c:v", "libx264",
+                  "-profile:v", "high",
+                  "-level", "4.0",
+                  "-pix_fmt", "yuv420p",
+                  "-c:a", "aac",
+                  "-b:a", "192k",
+                  "-movflags", "+faststart",
+                  editPath,
+                ]);
+                if (result.code !== 0)
+                  throw new Error(result.stderr?.trim() || "ffmpeg transcode failed.");
+                sourceFile = editPath;
               },
             },
             {
