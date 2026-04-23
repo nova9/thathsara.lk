@@ -22,30 +22,38 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
 <BaseLayout
   title={post.data.title}
   description={post.data.excerpt ?? getSummary(post.body)}
-  accentColor={post.data.accentColor}
 >
   <article>
     <a class="post-back" href="/">← Archive</a>
 
     <div class="post-header">
-      {tags.length > 0 && (
-        <div class="label-tag">
-          {tags.map((t, i) => (
-            <><a href={`/tags/${t}/`} class="post-tag-inline">#{t}</a>{i < tags.length - 1 ? " · " : ""}</>
-          ))}
-        </div>
-      )}
+      {
+        tags.length > 0 && (
+          <div class="label-tag">
+            {tags.map((t, i) => (
+              <>
+                <a href={`/tags/${t}/`} class="post-tag-inline">
+                  #{t}
+                </a>
+                {i < tags.length - 1 ? " · " : ""}
+              </>
+            ))}
+          </div>
+        )
+      }
       <h1 class="article-title">{post.data.title}</h1>
       <div class="article-meta">
         <span>{toDateLabel(post.data.date)}</span>
         <span>·</span>
         <span>{readMinutes} min read</span>
-        {post.data.updatedDate && (
-          <>
-            <span>·</span>
-            <span>Updated {toDateLabel(post.data.updatedDate)}</span>
-          </>
-        )}
+        {
+          post.data.updatedDate && (
+            <>
+              <span>·</span>
+              <span>Updated {toDateLabel(post.data.updatedDate)}</span>
+            </>
+          )
+        }
       </div>
       <div class="article-divider">
         <hr />✦<hr />
@@ -56,12 +64,16 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
       <Content />
     </div>
 
-    {tags.length > 0 && (
-      <div class="post-tags-footer">
-        {tags.map((tag) => (
-          <a href={`/tags/${tag}/`} class="post-tag-inline">#{tag}</a>
-        ))}
-      </div>
-    )}
+    {
+      tags.length > 0 && (
+        <div class="post-tags-footer">
+          {tags.map((tag) => (
+            <a href={`/tags/${tag}/`} class="post-tag-inline">
+              #{tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
   </article>
 </BaseLayout>

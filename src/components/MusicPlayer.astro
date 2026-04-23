@@ -212,17 +212,14 @@ if (fs.existsSync(musicDir)) {
     width: 3rem;
     height: 3rem;
     svg {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 24px;
+      height: 24px;
     }
   }
 
   .icon-loading-music,
   .icon-loading-shaka {
     animation: music-spin 1s linear infinite;
-    transform-box: fill-box;
-    transform-origin: center center;
-    will-change: transform;
   }
 
   @keyframes music-spin {
@@ -410,7 +407,7 @@ if (fs.existsSync(musicDir)) {
   }
 
   let isPlaying = false;
-  let isLoadingState = "none"; // 'none' | 'shaka' | 'music'
+  let isLoadingState = "music"; // 'none' | 'shaka' | 'music'
 
   async function setupPlayer() {
     // Check if music player is disabled in settings
