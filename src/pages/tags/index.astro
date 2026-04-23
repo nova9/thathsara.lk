@@ -13,18 +13,14 @@ const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 ---
 
 <BaseLayout title="Tags">
-  <div class="section-hd" style="padding-top: 3rem;">
-    <hr />
-    <span class="section-lbl">All Tags</span>
-    <hr />
-  </div>
-
-  <div class="tags-cloud">
-    {tags.map(([tag, count]) => (
-      <a class="tag-pill" href={`/tags/${tag}/`}>
-        #{tag}
-        <span style="margin-left: 4px; opacity: 0.6; font-size: 8px;">{count}</span>
-      </a>
-    ))}
+  <div class="page-top">
+    <div class="tags-cloud" style="margin-top: 0;">
+      {tags.map(([tag, count]) => (
+        <a class="tag-pill" href={`/tags/${tag}/`}>
+          #{tag}
+          <span style="margin-left: 4px; opacity: 0.6; font-size: 8px;">{count}</span>
+        </a>
+      ))}
+    </div>
   </div>
 </BaseLayout>

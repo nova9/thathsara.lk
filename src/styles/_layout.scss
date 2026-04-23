@@ -34,6 +34,18 @@
   margin-bottom: 0.5rem;
   color: var(--color-ink);
   padding-top: 3rem;
+
+  @media (max-width: bp.$bp-mobile-max) {
+    padding-top: 1.5rem;
+  }
+}
+
+.page-top {
+  padding-top: 3rem;
+
+  @media (max-width: bp.$bp-mobile-max) {
+    padding-top: 1rem;
+  }
 }
 
 .section-hd {
@@ -41,6 +53,10 @@
   align-items: center;
   gap: 1.2rem;
   margin-bottom: 1rem;
+
+  @media (max-width: bp.$bp-mobile-max) {
+    margin-bottom: 0.5rem;
+  }
 
   hr {
     flex: 1;
