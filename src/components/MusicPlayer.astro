@@ -407,7 +407,7 @@ if (fs.existsSync(musicDir)) {
   }
 
   let isPlaying = false;
-  let isLoadingState = "music"; // 'none' | 'shaka' | 'music'
+  let isLoadingState = "none"; // 'none' | 'shaka' | 'music'
 
   async function setupPlayer() {
     // Check if music player is disabled in settings
