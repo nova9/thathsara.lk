@@ -1,9 +1,24 @@
 ---
 import { toDateLabel } from "../lib/utils.js";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+}
+
 const { post } = Astro.props;
 
 const tags = post.data.tags ?? [];
-const excerpt = post.data.excerpt ?? "";
+const excerpt =
+  post.data.excerpt ??
+  post.body
+    ?.replace(/^---[\s\S]*?---/, "")
+    .replace(/import\s+.*?from\s+['"].*?['"]/gm, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/[#*`_[\]]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 200) ?? "";
 
 const wordCount = post.body?.split(/\s+/).length ?? 0;
 const readMinutes = Math.max(1, Math.round(wordCount / 200));

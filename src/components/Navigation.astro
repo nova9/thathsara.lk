@@ -39,7 +39,7 @@ function isActive(href: string) {
       </a>
     </>
   ))}
-  <button class="search-toggle" id="search-toggle" aria-label="Toggle search">
+  <button class="search-toggle" id="search-toggle" aria-label="Toggle search" style={currentPath !== "/" ? "display:none" : ""}>
     <span aria-hidden="true">⌕</span> Search
   </button>
 </nav>
@@ -112,7 +112,7 @@ function isActive(href: string) {
 <style lang="scss">
   // ── Masthead ─────────────────────────────────────────────────────────────────
   .masthead {
-    border-bottom: 3px double var(--color-ink);
+    border-bottom: 1px solid var(--color-ink-light);
     padding: 2rem 2rem 1.5rem;
     text-align: center;
     position: relative;

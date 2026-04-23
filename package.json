@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build",
     "preview": "astro preview",
     "download": "node --env-file=.env npm-run/download.js",
     "video": "node npm-run/download-video.js",
@@ -22,7 +22,6 @@
     "listr2": "^10.2.1",
     "music-metadata": "^11.12.3",
     "node-id3": "^0.2.9",
-    "pagefind": "^1.4.0",
     "sass": "^1.98.0"
   }
 }
