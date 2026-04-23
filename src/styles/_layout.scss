@@ -1,0 +1,111 @@
+@use "./breakpoints" as bp;
+
+.page-content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--content-padding) 5rem;
+  overflow-wrap: break-word;
+
+  @media (max-width: bp.$bp-mobile-max) {
+    padding-inline: 0.7rem;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-anim {
+  animation: fadeUp 0.3s ease;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 900;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink);
+  padding-top: 3rem;
+}
+
+.section-hd {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1rem;
+
+  hr {
+    flex: 1;
+    border: none;
+    border-top: 1px solid var(--color-rule);
+    margin: 0;
+  }
+}
+
+.section-lbl {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-ink-light);
+  white-space: nowrap;
+}
+
+.label-tag {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-red);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-red);
+    opacity: 0.3;
+  }
+}
+
+.read-link {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: gap 0.2s, color 0.2s, border-color 0.2s;
+  border-bottom: 1px solid var(--color-rule);
+  padding-bottom: 4px;
+
+  &:hover {
+    gap: 16px;
+    border-bottom-color: var(--color-gold);
+    color: var(--color-gold);
+    text-decoration: none;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}

@@ -1,0 +1,34 @@
+:root {
+  // Warm editorial palette
+  --color-bg: #f4ede0;
+  --color-paper: #f9f4eb;
+  --color-ink: #1e1810;
+  --color-ink-mid: #4a3f30;
+  --color-ink-light: #6e5d48;
+  --color-rule: #d4c4a8;
+  --color-gold: #b8882a;
+  --color-red: #9b2020;
+
+  // Aliases for existing code compatibility
+  --color-primary: var(--color-gold);
+  --color-border: var(--color-rule);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-ink-mid);
+  --color-text-meta: var(--color-ink-light);
+  --color-background: var(--color-bg);
+  --color-background-code: var(--color-paper);
+  --color-background-pre: var(--color-paper);
+
+  // Typography
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Source Serif 4', Georgia, serif;
+  --font-ui: 'DM Sans', sans-serif;
+
+  // Layout
+  --content-max-width: 760px;
+  --content-padding: 2rem;
+  --border-radius: 2px;
+  --font-size-base: 18px;
+  --line-height-base: 1.75;
+  --line-height-content: 1.85;
+}
