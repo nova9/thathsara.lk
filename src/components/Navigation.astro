@@ -1,271 +1,312 @@
 ---
 import { siteConfig } from "@/lib/site";
-import MenuIcon from "@/components/icons/MenuIcon.astro";
-import CogIcon from "@/components/icons/CogIcon.astro";
-import HeaderBrand from "@/components/HeaderBrand.astro";
 
-const menu = [
-  { name: "Home", href: "/" },
-  { name: "Posts", href: "/posts/" },
-  { name: "Tags", href: "/tags/" },
-  { name: "About", href: "/about/" },
-  { name: "Thoughts", href: "/thoughts/" },
-  { name: "Settings", href: "/settings/", icon: "cog", showText: false },
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { label: "Archive", href: "/" },
+  { label: "Tags", href: "/tags/" },
+  { label: "About", href: "/about/" },
+  { label: "Thoughts", href: "/thoughts/" },
 ];
 
-const iconMap: Record<string, any> = {
-  cog: CogIcon,
-};
+function isActive(href: string) {
+  if (href === "/") return currentPath === "/";
+  return currentPath.startsWith(href);
+}
 ---
 
-<header>
-  <HeaderBrand />
-  <button
-    id="menu-toggle"
-    aria-label="Toggle menu"
-    aria-expanded="false"
-    class="menu-toggle"
-  >
-    <MenuIcon class="menu-icon" />
-  </button>
-  <nav id="main-nav">
-    {
-      menu.map((item) => {
-        const IconComponent = item.icon ? iconMap[item.icon] : null;
-        const showText = item.showText !== false;
-
-        return (
-          <a
-            href={item.href}
-            aria-label={!showText ? item.name : undefined}
-            class:list={["nav-item", { "icon-only": !showText }]}
-            data-icon={item.icon}
-          >
-            {IconComponent && <IconComponent class="nav-icon" />}
-            {showText && <span>{item.name}</span>}
-          </a>
-        );
-      })
-    }
-  </nav>
+<header class="masthead">
+  <div class="masthead-eyebrow">Est. 2024 · {siteConfig.subtitle}</div>
+  <a href="/" class="masthead-title">
+    thathsara<em>.</em>lk
+  </a>
+  <div class="masthead-rule">
+    <hr />✦<hr />
+  </div>
 </header>
 
+<nav class="nav-bar">
+  {navItems.map((item, i) => (
+    <>
+      {i > 0 && <span class="nav-divider">·</span>}
+      <a
+        href={item.href}
+        class:list={["nav-item", { active: isActive(item.href) }]}
+        aria-current={isActive(item.href) ? "page" : undefined}
+      >
+        {item.label}
+      </a>
+    </>
+  ))}
+  <button class="search-toggle" id="search-toggle" aria-label="Toggle search">
+    <span aria-hidden="true">⌕</span> Search
+  </button>
+</nav>
+
+<div id="search-bar-wrapper" class="search-bar-wrapper" hidden>
+  <div class="search-bar-inner">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <input
+      id="search-input"
+      type="search"
+      placeholder="Search dispatches…"
+      autocomplete="off"
+    />
+    <button class="search-esc" id="search-close">esc</button>
+  </div>
+</div>
+
 <script>
-  function setupMenuToggle() {
-    const toggle = document.getElementById("menu-toggle");
-    const nav = document.getElementById("main-nav");
-    if (toggle && nav) {
-      toggle.addEventListener("click", () => {
-        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
-        toggle.setAttribute("aria-expanded", String(!isExpanded));
-        nav.classList.toggle("is-open");
+  function setupSearch() {
+    const toggle = document.getElementById("search-toggle");
+    const wrapper = document.getElementById("search-bar-wrapper");
+    const input = document.getElementById("search-input") as HTMLInputElement | null;
+    const close = document.getElementById("search-close");
+
+    if (!toggle || !wrapper || !input || !close) return;
+
+    function openSearch() {
+      wrapper!.hidden = false;
+      input!.focus();
+    }
+
+    function closeSearch() {
+      wrapper!.hidden = true;
+      input!.value = "";
+      filterCards("");
+    }
+
+    function filterCards(query: string) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll<HTMLElement>(".post-card").forEach((card) => {
+        const text = (card.dataset.search ?? "").toLowerCase();
+        card.style.display = !q || text.includes(q) ? "" : "none";
       });
     }
+
+    toggle.addEventListener("click", () => {
+      if (wrapper.hidden) {
+        openSearch();
+      } else {
+        closeSearch();
+      }
+    });
+
+    close.addEventListener("click", closeSearch);
+
+    input.addEventListener("input", () => filterCards(input.value));
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSearch();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !wrapper.hidden) closeSearch();
+    });
   }
-  document.addEventListener("astro:page-load", setupMenuToggle);
+
+  document.addEventListener("astro:page-load", setupSearch);
 </script>
 
 <style lang="scss">
-  @use "../styles/breakpoints" as bp;
+  // ── Masthead ─────────────────────────────────────────────────────────────────
+  .masthead {
+    border-bottom: 3px double var(--color-ink);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+  }
 
-  header {
+  .masthead-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-ink-light);
+    margin-bottom: 0.75rem;
+  }
+
+  .masthead-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--color-ink);
+    text-decoration: none;
+    display: inline-block;
+
+    em {
+      font-style: italic;
+      color: var(--color-gold);
+    }
+
+    &:hover { text-decoration: none; color: var(--color-ink); }
+  }
+
+  .masthead-rule {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
-    margin-block: 1em;
-    line-height: 2.5em;
-    padding: 0.75rem;
+    gap: 1rem;
+    margin: 1.2rem auto 0;
+    max-width: 400px;
+    color: var(--color-gold);
+    font-size: 14px;
+
+    hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid var(--color-rule);
+      margin: 0;
+    }
+  }
+
+  // ── Nav bar ───────────────────────────────────────────────────────────────────
+  .nav-bar {
+    border-bottom: 1px solid var(--color-rule);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: sticky;
     top: 0;
-    z-index: 10;
-    border-radius: 12px;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-background) 75%, transparent),
-      color-mix(in srgb, var(--color-background) 70%, transparent)
-    );
-    backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in srgb, var(--color-border) 30%, transparent);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    background: var(--color-bg);
+    z-index: 100;
+  }
 
-    .menu-toggle {
-      display: none; // Hidden on desktop
-      background: transparent;
-      border: none;
-      border-radius: 8px;
-      color: var(--color-text);
-      cursor: pointer;
-      padding: 0.25rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
+  .nav-item {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-ink-mid);
+    padding: 12px 18px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    text-decoration: none;
+    display: inline-block;
 
-      @media (hover: hover) {
-        &:hover {
-          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-        }
-      }
-
-      @media (hover: none) {
-        &:active {
-          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-        }
-      }
-
-      :global(svg) {
-        display: block;
-        width: 24px;
-        height: 24px;
-      }
-    }
-
-    nav {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-
-      .nav-item {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 8px;
-        text-decoration: none;
-        color: var(--color-text);
-        transition: all 0.3s ease;
-        font-weight: 500;
-
-        &:hover {
-          background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-          color: var(--color-primary);
-        }
-
-        &.icon-only {
-          padding: 0.5rem;
-          :global(.nav-icon) {
-            width: 1.25em;
-            height: 1.25em;
-          }
-        }
-      }
-
-      a {
-        text-decoration: none;
-        color: var(--color-text, #333);
-        font-weight: 500;
-        position: relative;
-        transition: color 0.3s ease;
-
-        &:hover,
-        &:focus {
-          color: var(--color-primary, #dc143c);
-        }
-      }
+    &:hover, &.active {
+      color: var(--color-ink);
+      border-bottom-color: var(--color-gold);
+      text-decoration: none;
     }
   }
 
-  @media (max-width: bp.$bp-mobile-max) {
-    header {
-      .menu-toggle {
-        display: flex;
-      }
+  .nav-divider {
+    color: var(--color-rule);
+    font-size: 14px;
+    line-height: 1;
+  }
 
-      #main-nav {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 1rem;
-        text-align: center;
-        animation: descend 0.3s ease-in-out;
-        border: 1px solid
-          color-mix(in srgb, var(--color-border) 30%, transparent);
-        border-radius: 12px;
+  .search-toggle {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-ink-light);
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
 
-        &.is-open {
-          display: flex;
-        }
+    &:hover {
+      color: var(--color-ink);
+      box-shadow: none;
+      background: none;
+      transform: translateY(-50%);
+    }
 
-        .nav-item {
-          width: 100%;
-          justify-content: center;
-          position: relative;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          border-radius: 8px; /* Slight pill shape for hover effect */
-          background: transparent;
-          border: none;
-          box-shadow: none;
-          transition:
-            background-color 0.2s ease,
-            color 0.2s ease;
-
-          &::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            border-bottom: 1px solid
-              color-mix(in srgb, var(--color-border) 30%, transparent);
-          }
-
-          &:last-child::after {
-            display: none;
-          }
-
-          &:first-child::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-          }
-
-          @media (hover: hover) {
-            &:hover {
-              background: color-mix(
-                in srgb,
-                var(--color-accent) 15%,
-                transparent
-              );
-            }
-          }
-
-          &:active {
-            background: color-mix(
-              in srgb,
-              var(--color-primary) 15%,
-              transparent
-            );
-          }
-        }
-      }
+    &:focus {
+      outline: none;
+      color: var(--color-gold);
     }
   }
 
-  @media (min-width: bp.$bp-mobile-max) {
-    header {
-      .menu-toggle {
-        display: none;
-      }
+  // ── Search bar ────────────────────────────────────────────────────────────────
+  .search-bar-wrapper {
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-rule);
 
-      #main-nav {
-        display: flex !important;
-      }
+    &[hidden] { display: none; }
+  }
+
+  .search-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 1rem 2rem;
+  }
+
+  .search-icon {
+    color: var(--color-ink-light);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  #search-input {
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--color-ink);
+    flex: 1;
+    caret-color: var(--color-gold);
+    padding: 0;
+
+    &::placeholder { color: var(--color-ink-light); }
+
+    &:focus { border-color: transparent; box-shadow: none; }
+  }
+
+  .search-esc {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-ink-light);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    border: 1px solid var(--color-rule);
+    transition: all 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: none;
+      border-color: var(--color-ink-light);
+      box-shadow: none;
+      transform: none;
+      color: var(--color-ink);
     }
   }
 
-  @keyframes descend {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
+  // ── Mobile ────────────────────────────────────────────────────────────────────
+  @media (max-width: 600px) {
+    .nav-bar {
+      justify-content: flex-start;
+      overflow-x: auto;
+      padding: 0 1rem;
+      gap: 0;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+
+    .search-toggle { display: none; }
+    .masthead { padding: 1.5rem 1.25rem 1rem; }
   }
 </style>

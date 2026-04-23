@@ -1,25 +1,29 @@
 ---
-import { getSummary, toDateLabel } from "../lib/utils.js";
+import { toDateLabel } from "../lib/utils.js";
 const { post } = Astro.props;
+
+const tags = post.data.tags ?? [];
+const excerpt = post.data.excerpt ?? "";
+
+const wordCount = post.body?.split(/\s+/).length ?? 0;
+const readMinutes = Math.max(1, Math.round(wordCount / 200));
+const readTime = `${readMinutes} min`;
+
+const searchText = [post.data.title, excerpt, ...tags].join(" ").toLowerCase();
 ---
 
-<section
-  class={`list-item ${post.data.featured ? "featured" : ""}`}
-  style={post.data.accentColor
-    ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
-    : undefined}
+<a
+  href={`/posts/${post.id}/`}
+  class="post-card"
+  data-search={searchText}
 >
-  <h1 class="title">
-    <a href={`/posts/${post.id}/`}>{post.data.title}</a>
-  </h1>
-  <time>
-    {toDateLabel(post.data.date)}
-    {
-      post.data.updatedDate && (
-        <> · Updated {toDateLabel(post.data.updatedDate)}</>
-      )
-    }
-  </time>
-  <p>{post.data.excerpt ?? getSummary(post.body)}</p>
-  <a class="readmore" href={`/posts/${post.id}/`}> Read more &rarr;&nbsp; </a>
-</section>
+  <div class="post-meta">
+    <span class="post-date">{toDateLabel(post.data.date)}</span>
+    {tags.map((tag) => (
+      <span class="post-tag">#{tag}</span>
+    ))}
+    <span class="post-read-time">{readTime} read</span>
+  </div>
+  <div class="post-title">{post.data.title}</div>
+  {excerpt && <p class="post-excerpt-text">{excerpt}</p>}
+</a>

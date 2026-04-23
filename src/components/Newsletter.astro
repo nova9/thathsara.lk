@@ -1,0 +1,36 @@
+---
+---
+
+<div class="newsletter" id="newsletter">
+  <div class="newsletter-title">Transmissions</div>
+  <div class="newsletter-sub">New dispatches from the edge of understanding. No noise.</div>
+  <div id="newsletter-success" class="newsletter-success" hidden>
+    ✦ Initiated. Watch your inbox.
+  </div>
+  <form class="newsletter-form" id="newsletter-form">
+    <input
+      class="newsletter-input"
+      type="email"
+      placeholder="your@email.com"
+      required
+      autocomplete="email"
+    />
+    <button class="newsletter-btn" type="submit">Subscribe</button>
+  </form>
+</div>
+
+<script>
+  function setupNewsletter() {
+    const form = document.getElementById("newsletter-form") as HTMLFormElement | null;
+    const success = document.getElementById("newsletter-success");
+    if (!form || !success) return;
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      form.hidden = true;
+      success.hidden = false;
+    });
+  }
+
+  document.addEventListener("astro:page-load", setupNewsletter);
+</script>

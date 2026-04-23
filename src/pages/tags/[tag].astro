@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getVisiblePosts, toDateLabel } from "@/lib/utils";
+import PostCard from "@/components/PostCard.astro";
+import { getVisiblePosts } from "@/lib/utils";
 
 export async function getStaticPaths() {
   const allPosts = await getVisiblePosts();
@@ -9,9 +10,9 @@ export async function getStaticPaths() {
   ];
 
   return uniqueTags.map((tag) => {
-    const filteredPosts = allPosts.filter((post) =>
-      post.data.tags?.includes(tag),
-    );
+    const filteredPosts = allPosts
+      .filter((post) => post.data.tags?.includes(tag))
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
     return {
       params: { tag },
       props: { posts: filteredPosts },
@@ -23,24 +24,16 @@ const { tag } = Astro.params;
 const { posts } = Astro.props;
 ---
 
-<BaseLayout title={`Posts tagged with #${tag}`}>
-  <h1 class="page-title">Posts tagged with <i>#{tag}</i></h1>
+<BaseLayout title={`#${tag}`}>
+  <div style="padding-top: 3rem;">
+    <a href="/tags/" class="post-back">← All Tags</a>
 
-  <ul class="posts">
-    {
-      posts.map((post) => (
-        <li
-          class="post"
-          style={
-            post.data.accentColor
-              ? `--color-primary: ${post.data.accentColor}; --color-border: ${post.data.accentColor};`
-              : undefined
-          }
-        >
-          <a href={`/posts/${post.id}/`}>{post.data.title}</a>
-          <span class="meta">{toDateLabel(post.data.date)}</span>
-        </li>
-      ))
-    }
-  </ul>
+    <div class="section-hd">
+      <hr />
+      <span class="section-lbl">#{tag}</span>
+      <hr />
+    </div>
+
+    {posts.map((post) => <PostCard post={post} />)}
+  </div>
 </BaseLayout>
