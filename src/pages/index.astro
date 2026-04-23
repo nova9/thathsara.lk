@@ -6,15 +6,12 @@ import { siteConfig } from "@/lib/site";
 import { getAllPosts, toDateLabel } from "@/lib/utils";
 
 const posts = await getAllPosts();
-const featured = posts[0];
-const rest = posts.slice(1);
-
-const wordCount = featured?.body?.split(/\s+/).length ?? 0;
-const readMinutes = Math.max(1, Math.round(wordCount / 200));
+const featuredPosts = posts.filter((p) => p.data.featured);
+const rest = posts.filter((p) => !p.data.featured);
 ---
 
 <BaseLayout description={siteConfig.description}>
-  {featured && (
+  {featuredPosts.map((featured) => (
     <section class="hero">
       <div class="label-tag">Featured Dispatch</div>
       <h1 class="hero-title">{featured.data.title}</h1>
@@ -25,7 +22,7 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
         Read in full →
       </a>
     </section>
-  )}
+  ))}
 
   <div class="section-hd">
     <hr />
