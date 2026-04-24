@@ -173,6 +173,10 @@ if (fs.existsSync(musicDir)) {
         transform: scale(1.05);
         background: var(--color-primary, #555);
         color: var(--color-background, #fff);
+
+        .loader::after {
+          border-color: var(--color-background, #fff);
+        }
       }
 
       &:active {
@@ -185,6 +189,10 @@ if (fs.existsSync(musicDir)) {
         transform: scale(1.05);
         background: var(--color-primary, #555);
         color: var(--color-background, #fff);
+
+        .loader::after {
+          border-color: var(--color-background, #fff);
+        }
       }
     }
 
@@ -478,7 +486,7 @@ if (fs.existsSync(musicDir)) {
     }
 
     async function loadTrack(track) {
-      isLoadingState = "music";
+      isLoadingState = track.manifestUrl ? "shaka" : "music";
       updateUI();
 
       await audio.loadTrack(track.manifestUrl, track.url);
