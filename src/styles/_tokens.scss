@@ -32,3 +32,16 @@
   --line-height-base: 1.75;
   --line-height-content: 1.85;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg:        #151009;
+    --color-paper:     #1c1510;
+    --color-ink:       #e8dcc8;
+    --color-ink-mid:   #a09070;
+    --color-ink-light: #9e8c74;
+    --color-rule:      #2e2518;
+    --color-gold:      #c8982a;
+    --color-red:       #e05040;
+  }
+}
