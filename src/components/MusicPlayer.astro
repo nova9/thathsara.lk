@@ -72,22 +72,7 @@ if (fs.existsSync(musicDir)) {
       >
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
       </svg>
-      <svg
-        class="icon-loading-shaka"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        style="display: none;"
-      >
-        <path
-          d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
-        >
-        </path>
-      </svg>
+      <span class="loader" style="display: none;"></span>
       <svg
         class="icon-loading-music"
         xmlns="http://www.w3.org/2000/svg"
@@ -217,8 +202,7 @@ if (fs.existsSync(musicDir)) {
     }
   }
 
-  .icon-loading-music,
-  .icon-loading-shaka {
+  .icon-loading-music {
     animation: music-spin 1s linear infinite;
   }
 
@@ -229,6 +213,45 @@ if (fs.existsSync(musicDir)) {
     to {
       transform: rotate(360deg);
     }
+  }
+
+  .loader {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    position: relative;
+    animation: rotate 1s linear infinite;
+    flex-shrink: 0;
+
+    &::before,
+    &::after {
+      content: "";
+      box-sizing: border-box;
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      animation: prixClipFix 2s linear infinite;
+    }
+
+    &::after {
+      border-color: var(--color-primary);
+      animation: prixClipFix 2s linear infinite, rotate 0.5s linear infinite reverse;
+      inset: 3px;
+    }
+  }
+
+  @keyframes rotate {
+    0%   { transform: rotate(0deg) }
+    100% { transform: rotate(360deg) }
+  }
+
+  @keyframes prixClipFix {
+    0%   { clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0) }
+    25%  { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0) }
+    50%  { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%) }
+    75%  { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%) }
+    100% { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0) }
   }
 
   .music-next {
@@ -429,7 +452,7 @@ if (fs.existsSync(musicDir)) {
 
     const iconPlay = btn.querySelector(".icon-play");
     const iconPause = btn.querySelector(".icon-pause");
-    const iconLoadingShaka = btn.querySelector(".icon-loading-shaka");
+    const iconLoadingShaka = btn.querySelector(".loader");
     const iconLoadingMusic = btn.querySelector(".icon-loading-music");
 
     if (!iconPlay || !iconPause || !iconLoadingShaka || !iconLoadingMusic)
