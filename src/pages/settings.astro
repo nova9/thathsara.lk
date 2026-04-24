@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/site";
 ---
 
 <BaseLayout title="Settings" description="Site settings">
-  <main class="page-content">
+  <div>
     <div class="settings-header">
       <h1>Settings</h1>
       <p>Manage your site preferences and experience.</p>
@@ -48,7 +48,7 @@ import { siteConfig } from "@/lib/site";
       </section>
       -->
     </div>
-  </main>
+  </div>
 </BaseLayout>
 
 <script>
@@ -83,21 +83,9 @@ import { siteConfig } from "@/lib/site";
 </script>
 
 <style lang="scss">
-  .page-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding-bottom: 4rem;
-  }
-
   .settings-header {
     margin-bottom: 2rem;
     margin-top: 1rem;
-
-    h1 {
-      margin: 0 0 0.5rem 0;
-      font-size: 2rem;
-      letter-spacing: -0.02em;
-    }
 
     p {
       margin: 0;

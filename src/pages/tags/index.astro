@@ -13,7 +13,7 @@ const tags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 ---
 
 <BaseLayout title="Tags">
-  <div class="page-top">
+  <div>
     <div class="tags-cloud" style="margin-top: 0;">
       {tags.map(([tag, count]) => (
         <a class="tag-pill" href={`/tags/${tag}/`}>

@@ -3,7 +3,7 @@
 .page-content {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 0 var(--content-padding) 5rem;
+  padding: 2rem var(--content-padding) 5rem;
   overflow-wrap: break-word;
 
   @media (max-width: bp.$bp-mobile-max) {
@@ -37,14 +37,6 @@
 
   @media (max-width: bp.$bp-mobile-max) {
     padding-top: 1.5rem;
-  }
-}
-
-.page-top {
-  padding-top: 3rem;
-
-  @media (max-width: bp.$bp-mobile-max) {
-    padding-top: 1rem;
   }
 }
 
