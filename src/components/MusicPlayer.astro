@@ -73,28 +73,7 @@ if (fs.existsSync(musicDir)) {
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
       </svg>
       <span class="loader" style="display: none;"></span>
-      <svg
-        class="icon-loading-music"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 50 50"
-        fill="none"
-        style="display: none;"
-      >
-        <circle
-          cx="25"
-          cy="25"
-          r="20"
-          stroke="currentColor"
-          stroke-width="5"
-          opacity="0.2"></circle>
-        <path
-          d="M45 25a20 20 0 1 1-20-20"
-          stroke="currentColor"
-          stroke-width="5"
-          stroke-linecap="round"
-        >
-        </path>
-      </svg>
+      <span class="icon-loading-music" style="display: none;"></span>
     </button>
     <button
       id="music-next"
@@ -211,6 +190,12 @@ if (fs.existsSync(musicDir)) {
   }
 
   .icon-loading-music {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid currentColor;
+    border-bottom-color: var(--color-primary);
+    border-radius: 50%;
+    box-sizing: border-box;
     animation: music-spin 1s linear infinite;
   }
 
@@ -486,7 +471,7 @@ if (fs.existsSync(musicDir)) {
     }
 
     async function loadTrack(track) {
-      isLoadingState = track.manifestUrl ? "shaka" : "music";
+      isLoadingState = "music";
       updateUI();
 
       await audio.loadTrack(track.manifestUrl, track.url);
