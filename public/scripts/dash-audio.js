@@ -114,6 +114,14 @@ class DashAudio extends HTMLElement {
   get readyState() {
     return this.audio.readyState;
   }
+
+  get volume() {
+    return this.audio.volume;
+  }
+
+  set volume(v) {
+    this.audio.volume = v;
+  }
 }
 
 if (!customElements.get("dash-audio")) {
