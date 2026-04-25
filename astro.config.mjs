@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
 import mdx from "@astrojs/mdx";
@@ -10,4 +10,15 @@ export default defineConfig({
   build: {
     inlineStylesheets: "always",
   },
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: "DM Sans",
+      cssVariable: "--font-dm-sans",
+      weights: [300, 400, 500],
+      styles: ["normal"],
+      subsets: ["latin"],
+      fallbacks: ["sans-serif"],
+    },
+  ],
 });

@@ -20,9 +20,9 @@
   --color-background-pre: var(--color-paper);
 
   // Typography
-  --font-display: 'DM Sans', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-ui: 'DM Sans', sans-serif;
+  --font-display: var(--font-dm-sans), sans-serif;
+  --font-body: var(--font-dm-sans), sans-serif;
+  --font-ui: var(--font-dm-sans), sans-serif;
 
   // Layout
   --content-max-width: 760px;
