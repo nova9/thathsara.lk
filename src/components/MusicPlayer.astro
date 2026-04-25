@@ -283,7 +283,9 @@ const tracks = await getMusicTracks();
   }
 </style>
 
-<script is:inline src="/scripts/dash-audio.js"></script>
+<script>
+  import "@/scripts/dash-audio.js";
+</script>
 
 <script is:inline>
   const VOLUME_LEVELS = [1, 0.5, 0.1, 0];
