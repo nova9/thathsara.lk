@@ -1,13 +1,29 @@
+// Gilded-parchment palette: warm gold and cool navy as complements (40° + 220°).
+$hue-warm: 40;
+$hue-cool: 220;
+
+@function warm($l, $s) {
+  @return hsl($hue-warm, $s, $l);
+}
+
+@function cool($l, $s) {
+  @return hsl($hue-cool, $s, $l);
+}
+
 :root {
-  // Warm editorial palette
-  --color-bg: #f4ede0;
-  --color-paper: #f9f4eb;
-  --color-ink: #1e1810;
-  --color-ink-mid: #4a3f30;
-  --color-ink-light: #6e5d48;
-  --color-rule: #d4c4a8;
-  --color-gold: #b8882a;
-  --color-red: #9b2020;
+  // Surfaces: warm parchment.
+  --color-paper:     #{warm(96%, 55%)};
+  --color-bg:        #{warm(93%, 42%)};
+  --color-rule:      #{warm(78%, 30%)};
+
+  // Text: cool navy ink ladder.
+  --color-ink:       #{cool(12%, 55%)};
+  --color-ink-mid:   #{cool(30%, 35%)};
+  --color-ink-light: #{cool(48%, 22%)};
+
+  // Accents.
+  --color-gold:      #{warm(48%, 72%)};
+  --color-red:       #{hsl(0, 70%, 38%)};
 
   // Aliases for existing code compatibility
   --color-primary: var(--color-gold);
@@ -35,13 +51,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg:        #151009;
-    --color-paper:     #1c1510;
-    --color-ink:       #e8dcc8;
-    --color-ink-mid:   #a09070;
-    --color-ink-light: #9e8c74;
-    --color-rule:      #2e2518;
-    --color-gold:      #c8982a;
-    --color-red:       #e05040;
+    // Surfaces: deep navy hood.
+    --color-bg:        #{cool( 6%, 50%)};
+    --color-paper:     #{cool(10%, 40%)};
+    --color-rule:      #{cool(20%, 35%)};
+
+    // Text: warm cream highlights.
+    --color-ink:       #{warm(88%, 45%)};
+    --color-ink-mid:   #{warm(70%, 30%)};
+    --color-ink-light: #{warm(58%, 22%)};
+
+    // Accents.
+    --color-gold:      #{warm(58%, 75%)};
+    --color-red:       #{hsl(0, 75%, 62%)};
   }
 }
