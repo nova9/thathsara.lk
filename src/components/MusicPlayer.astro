@@ -1,43 +1,7 @@
 ---
-import fs from "node:fs";
-import path from "node:path";
-import * as mm from "music-metadata";
+import { getMusicTracks } from "@/lib/music";
 
-const musicDir = path.join(process.cwd(), "public", "music");
-const dashDir = path.join(musicDir, "dash");
-let tracks: {
-  url: string;
-  manifestUrl: string | null;
-  title: string;
-  artist: string;
-}[] = [];
-
-if (fs.existsSync(musicDir)) {
-  const files = fs.readdirSync(musicDir);
-  const audioExtensions = [".mp3", ".webm", ".opus"];
-  const audioFiles = files.filter((f) =>
-    audioExtensions.some((ext) => f.endsWith(ext)),
-  );
-
-  tracks = await Promise.all(
-    audioFiles.map(async (f) => {
-      const filePath = path.join(musicDir, f);
-      const fileName = f.replace(/\.[^/.]+$/, "");
-      const manifestPath = path.join(dashDir, fileName, "manifest.mpd");
-      const metadata = await mm.parseFile(filePath, {
-        skipCovers: true,
-      });
-      return {
-        url: `/music/${f}`,
-        manifestUrl: fs.existsSync(manifestPath)
-          ? `/music/dash/${fileName}/manifest.mpd`
-          : null,
-        title: metadata.common.title || fileName,
-        artist: metadata.common.artist || "Unknown Artist",
-      };
-    }),
-  );
-}
+const tracks = await getMusicTracks();
 ---
 
 <div
@@ -73,7 +37,6 @@ if (fs.existsSync(musicDir)) {
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
       </svg>
       <span class="loader" style="display: none;"></span>
-      <span class="icon-loading-music" style="display: none;"></span>
     </button>
     <button
       id="music-next"
@@ -147,31 +110,20 @@ if (fs.existsSync(musicDir)) {
       transform 0.2s ease,
       background 0.2s ease;
 
-    @media (hover: hover) {
-      &:hover {
-        transform: scale(1.05);
-        background: var(--color-primary, #555);
-        color: var(--color-background, #fff);
+    &:hover,
+    &:active {
+      transform: scale(1.05);
+      background: var(--color-primary, #555);
+      color: var(--color-background, #fff);
 
-        .loader::after {
-          border-color: var(--color-background, #fff);
-        }
-      }
-
-      &:active {
-        transform: scale(0.95);
+      .loader::after {
+        border-color: var(--color-background, #fff);
       }
     }
 
-    @media (hover: none) {
+    @media (hover: hover) {
       &:active {
-        transform: scale(1.05);
-        background: var(--color-primary, #555);
-        color: var(--color-background, #fff);
-
-        .loader::after {
-          border-color: var(--color-background, #fff);
-        }
+        transform: scale(0.95);
       }
     }
 
@@ -186,25 +138,6 @@ if (fs.existsSync(musicDir)) {
     svg {
       width: 24px;
       height: 24px;
-    }
-  }
-
-  .icon-loading-music {
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 3px solid currentColor;
-    border-bottom-color: var(--color-primary);
-    border-radius: 50%;
-    box-sizing: border-box;
-    animation: music-spin 1s linear infinite;
-  }
-
-  @keyframes music-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
     }
   }
 
@@ -286,364 +219,184 @@ if (fs.existsSync(musicDir)) {
   }
 </style>
 
+<script is:inline src="/scripts/dash-audio.js"></script>
+
 <script is:inline>
-  class DashAudio extends HTMLElement {
-    constructor() {
-      super();
-      this.audio = document.createElement("audio");
-      if (this.hasAttribute("preload")) {
-        this.audio.setAttribute("preload", this.getAttribute("preload"));
+  class MusicController {
+    constructor(panel) {
+      this.panel = panel;
+      this.btn = document.getElementById("music-toggle");
+      this.nextBtn = document.getElementById("music-next");
+      this.audio = document.getElementById("bg-audio");
+      this.iconPlay = this.btn.querySelector(".icon-play");
+      this.iconPause = this.btn.querySelector(".icon-pause");
+      this.iconLoading = this.btn.querySelector(".loader");
+      this.infoPanel = document.getElementById("music-info");
+      this.titleElement = document.getElementById("music-title");
+      this.artistElement = document.getElementById("music-artist");
+
+      this.tracks = [];
+      try {
+        this.tracks = JSON.parse(panel.dataset.tracks || "[]");
+      } catch (e) {
+        console.error(e);
       }
-      this.appendChild(this.audio);
-      this.shakaPlayer = null;
-      this.shakaPromise = null;
-      this._loaded = false;
-    }
-
-    async getShaka() {
-      if (window.shaka) return window.shaka;
-      if (this.shakaPromise) return this.shakaPromise;
-
-      this.dispatchEvent(new Event("shakaloading"));
-      this.shakaPromise = new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src =
-          "https://cdn.jsdelivr.net/npm/shaka-player/dist/shaka-player.dash.js";
-        script.onload = () => {
-          this.dispatchEvent(new Event("shakaloaded"));
-          resolve(window.shaka);
-        };
-        script.onerror = (err) => {
-          this.dispatchEvent(new Event("shakaloaded"));
-          reject(err);
-        };
-        document.head.appendChild(script);
-      });
-      return this.shakaPromise;
-    }
-
-    connectedCallback() {
-      // If the element is reconnected before the destruction fires, cancel it.
-      if (this._destroyTimeout) {
-        clearTimeout(this._destroyTimeout);
-        this._destroyTimeout = null;
+      if (this.tracks.length > 0) {
+        this.tracks.sort(() => Math.random() - 0.5);
+        this.setInfo(this.tracks[0]);
       }
 
-      if (this._eventsBound) return;
-      this._eventsBound = true;
-      const events = [
-        "play",
-        "playing",
-        "waiting",
-        "canplay",
-        "pause",
-        "ended",
-      ];
-      events.forEach((evt) => {
-        this.audio.addEventListener(evt, () => {
-          this.dispatchEvent(new Event(evt));
-        });
+      this.currentTrackIndex = 0;
+      this.isTrackLoaded = false;
+      // Audio element persists across page navigations — recover its actual state.
+      this.isPlaying = !this.audio.paused;
+      this.isLoading = false;
+      this.scrollTimeout = null;
+
+      this.bindEvents();
+      this.updateUI();
+    }
+
+    bindEvents() {
+      this.btn.addEventListener("click", () => this.toggle());
+      this.nextBtn.addEventListener("click", () => this.playNext());
+      this.audio.addEventListener("ended", () => this.playNext());
+
+      this.audio.addEventListener("play", () => {
+        this.isPlaying = true;
+        this.updateUI();
       });
+      this.audio.addEventListener("playing", () => {
+        this.isLoading = false;
+        this.isPlaying = true;
+        this.updateUI();
+      });
+      this.audio.addEventListener("pause", () => {
+        this.isPlaying = false;
+        this.updateUI();
+      });
+      this.audio.addEventListener("waiting", () => {
+        this.isLoading = true;
+        this.updateUI();
+      });
+      this.audio.addEventListener("canplay", () => {
+        this.isLoading = false;
+        this.updateUI();
+      });
+      this.audio.addEventListener("shakaloading", () => {
+        this.isLoading = true;
+        this.updateUI();
+      });
+
+      window.addEventListener("scroll", () => this.handleScroll());
     }
 
-    disconnectedCallback() {
-      // Astro View Transitions unmount/remount persistent elements.
-      // Use setTimeout to defer destruction and allow connectedCallback to cancel it.
-      this._destroyTimeout = setTimeout(() => {
-        if (!this.isConnected) {
-          this.destroyShaka();
-        }
-      }, 0); // 0ms is enough because connectedCallback fires synchronously during DOM swaps
+    setInfo(track) {
+      this.titleElement.textContent = track.title;
+      this.artistElement.textContent = track.artist;
     }
 
-    async loadTrack(manifestUrl, fallbackUrl) {
-      this._loaded = true;
-      if (!manifestUrl) {
-        this.destroyShaka();
-        this.audio.src = fallbackUrl;
+    async loadTrack(track) {
+      this.isLoading = true;
+      this.updateUI();
+      await this.audio.loadTrack(track.manifestUrl, track.url);
+    }
+
+    async toggle() {
+      if (!this.audio.paused) {
+        this.audio.pause();
         return;
       }
-
-      try {
-        const shakaLib = await this.getShaka();
-        shakaLib.polyfill.installAll();
-
-        if (!shakaLib.Player.isBrowserSupported()) {
-          this.destroyShaka();
-          this.audio.src = fallbackUrl;
-          return;
-        }
-
-        if (!this.shakaPlayer) {
-          this.shakaPlayer = new shakaLib.Player();
-          await this.shakaPlayer.attach(this.audio);
-          this.shakaPlayer.addEventListener("error", (event) => {
-            console.error("Shaka error", event?.detail || event);
-          });
-        }
-
-        await this.shakaPlayer.load(manifestUrl);
-      } catch (error) {
-        console.error(error);
-        this.destroyShaka();
-        this.audio.src = fallbackUrl;
+      if (!this.isTrackLoaded && this.tracks.length > 0) {
+        await this.loadTrack(this.tracks[this.currentTrackIndex]);
+        this.isTrackLoaded = true;
       }
-    }
-
-    destroyShaka() {
-      if (this.shakaPlayer) {
-        this.shakaPlayer.destroy();
-        this.shakaPlayer = null;
+      // preload="none" defers buffering until play; show loading until we have data.
+      if (this.audio.readyState < 3) {
+        this.isLoading = true;
+        this.updateUI();
       }
+      this.audio
+        .play()
+        .catch((e) => console.error("Audio playback prevented:", e));
     }
 
-    play() {
-      return this.audio.play();
+    async playNext() {
+      if (this.tracks.length === 0) return;
+      this.currentTrackIndex =
+        (this.currentTrackIndex + 1) % this.tracks.length;
+      const track = this.tracks[this.currentTrackIndex];
+      await this.loadTrack(track);
+      this.isTrackLoaded = true;
+      this.setInfo(track);
+      this.audio
+        .play()
+        .catch((e) => console.error("Audio playback prevented:", e));
     }
 
-    pause() {
-      this.audio.pause();
-    }
+    updateUI() {
+      const state = this.isLoading
+        ? "loading"
+        : this.isPlaying
+          ? "playing"
+          : "paused";
 
-    get paused() {
-      return this.audio.paused;
-    }
-
-    get readyState() {
-      return this.audio.readyState;
-    }
-
-    get loaded() {
-      return this._loaded;
-    }
-  }
-
-  if (!customElements.get("dash-audio")) {
-    customElements.define("dash-audio", DashAudio);
-  }
-
-  let isPlaying = false;
-  let isLoadingState = "none"; // 'none' | 'shaka' | 'music'
-
-  async function setupPlayer() {
-    // Check if music player is disabled in settings
-    const isPlayerDisabled =
-      localStorage.getItem("music-player-disabled") === "true";
-    const panel = document.querySelector(".music-panel");
-
-    if (!isPlayerDisabled && panel) {
-      panel.style.display = "flex";
-    } else {
-      return; // Don't set up the player if it's disabled
-    }
-
-    const btn = document.getElementById("music-toggle");
-    const nextBtn = document.getElementById("music-next");
-    const audio = document.getElementById("bg-audio");
-
-    if (!panel || !btn || !nextBtn || !audio) return;
-
-    const iconPlay = btn.querySelector(".icon-play");
-    const iconPause = btn.querySelector(".icon-pause");
-    const iconLoadingShaka = btn.querySelector(".loader");
-    const iconLoadingMusic = btn.querySelector(".icon-loading-music");
-
-    if (!iconPlay || !iconPause || !iconLoadingShaka || !iconLoadingMusic)
-      return;
-    if (panel.dataset.initialized) return;
-
-    panel.dataset.initialized = "true";
-
-    let tracks = [];
-    try {
-      tracks = JSON.parse(panel.dataset.tracks || "[]");
-    } catch (e) {
-      console.error(e);
-    }
-
-    const infoPanel = document.getElementById("music-info");
-    const titleElement = document.getElementById("music-title");
-    const artistElement = document.getElementById("music-artist");
-
-    function setInfo(track) {
-      if (titleElement) titleElement.textContent = track.title;
-      if (artistElement) artistElement.textContent = track.artist;
-    }
-
-    async function loadTrack(track) {
-      isLoadingState = "music";
-      updateUI();
-
-      await audio.loadTrack(track.manifestUrl, track.url);
-    }
-
-    let currentTrackIndex = 0;
-    let isTrackLoaded = false;
-
-    if (tracks.length > 0 && !audio.loaded) {
-      // Shuffle tracks on start
-      tracks = tracks.sort(() => Math.random() - 0.5);
-      // Just set info, don't load the audio source yet to save network/CPU during page load
-      setInfo(tracks[0]);
-    }
-
-    async function playNextTrack() {
-      if (tracks.length > 0) {
-        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-        await loadTrack(tracks[currentTrackIndex]);
-        isTrackLoaded = true;
-        setInfo(tracks[currentTrackIndex]);
-        audio
-          .play()
-          .catch((e) => console.error("Audio playback prevented:", e));
-      }
-    }
-
-    audio.addEventListener("ended", playNextTrack);
-    nextBtn.addEventListener("click", () => {
-      // Ensure we immediately start playing the next track
-      playNextTrack();
-    });
-
-    // Recover state if audio is actually playing (for persisted element)
-    if (!audio.paused) {
-      isPlaying = true;
-    }
-
-    function updateUI() {
-      // Determine the current highest-priority state
-      const currentState =
-        isLoadingState === "shaka"
-          ? "loadingShaka"
-          : isLoadingState === "music"
-            ? "loadingMusic"
-            : isPlaying
-              ? "playing"
-              : "paused";
-
-      // Data-driven map for UI elements
       // prettier-ignore
-      const uiStateMap = {
-        loadingShaka: { play: "none", pause: "none", shaka: "block", music: "none", disabled: true },
-        loadingMusic: { play: "none", pause: "none", shaka: "none", music: "block", disabled: false },
-        playing:      { play: "none", pause: "block", shaka: "none", music: "none", disabled: false },
-        paused:       { play: "block", pause: "none", shaka: "none", music: "none", disabled: false },
+      const map = {
+        loading: { play: "none",  pause: "none",  loader: "block", disabled: true  },
+        playing: { play: "none",  pause: "block", loader: "none",  disabled: false },
+        paused:  { play: "block", pause: "none",  loader: "none",  disabled: false },
       };
+      const c = map[state];
 
-      const config = uiStateMap[currentState];
-
-      iconPlay.style.display = config.play;
-      iconPause.style.display = config.pause;
-      iconLoadingShaka.style.display = config.shaka;
-      iconLoadingMusic.style.display = config.music;
-      btn.disabled = config.disabled;
+      this.iconPlay.style.display = c.play;
+      this.iconPause.style.display = c.pause;
+      this.iconLoading.style.display = c.loader;
+      this.btn.disabled = c.disabled;
     }
-    updateUI();
 
-    btn.addEventListener("click", async () => {
-      if (audio.paused) {
-        if (!isTrackLoaded && tracks.length > 0) {
-          await loadTrack(tracks[currentTrackIndex]);
-          isTrackLoaded = true;
-        }
-        // Will lazily load the audio since preload="none" was set
+    handleScroll() {
+      if (!window.matchMedia("(max-width: 37.4em)").matches) return;
+      this.infoPanel.classList.add("is-scrolling");
+      clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = setTimeout(() => {
+        this.infoPanel.classList.remove("is-scrolling");
+      }, 2000);
+    }
+  }
 
-        // Show loading state while waiting for data
-        if (audio.readyState < 3) {
-          // 3 = HAVE_FUTURE_DATA
-          isLoadingState = "music";
-          updateUI();
-        }
-
-        audio
-          .play()
-          .catch((e) => console.error("Audio playback prevented:", e));
-      } else {
-        audio.pause();
-      }
-    });
-
-    audio.addEventListener("play", () => {
-      isPlaying = true;
-      updateUI();
-    });
-
-    audio.addEventListener("playing", () => {
-      isLoadingState = "none";
-      isPlaying = true;
-      updateUI();
-    });
-
-    audio.addEventListener("waiting", () => {
-      isLoadingState = "music";
-      updateUI();
-    });
-
-    audio.addEventListener("canplay", () => {
-      isLoadingState = "none";
-      updateUI();
-    });
-
-    audio.addEventListener("shakaloading", () => {
-      isLoadingState = "shaka";
-      updateUI();
-    });
-
-    audio.addEventListener("shakaloaded", () => {
-      isLoadingState = "music";
-      updateUI();
-    });
-
-    audio.addEventListener("pause", () => {
-      isPlaying = false;
-      updateUI();
-    });
-
-    // Show info on mobile when scrolling
-    let scrollTimeout;
-    window.addEventListener("scroll", () => {
-      if (!infoPanel) return;
-
-      if (window.matchMedia("(max-width: 37.4em)").matches) {
-        infoPanel.classList.add("is-scrolling");
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-          infoPanel.classList.remove("is-scrolling");
-        }, 2000);
-      }
-    });
+  function setupPlayer() {
+    if (localStorage.getItem("music-player-disabled") === "true") return;
+    const panel = document.querySelector(".music-panel");
+    if (!panel) return;
+    panel.style.display = "flex";
+    if (!panel._controller) {
+      panel._controller = new MusicController(panel);
+    }
   }
 
   function initWhenIdle() {
     if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => setupPlayer().catch((e) => console.error(e)));
+      requestIdleCallback(setupPlayer);
     } else {
-      setTimeout(() => setupPlayer().catch((e) => console.error(e)), 1);
+      setTimeout(setupPlayer, 1);
     }
   }
 
   // Run on first load when browser is idle to prevent Lighthouse blocking time
   document.addEventListener("DOMContentLoaded", initWhenIdle);
-
-  // Also hook into Astro's view transitions event if they choose to add it later
   document.addEventListener("astro:page-load", initWhenIdle);
 
-  // Listen for settings changes via custom event
   document.addEventListener("music-player-toggled", (e) => {
-    const customEvent = e;
     const panel = document.querySelector(".music-panel");
-    const audio = document.getElementById("bg-audio");
-
-    if (customEvent.detail.disabled) {
-      if (panel) panel.style.display = "none";
-      if (audio) {
-        audio.pause();
-      }
+    if (!panel) return;
+    if (e.detail.disabled) {
+      panel.style.display = "none";
+      document.getElementById("bg-audio")?.pause();
     } else {
-      if (panel) {
-        panel.style.display = "flex";
-        // Initialize player if it hasn't been set up yet
-        setupPlayer().catch((e) => console.error(e));
+      panel.style.display = "flex";
+      if (!panel._controller) {
+        panel._controller = new MusicController(panel);
       }
     }
   });
