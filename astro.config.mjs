@@ -7,9 +7,6 @@ export default defineConfig({
   site: "https://thathsara.lk",
   trailingSlash: "always",
   integrations: [sitemap(), mdx()],
-  build: {
-    inlineStylesheets: "always",
-  },
   fonts: [
     {
       provider: fontProviders.google(),
