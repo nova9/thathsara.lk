@@ -365,7 +365,7 @@ const tracks = await getMusicTracks();
       this.scrollTimeout = null;
 
       const storedVolume = parseFloat(
-        localStorage.getItem(VOLUME_STORAGE_KEY) ?? "1",
+        localStorage.getItem(VOLUME_STORAGE_KEY) ?? "0.9",
       );
       this.volume =
         Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1
@@ -395,9 +395,14 @@ const tracks = await getMusicTracks();
           if (t instanceof HTMLTextAreaElement) return;
           if (
             t instanceof HTMLInputElement &&
-            !["range", "checkbox", "radio", "button", "submit", "reset"].includes(
-              t.type,
-            )
+            ![
+              "range",
+              "checkbox",
+              "radio",
+              "button",
+              "submit",
+              "reset",
+            ].includes(t.type)
           ) {
             return;
           }
