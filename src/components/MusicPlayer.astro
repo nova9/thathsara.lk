@@ -331,20 +331,38 @@ const tracks = await getMusicTracks();
 <script is:inline>
   const VOLUME_STEP = 0.1;
   const VOLUME_STORAGE_KEY = "music-player-volume";
+  const NON_TEXT_INPUT_TYPES = new Set([
+    "range",
+    "checkbox",
+    "radio",
+    "button",
+    "submit",
+    "reset",
+  ]);
+
+  function isTextInput(target) {
+    if (!(target instanceof HTMLElement)) return false;
+    if (target.isContentEditable) return true;
+    if (target instanceof HTMLTextAreaElement) return true;
+    if (target instanceof HTMLInputElement) {
+      return !NON_TEXT_INPUT_TYPES.has(target.type);
+    }
+    return false;
+  }
 
   class MusicController {
     constructor(panel) {
       this.panel = panel;
-      this.btn = document.getElementById("music-toggle");
-      this.nextBtn = document.getElementById("music-next");
-      this.audio = document.getElementById("bg-audio");
+      this.btn = panel.querySelector("#music-toggle");
+      this.nextBtn = panel.querySelector("#music-next");
+      this.audio = panel.querySelector("#bg-audio");
       this.iconPlay = this.btn.querySelector(".icon-play");
       this.iconPause = this.btn.querySelector(".icon-pause");
       this.iconLoading = this.btn.querySelector(".loader");
-      this.volumeSlider = document.getElementById("music-volume");
-      this.infoPanel = document.getElementById("music-info");
-      this.titleElement = document.getElementById("music-title");
-      this.artistElement = document.getElementById("music-artist");
+      this.volumeSlider = panel.querySelector("#music-volume");
+      this.infoPanel = panel.querySelector("#music-info");
+      this.titleElement = panel.querySelector("#music-title");
+      this.artistElement = panel.querySelector("#music-artist");
 
       this.tracks = [];
       try {
@@ -389,24 +407,7 @@ const tracks = await getMusicTracks();
       window.addEventListener("keydown", (e) => {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
         if (e.key !== "[" && e.key !== "]") return;
-        const t = e.target;
-        if (t instanceof HTMLElement) {
-          if (t.isContentEditable) return;
-          if (t instanceof HTMLTextAreaElement) return;
-          if (
-            t instanceof HTMLInputElement &&
-            ![
-              "range",
-              "checkbox",
-              "radio",
-              "button",
-              "submit",
-              "reset",
-            ].includes(t.type)
-          ) {
-            return;
-          }
-        }
+        if (isTextInput(e.target)) return;
         e.preventDefault();
         this.adjustVolume(e.key === "]" ? VOLUME_STEP : -VOLUME_STEP);
       });
