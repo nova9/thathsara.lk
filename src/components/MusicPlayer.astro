@@ -51,53 +51,21 @@ const tracks = await getMusicTracks();
         <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path>
       </svg>
     </button>
-    <button
-      id="music-volume"
-      class="music-btn music-volume"
-      aria-label="Volume"
-    >
-      <svg
-        class="icon-volume-high"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-        <path
-          d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-        ></path>
-      </svg>
-      <svg
-        class="icon-volume-mid"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        style="display: none;"
-      >
-        <path
-          d="M5 9v6h4l5 5V4L9 9H5zm11.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"
-        ></path>
-      </svg>
-      <svg
-        class="icon-volume-low"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        style="display: none;"
-      >
-        <path d="M7 9v6h4l5 5V4l-5 5H7z"></path>
-      </svg>
-      <svg
-        class="icon-volume-off"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        style="display: none;"
-      >
-        <path
-          d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
-        ></path>
-      </svg>
-    </button>
+    <div class="music-volume-wrap">
+      <input
+        id="music-volume"
+        class="music-volume"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value="100"
+        aria-label="Volume"
+      />
+      <span class="music-volume-hint" aria-hidden="true">
+        <kbd>[</kbd><kbd>]</kbd>
+      </span>
+    </div>
   </div>
   <!-- preload="none" ensures we don't download audio during initial load, preserving Lighthouse performance scores -->
   <dash-audio id="bg-audio" preload="none"></dash-audio>
@@ -243,8 +211,7 @@ const tracks = await getMusicTracks();
     }
   }
 
-  .music-next,
-  .music-volume {
+  .music-next {
     width: 2rem;
     height: 2rem;
     svg {
@@ -253,11 +220,85 @@ const tracks = await getMusicTracks();
     }
   }
 
+  .music-volume-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0.25rem;
+  }
+
+  .music-volume-hint {
+    position: absolute;
+    right: calc(100% + 0.4rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.15rem;
+    color: var(--color-text, #fff);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+
+    kbd {
+      font-family: inherit;
+      font-size: 0.55rem;
+      line-height: 1;
+      padding: 0.15rem 0.3rem;
+      border: 1px solid currentColor;
+      border-radius: 3px;
+      background: var(--color-background, #333);
+    }
+  }
+
+  .music-volume-wrap:hover .music-volume-hint,
+  .music-volume:focus-visible + .music-volume-hint {
+    opacity: 0.7;
+  }
+
+  .music-volume {
+    /* Vertical slider, min at bottom, max at top. */
+    writing-mode: vertical-lr;
+    direction: rtl;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 0.4rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: var(--color-border, #444);
+    cursor: pointer;
+    outline: none;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 0;
+      height: 0;
+      background: transparent;
+      border: none;
+    }
+
+    &::-moz-range-thumb {
+      width: 0;
+      height: 0;
+      background: transparent;
+      border: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
   /* Adjust for mobile - hide info by default, show on scroll */
   @media (max-width: 37.4em) {
     .music-panel {
       bottom: 1rem;
       right: 1rem;
+    }
+
+    .music-volume-wrap {
+      display: none;
     }
 
     .music-info {
@@ -288,8 +329,8 @@ const tracks = await getMusicTracks();
 </script>
 
 <script is:inline>
-  const VOLUME_LEVELS = [1, 0.5, 0.1, 0];
-  const VOLUME_STORAGE_KEY = "music-player-volume-index";
+  const VOLUME_STEP = 0.1;
+  const VOLUME_STORAGE_KEY = "music-player-volume";
 
   class MusicController {
     constructor(panel) {
@@ -300,13 +341,7 @@ const tracks = await getMusicTracks();
       this.iconPlay = this.btn.querySelector(".icon-play");
       this.iconPause = this.btn.querySelector(".icon-pause");
       this.iconLoading = this.btn.querySelector(".loader");
-      this.volumeBtn = document.getElementById("music-volume");
-      this.volumeIcons = [
-        this.volumeBtn.querySelector(".icon-volume-high"),
-        this.volumeBtn.querySelector(".icon-volume-mid"),
-        this.volumeBtn.querySelector(".icon-volume-low"),
-        this.volumeBtn.querySelector(".icon-volume-off"),
-      ];
+      this.volumeSlider = document.getElementById("music-volume");
       this.infoPanel = document.getElementById("music-info");
       this.titleElement = document.getElementById("music-title");
       this.artistElement = document.getElementById("music-artist");
@@ -329,16 +364,13 @@ const tracks = await getMusicTracks();
       this.isLoading = false;
       this.scrollTimeout = null;
 
-      const storedVolume = parseInt(
-        localStorage.getItem(VOLUME_STORAGE_KEY) ?? "0",
-        10,
+      const storedVolume = parseFloat(
+        localStorage.getItem(VOLUME_STORAGE_KEY) ?? "1",
       );
-      this.volumeIndex =
-        Number.isInteger(storedVolume) &&
-        storedVolume >= 0 &&
-        storedVolume < VOLUME_LEVELS.length
+      this.volume =
+        Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1
           ? storedVolume
-          : 0;
+          : 1;
       this.applyVolume();
 
       this.bindEvents();
@@ -348,8 +380,31 @@ const tracks = await getMusicTracks();
     bindEvents() {
       this.btn.addEventListener("click", () => this.toggle());
       this.nextBtn.addEventListener("click", () => this.playNext());
-      this.volumeBtn.addEventListener("click", () => this.cycleVolume());
       this.audio.addEventListener("ended", () => this.playNext());
+
+      this.volumeSlider.addEventListener("input", (e) => {
+        this.setVolume(parseInt(e.target.value, 10) / 100);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (e.key !== "[" && e.key !== "]") return;
+        const t = e.target;
+        if (t instanceof HTMLElement) {
+          if (t.isContentEditable) return;
+          if (t instanceof HTMLTextAreaElement) return;
+          if (
+            t instanceof HTMLInputElement &&
+            !["range", "checkbox", "radio", "button", "submit", "reset"].includes(
+              t.type,
+            )
+          ) {
+            return;
+          }
+        }
+        e.preventDefault();
+        this.adjustVolume(e.key === "]" ? VOLUME_STEP : -VOLUME_STEP);
+      });
 
       this.audio.addEventListener("play", () => {
         this.isPlaying = true;
@@ -385,19 +440,21 @@ const tracks = await getMusicTracks();
       this.artistElement.textContent = track.artist;
     }
 
-    cycleVolume() {
-      this.volumeIndex = (this.volumeIndex + 1) % VOLUME_LEVELS.length;
-      localStorage.setItem(VOLUME_STORAGE_KEY, String(this.volumeIndex));
+    adjustVolume(delta) {
+      this.setVolume(Math.round((this.volume + delta) * 10) / 10);
+    }
+
+    setVolume(value) {
+      this.volume = Math.max(0, Math.min(1, value));
+      localStorage.setItem(VOLUME_STORAGE_KEY, String(this.volume));
       this.applyVolume();
     }
 
     applyVolume() {
-      this.audio.volume = VOLUME_LEVELS[this.volumeIndex];
-      this.volumeIcons.forEach((icon, i) => {
-        icon.style.display = i === this.volumeIndex ? "block" : "none";
-      });
-      const pct = Math.round(VOLUME_LEVELS[this.volumeIndex] * 100);
-      this.volumeBtn.setAttribute("aria-label", `Volume ${pct}%`);
+      this.audio.volume = this.volume;
+      const pct = Math.round(this.volume * 100);
+      this.volumeSlider.value = String(pct);
+      this.volumeSlider.style.background = `linear-gradient(to top, var(--color-text, #fff) ${pct}%, var(--color-border, #444) ${pct}%)`;
     }
 
     async loadTrack(track) {
