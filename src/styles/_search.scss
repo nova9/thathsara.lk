@@ -59,9 +59,11 @@
         text-decoration: none;
         color: var(--color-ink);
 
-        &:hover {
-          color: var(--color-gold);
-          text-decoration: none;
+        @media (hover: hover) {
+          &:hover {
+            color: var(--color-gold);
+            text-decoration: none;
+          }
         }
       }
 

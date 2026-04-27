@@ -14,9 +14,11 @@
   margin-bottom: 0.75rem;
   transition: color 0.15s;
 
-  &:hover {
-    color: var(--color-gold);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-gold);
+      text-decoration: none;
+    }
   }
 }
 
@@ -104,9 +106,11 @@
     color: var(--color-gold);
     text-decoration-color: var(--color-gold);
 
-    &:hover {
-      color: var(--color-red);
-      text-decoration-color: var(--color-red);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-red);
+        text-decoration-color: var(--color-red);
+      }
     }
   }
 

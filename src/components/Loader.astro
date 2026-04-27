@@ -1,0 +1,70 @@
+---
+export interface Props {
+  size?: string;
+  hidden?: boolean;
+}
+
+const { size, hidden = false } = Astro.props;
+const styles = [
+  size ? `--loader-size: ${size}` : null,
+  hidden ? "display: none" : null,
+]
+  .filter(Boolean)
+  .join("; ");
+---
+
+<span class="loader" style={styles || undefined}></span>
+
+<style lang="scss">
+  .loader {
+    width: var(--loader-size, 1.5rem);
+    height: var(--loader-size, 1.5rem);
+    border-radius: 50%;
+    position: relative;
+    animation: loader-rotate 1s linear infinite;
+    flex-shrink: 0;
+
+    &::before,
+    &::after {
+      content: "";
+      box-sizing: border-box;
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      animation: loader-clip 2s linear infinite;
+    }
+
+    &::after {
+      border-color: var(--loader-inner-color, var(--color-primary));
+      animation:
+        loader-clip 2s linear infinite,
+        loader-rotate 0.5s linear infinite reverse;
+      inset: 3px;
+    }
+  }
+
+  @keyframes loader-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes loader-clip {
+    0% {
+      clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
+    }
+    25% {
+      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
+    }
+    50% {
+      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%);
+    }
+    75% {
+      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
+    }
+    100% {
+      clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0);
+    }
+  }
+</style>

@@ -142,7 +142,9 @@ function isActive(href: string) {
       color: var(--color-gold);
     }
 
-    &:hover { text-decoration: none; color: var(--color-ink); }
+    @media (hover: hover) {
+      &:hover { text-decoration: none; color: var(--color-ink); }
+    }
   }
 
   .masthead-rule {
@@ -188,10 +190,18 @@ function isActive(href: string) {
     text-decoration: none;
     display: inline-block;
 
-    &:hover, &.active {
+    &.active {
       color: var(--color-ink);
       border-bottom-color: var(--color-gold);
       text-decoration: none;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-ink);
+        border-bottom-color: var(--color-gold);
+        text-decoration: none;
+      }
     }
   }
 
@@ -220,11 +230,13 @@ function isActive(href: string) {
     gap: 5px;
     padding: 0;
 
-    &:hover {
-      color: var(--color-ink);
-      box-shadow: none;
-      background: none;
-      transform: translateY(-50%);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-ink);
+        box-shadow: none;
+        background: none;
+        transform: translateY(-50%);
+      }
     }
 
     &:focus {
@@ -287,12 +299,14 @@ function isActive(href: string) {
     transition: all 0.15s;
     flex-shrink: 0;
 
-    &:hover {
-      background: none;
-      border-color: var(--color-ink-light);
-      box-shadow: none;
-      transform: none;
-      color: var(--color-ink);
+    @media (hover: hover) {
+      &:hover {
+        background: none;
+        border-color: var(--color-ink-light);
+        box-shadow: none;
+        transform: none;
+        color: var(--color-ink);
+      }
     }
   }
 
@@ -323,7 +337,9 @@ function isActive(href: string) {
       font-size: 16px;
       line-height: 1;
 
-      &:hover { transform: none; }
+      @media (hover: hover) {
+        &:hover { transform: none; }
+      }
     }
 
     .search-label { display: none; }

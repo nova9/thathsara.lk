@@ -1,4 +1,6 @@
 ---
+import Loader from "./Loader.astro";
+
 export interface Props {
   src?: string;
   manifestUrl?: string;
@@ -36,26 +38,7 @@ const id = Math.random().toString(36).substring(2, 11);
     >
       <path d="M8 5.5v13l11-6.5z"></path>
     </svg>
-    <svg
-      class="icon-loading-large"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 50 50"
-      fill="none"
-      style="display: none;"
-    >
-      <circle
-        cx="25"
-        cy="25"
-        r="20"
-        stroke="currentColor"
-        stroke-width="3.5"
-        opacity="0.22"></circle>
-      <path
-        d="M45 25a20 20 0 1 1-20-20"
-        stroke="currentColor"
-        stroke-width="3.5"
-        stroke-linecap="round"></path>
-    </svg>
+    <Loader size="2rem" hidden />
   </button>
 
   <div class="video-controls">
@@ -270,9 +253,14 @@ const id = Math.random().toString(36).substring(2, 11);
     z-index: 10;
   }
 
-  .video-player.show-ui .video-title,
-  .video-player:hover .video-title {
+  .video-player.show-ui .video-title {
     opacity: 1;
+  }
+
+  @media (hover: hover) {
+    .video-player:hover .video-title {
+      opacity: 1;
+    }
   }
 
   // Center play button
@@ -321,16 +309,6 @@ const id = Math.random().toString(36).substring(2, 11);
     }
   }
 
-  .icon-loading-large {
-    animation: video-spin 0.8s linear infinite;
-  }
-
-  @keyframes video-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   // Controls overlay
   .video-controls {
     position: absolute;
@@ -351,9 +329,14 @@ const id = Math.random().toString(36).substring(2, 11);
     opacity: 0;
     transition: opacity 0.25s ease;
 
-    .video-player.show-ui &,
-    .video-player:hover & {
+    .video-player.show-ui & {
       opacity: 1;
+    }
+
+    @media (hover: hover) {
+      .video-player:hover & {
+        opacity: 1;
+      }
     }
   }
 
@@ -381,12 +364,14 @@ const id = Math.random().toString(36).substring(2, 11);
       transition: transform 0.15s ease;
     }
 
-    &:hover::after {
-      transform: translate(-50%, -50%) scale(1);
-    }
+    @media (hover: hover) {
+      &:hover::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
 
-    &:hover .video-progress-bar {
-      height: 5px;
+      &:hover .video-progress-bar {
+        height: 5px;
+      }
     }
   }
 
@@ -519,10 +504,6 @@ const id = Math.random().toString(36).substring(2, 11);
       border: none;
       padding: 0;
 
-      &:hover {
-        height: 5px;
-      }
-
       &::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 12px;
@@ -534,8 +515,14 @@ const id = Math.random().toString(36).substring(2, 11);
         transition: opacity 0.15s ease;
       }
 
-      &:hover::-webkit-slider-thumb {
-        opacity: 1;
+      @media (hover: hover) {
+        &:hover {
+          height: 5px;
+        }
+
+        &:hover::-webkit-slider-thumb {
+          opacity: 1;
+        }
       }
 
       &::-moz-range-thumb {
@@ -619,9 +606,11 @@ const id = Math.random().toString(36).substring(2, 11);
           background 0.12s ease,
           color 0.12s ease;
 
-        &:hover {
-          background: rgba(255, 255, 255, 0.1);
-          color: #fff;
+        @media (hover: hover) {
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+          }
         }
       }
 
@@ -690,9 +679,7 @@ const id = Math.random().toString(36).substring(2, 11);
       this.centerPlayBtn = player.querySelector(".video-center-play");
       this.centerPlayIcon =
         this.centerPlayBtn.querySelector(".icon-play-large");
-      this.centerLoadingIcon = this.centerPlayBtn.querySelector(
-        ".icon-loading-large",
-      );
+      this.centerLoadingIcon = this.centerPlayBtn.querySelector(".loader");
 
       this.playPauseBtn = player.querySelector(".play-pause-btn");
       this.iconPlay = this.playPauseBtn.querySelector(".icon-play");

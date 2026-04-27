@@ -18,8 +18,10 @@ import { siteConfig } from "@/lib/site";
       font-weight: bold;
       text-decoration: none;
       color: var(--color-text, #333);
-      &:hover {
-        color: var(--color-primary, #dc143c);
+      @media (hover: hover) {
+        &:hover {
+          color: var(--color-primary, #dc143c);
+        }
       }
     }
 

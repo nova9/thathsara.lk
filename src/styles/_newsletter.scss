@@ -91,11 +91,13 @@
   border-radius: 0;
   white-space: nowrap;
 
-  &:hover {
-    background: var(--color-gold);
-    border-color: var(--color-gold);
-    box-shadow: none;
-    transform: none;
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-gold);
+      border-color: var(--color-gold);
+      box-shadow: none;
+      transform: none;
+    }
   }
 }
 

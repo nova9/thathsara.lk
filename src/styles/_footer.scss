@@ -25,9 +25,11 @@
   align-items: center;
   gap: 5px;
 
-  &:hover {
-    color: var(--color-gold);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-gold);
+      text-decoration: none;
+    }
   }
 
   svg {
@@ -58,8 +60,10 @@
     color: var(--color-ink-light);
     text-decoration: none;
 
-    &:hover {
-      color: var(--color-gold);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-gold);
+      }
     }
   }
 }
@@ -92,9 +96,11 @@
   gap: 5px;
   transition: color 0.2s;
 
-  &:hover {
-    color: var(--color-gold);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-gold);
+      text-decoration: none;
+    }
   }
 }
 
@@ -118,8 +124,10 @@
   a {
     color: var(--color-ink-light);
 
-    &:hover {
-      color: var(--color-gold);
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-gold);
+      }
     }
   }
 }

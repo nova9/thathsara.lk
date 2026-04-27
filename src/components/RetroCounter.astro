@@ -56,9 +56,11 @@ const startTime =
     letter-spacing: 0.15em;
     opacity: 0.8;
 
-    &:hover {
-      opacity: 1;
-      color: var(--color-primary);
+    @media (hover: hover) {
+      &:hover {
+        opacity: 1;
+        color: var(--color-primary);
+      }
     }
   }
 </style>

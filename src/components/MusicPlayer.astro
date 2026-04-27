@@ -1,5 +1,6 @@
 ---
 import { getMusicTracks } from "@/lib/music";
+import Loader from "./Loader.astro";
 
 const tracks = await getMusicTracks();
 ---
@@ -36,7 +37,7 @@ const tracks = await getMusicTracks();
       >
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
       </svg>
-      <span class="loader" style="display: none;"></span>
+      <Loader hidden />
     </button>
     <button
       id="music-next"
@@ -125,18 +126,21 @@ const tracks = await getMusicTracks();
       transform 0.2s ease,
       background 0.2s ease;
 
-    &:hover,
     &:active {
       transform: scale(1.05);
       background: var(--color-primary, #555);
       color: var(--color-background, #fff);
-
-      .loader::after {
-        border-color: var(--color-background, #fff);
-      }
+      --loader-inner-color: var(--color-bg, #fff);
     }
 
     @media (hover: hover) {
+      &:hover {
+        transform: scale(1.05);
+        background: var(--color-primary, #555);
+        color: var(--color-background, #fff);
+        --loader-inner-color: var(--color-bg, #fff);
+      }
+
       &:active {
         transform: scale(0.95);
       }
@@ -250,9 +254,14 @@ const tracks = await getMusicTracks();
     }
   }
 
-  .music-volume-wrap:hover .music-volume-hint,
   .music-volume:focus-visible + .music-volume-hint {
     opacity: 0.7;
+  }
+
+  @media (hover: hover) {
+    .music-volume-wrap:hover .music-volume-hint {
+      opacity: 0.7;
+    }
   }
 
   .music-volume {

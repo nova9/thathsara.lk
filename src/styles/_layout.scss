@@ -102,11 +102,13 @@
   border-bottom: 1px solid var(--color-rule);
   padding-bottom: 4px;
 
-  &:hover {
-    gap: 16px;
-    border-bottom-color: var(--color-gold);
-    color: var(--color-gold);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      gap: 16px;
+      border-bottom-color: var(--color-gold);
+      color: var(--color-gold);
+      text-decoration: none;
+    }
   }
 }
 

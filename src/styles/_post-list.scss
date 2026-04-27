@@ -51,12 +51,14 @@
     padding: 1.25rem 0;
   }
 
-  &:hover {
-    opacity: 0.85;
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      opacity: 0.85;
+      text-decoration: none;
 
-    .post-title {
-      color: var(--color-gold);
+      .post-title {
+        color: var(--color-gold);
+      }
     }
   }
 }
@@ -84,9 +86,11 @@
   color: var(--color-gold);
   text-decoration: none;
 
-  &:hover {
-    color: var(--color-red);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-red);
+      text-decoration: none;
+    }
   }
 }
 
@@ -146,12 +150,20 @@
   transition: all 0.2s;
   display: inline-block;
 
-  &:hover,
   &.active {
     background: var(--color-ink);
     color: var(--color-bg);
     border-color: var(--color-ink);
     text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-ink);
+      color: var(--color-bg);
+      border-color: var(--color-ink);
+      text-decoration: none;
+    }
   }
 }
 
@@ -163,8 +175,10 @@
   color: var(--color-gold);
   text-decoration: none;
 
-  &:hover {
-    color: var(--color-red);
-    text-decoration: none;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-red);
+      text-decoration: none;
+    }
   }
 }
