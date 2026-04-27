@@ -1,5 +1,6 @@
 ---
 import Loader from "./Loader.astro";
+import PauseIcon from "./icons/PauseIcon.astro";
 import PlayIcon from "./icons/PlayIcon.astro";
 
 export interface Props {
@@ -54,19 +55,7 @@ const id = Math.random().toString(36).substring(2, 11);
         aria-label="Play/Pause"
       >
         <PlayIcon class="icon-play" />
-        <svg
-          class="icon-pause"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          style="display: none;"
-        >
-          <path d="M8 5v14M16 5v14"></path>
-        </svg>
+        <PauseIcon class="icon-pause" />
       </button>
 
       <div class="video-time">
@@ -240,6 +229,14 @@ const id = Math.random().toString(36).substring(2, 11);
     .video-player:hover .video-title {
       opacity: 1;
     }
+  }
+
+  .icon-play {
+    display: block;
+  }
+
+  .icon-pause {
+    display: none;
   }
 
   // Center play button
@@ -709,18 +706,9 @@ const id = Math.random().toString(36).substring(2, 11);
       });
 
       const toggle = () => this.togglePlay();
-      this.centerPlayBtn.addEventListener("click", () => {
-        console.log("center play clicked");
-        toggle();
-      });
-      this.playPauseBtn.addEventListener("click", () => {
-        console.log("play/pause clicked");
-        toggle();
-      });
-      this.video.addEventListener("click", () => {
-        console.log("video clicked");
-        toggle();
-      });
+      this.centerPlayBtn.addEventListener("click", () => toggle());
+      this.playPauseBtn.addEventListener("click", () => toggle());
+      this.video.addEventListener("click", () => toggle());
 
       this.dashVideo.addEventListener("play", () => this.onPlay());
       this.dashVideo.addEventListener("pause", () => this.onPause());
