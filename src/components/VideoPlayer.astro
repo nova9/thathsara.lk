@@ -71,7 +71,11 @@ const id = Math.random().toString(36).substring(2, 11);
 
     <!-- Button row -->
     <div class="video-buttons-row">
-      <button type="button" class="video-btn play-pause-btn" aria-label="Play/Pause">
+      <button
+        type="button"
+        class="video-btn play-pause-btn"
+        aria-label="Play/Pause"
+      >
         <svg
           class="icon-play"
           xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +105,9 @@ const id = Math.random().toString(36).substring(2, 11);
 
       <div class="video-quality-container" style="display: none;">
         <div class="video-quality-select">
-          <button class="video-quality-btn" type="button" aria-label="Quality">Auto</button>
+          <button class="video-quality-btn" type="button" aria-label="Quality"
+            >Auto</button
+          >
           <ul class="video-quality-menu"></ul>
         </div>
       </div>
@@ -142,7 +148,11 @@ const id = Math.random().toString(36).substring(2, 11);
         />
       </div>
 
-      <button type="button" class="video-btn fullscreen-btn" aria-label="Fullscreen">
+      <button
+        type="button"
+        class="video-btn fullscreen-btn"
+        aria-label="Fullscreen"
+      >
         <svg
           class="icon-fullscreen"
           xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +232,11 @@ const id = Math.random().toString(36).substring(2, 11);
     left: 0;
     width: 100%;
     padding: 1rem 1rem 2.5rem;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 100%);
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.65) 0%,
+      transparent 100%
+    );
     color: #fff;
     font-size: 0.9rem;
     font-weight: 600;
@@ -518,6 +532,8 @@ const id = Math.random().toString(36).substring(2, 11);
     align-items: center;
 
     .video-quality-select {
+      display: flex;
+      align-items: center;
       position: relative;
     }
 
@@ -535,7 +551,9 @@ const id = Math.random().toString(36).substring(2, 11);
       line-height: 1;
       cursor: pointer;
       outline: none;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
 
       @media (hover: hover) {
         &:hover {
@@ -574,7 +592,9 @@ const id = Math.random().toString(36).substring(2, 11);
         color: rgba(255, 255, 255, 0.6);
         cursor: pointer;
         white-space: nowrap;
-        transition: background 0.12s ease, color 0.12s ease;
+        transition:
+          background 0.12s ease,
+          color 0.12s ease;
 
         &:hover {
           background: rgba(255, 255, 255, 0.1);
@@ -617,164 +637,18 @@ const id = Math.random().toString(36).substring(2, 11);
   }
 </style>
 
+<script>
+  import "@/scripts/dash-video.js";
+</script>
+
 <script is:inline>
-  class DashVideo extends HTMLElement {
-    constructor() {
-      super();
-      this.video = this.querySelector("video");
-      this.shakaPlayer = null;
-      this.shakaPromise = null;
-    }
-
-    async getShaka() {
-      if (window.shaka) return window.shaka;
-      if (this.shakaPromise) return this.shakaPromise;
-
-      this.dispatchEvent(new Event("shakaloading"));
-      this.shakaPromise = new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src =
-          "https://cdn.jsdelivr.net/npm/shaka-player/dist/shaka-player.dash.js";
-        script.onload = () => {
-          this.dispatchEvent(new Event("shakaloaded"));
-          resolve(window.shaka);
-        };
-        script.onerror = (err) => {
-          this.dispatchEvent(new Event("shakaloaded"));
-          reject(err);
-        };
-        document.head.appendChild(script);
-      });
-      return this.shakaPromise;
-    }
-
-    connectedCallback() {
-      if (this._destroyTimeout) {
-        clearTimeout(this._destroyTimeout);
-        this._destroyTimeout = null;
-      }
-
-      if (this._eventsBound) return;
-      this._eventsBound = true;
-      const events = [
-        "play",
-        "playing",
-        "waiting",
-        "canplay",
-        "pause",
-        "ended",
-        "timeupdate",
-        "progress",
-        "loadedmetadata",
-        "volumechange",
-      ];
-      events.forEach((evt) => {
-        this.video.addEventListener(evt, () => {
-          this.dispatchEvent(new Event(evt));
-        });
-      });
-    }
-
-    disconnectedCallback() {
-      this._destroyTimeout = setTimeout(() => {
-        if (!this.isConnected) {
-          this.destroyShaka();
-        }
-      }, 0);
-    }
-
-    async loadVideo(manifestUrl, fallbackUrl) {
-      if (!manifestUrl) {
-        this.destroyShaka();
-        if (fallbackUrl) {
-          this.video.src = fallbackUrl;
-        }
-        return;
-      }
-
-      const lockedHeight = this.getBoundingClientRect().height;
-      if (lockedHeight > 0) {
-        this.style.height = lockedHeight + "px";
-        this.video.addEventListener("playing", () => { this.style.height = ""; }, { once: true });
-      }
-
-      try {
-        const shakaLib = await this.getShaka();
-        shakaLib.polyfill.installAll();
-
-        if (!shakaLib.Player.isBrowserSupported()) {
-          this.destroyShaka();
-          if (fallbackUrl) this.video.src = fallbackUrl;
-          return;
-        }
-
-        if (!this.shakaPlayer) {
-          this.shakaPlayer = new shakaLib.Player();
-          await this.shakaPlayer.attach(this.video);
-
-          this.shakaPlayer.configure({
-            streaming: {
-              bufferingGoal: 3600,
-              rebufferingGoal: 2,
-              bufferBehind: 3600,
-            },
-          });
-
-          this.shakaPlayer.addEventListener("error", (event) => {
-            console.error("Shaka error", event?.detail || event);
-          });
-        }
-
-        await this.shakaPlayer.load(manifestUrl);
-        this.dispatchEvent(new Event("shakaready"));
-      } catch (error) {
-        console.error("Error loading Shaka player", error);
-        this.destroyShaka();
-        if (fallbackUrl) this.video.src = fallbackUrl;
-      }
-    }
-
-    getTracks() {
-      if (!this.shakaPlayer) return [];
-      return this.shakaPlayer.getVariantTracks();
-    }
-
-    selectTrack(id) {
-      if (!this.shakaPlayer) return;
-      if (id === "auto") {
-        this.shakaPlayer.configure({ abr: { enabled: true } });
-      } else {
-        this.shakaPlayer.configure({ abr: { enabled: false } });
-        const tracks = this.shakaPlayer.getVariantTracks();
-        const track = tracks.find((t) => t.id == id);
-        if (track) {
-          this.shakaPlayer.selectVariantTrack(track, true);
-        }
-      }
-    }
-
-    destroyShaka() {
-      if (this.shakaPlayer) {
-        this.shakaPlayer.destroy();
-        this.shakaPlayer = null;
-      }
-    }
-
-    play() {
-      return this.video.play();
-    }
-
-    pause() {
-      this.video.pause();
-    }
-
-    get paused() {
-      return this.video.paused;
-    }
+  function showOnly(showEl, hideEl) {
+    showEl.style.display = "block";
+    hideEl.style.display = "none";
   }
 
-  if (!customElements.get("dash-video")) {
-    customElements.define("dash-video", DashVideo);
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
   function formatTime(seconds) {
@@ -784,273 +658,295 @@ const id = Math.random().toString(36).substring(2, 11);
     return `${m}:${s.toString().padStart(2, "0")}`;
   }
 
-  function setupVideoPlayers() {
-    const players = document.querySelectorAll(".video-player");
+  class VideoController {
+    constructor(player) {
+      this.player = player;
+      this.dashVideo = player.querySelector("dash-video");
+      this.video = this.dashVideo.querySelector("video");
 
-    players.forEach((player) => {
-      if (player.dataset.initialized === "true") return;
-      player.dataset.initialized = "true";
-
-      const dashVideo = player.querySelector("dash-video");
-      const video = dashVideo.querySelector("video");
-
-      const centerPlayBtn = player.querySelector(".video-center-play");
-      const centerPlayIcon = centerPlayBtn.querySelector(".icon-play-large");
-      const centerLoadingIcon = centerPlayBtn.querySelector(
+      this.centerPlayBtn = player.querySelector(".video-center-play");
+      this.centerPlayIcon =
+        this.centerPlayBtn.querySelector(".icon-play-large");
+      this.centerLoadingIcon = this.centerPlayBtn.querySelector(
         ".icon-loading-large",
       );
 
-      const playPauseBtn = player.querySelector(".play-pause-btn");
-      const iconPlay = playPauseBtn.querySelector(".icon-play");
-      const iconPause = playPauseBtn.querySelector(".icon-pause");
+      this.playPauseBtn = player.querySelector(".play-pause-btn");
+      this.iconPlay = this.playPauseBtn.querySelector(".icon-play");
+      this.iconPause = this.playPauseBtn.querySelector(".icon-pause");
 
-      const muteBtn = player.querySelector(".mute-btn");
-      const iconVol = muteBtn.querySelector(".icon-volume");
-      const iconMuted = muteBtn.querySelector(".icon-muted");
+      this.muteBtn = player.querySelector(".mute-btn");
+      this.iconVol = this.muteBtn.querySelector(".icon-volume");
+      this.iconMuted = this.muteBtn.querySelector(".icon-muted");
 
-      const fullscreenBtn = player.querySelector(".fullscreen-btn");
-      const iconFullscreen = fullscreenBtn.querySelector(".icon-fullscreen");
-      const iconFullscreenExit = fullscreenBtn.querySelector(
+      this.fullscreenBtn = player.querySelector(".fullscreen-btn");
+      this.iconFullscreen =
+        this.fullscreenBtn.querySelector(".icon-fullscreen");
+      this.iconFullscreenExit = this.fullscreenBtn.querySelector(
         ".icon-fullscreen-exit",
       );
 
-      const timelineContainer = player.querySelector(".video-timeline-container");
-      const timeline = player.querySelector(".video-timeline");
-      const progressBar = player.querySelector(".video-progress-bar");
-      const timeCurrent = player.querySelector(".time-current");
-      const timeDuration = player.querySelector(".time-duration");
+      this.timelineContainer = player.querySelector(
+        ".video-timeline-container",
+      );
+      this.timeline = player.querySelector(".video-timeline");
+      this.progressBar = player.querySelector(".video-progress-bar");
+      this.timeCurrent = player.querySelector(".time-current");
+      this.timeDuration = player.querySelector(".time-duration");
 
-      const volumeSlider = player.querySelector(".video-volume");
-      const qualityContainer = player.querySelector(".video-quality-container");
-      const qualityBtn = player.querySelector(".video-quality-btn");
-      const qualityMenu = player.querySelector(".video-quality-menu");
+      this.volumeSlider = player.querySelector(".video-volume");
+      this.qualityContainer = player.querySelector(".video-quality-container");
+      this.qualityBtn = player.querySelector(".video-quality-btn");
+      this.qualityMenu = player.querySelector(".video-quality-menu");
 
-      const src = player.dataset.src;
-      const manifest = player.dataset.manifest;
+      this.src = player.dataset.src;
+      this.manifest = player.dataset.manifest;
+      this.isVideoLoaded = false;
+      this.hideUiTimeout = null;
 
-      let isVideoLoaded = false;
-      let hideUiTimeout;
+      this.bindEvents();
+      this.player.classList.add("show-ui");
 
-      function triggerUiHiding() {
-        clearTimeout(hideUiTimeout);
-        player.classList.add("show-ui");
-        if (!video.paused) {
-          hideUiTimeout = setTimeout(() => {
-            player.classList.remove("show-ui");
-          }, 3000);
-        }
+      if (this.src && !this.manifest) {
+        this.video.src = this.src;
       }
+    }
 
-      player.addEventListener("mousemove", triggerUiHiding);
-      player.addEventListener("mouseleave", () => {
-        if (!video.paused) player.classList.remove("show-ui");
+    bindEvents() {
+      this.player.addEventListener("mousemove", () => this.scheduleUiHide());
+      this.player.addEventListener("mouseleave", () => {
+        if (!this.video.paused) this.player.classList.remove("show-ui");
       });
 
-      async function togglePlay() {
-        if (!isVideoLoaded) {
-          centerPlayIcon.style.display = "none";
-          centerLoadingIcon.style.display = "block";
+      const toggle = () => this.togglePlay();
+      this.centerPlayBtn.addEventListener("click", toggle);
+      this.playPauseBtn.addEventListener("click", toggle);
+      this.video.addEventListener("click", toggle);
 
-          await dashVideo.loadVideo(manifest, src);
-          isVideoLoaded = true;
-
-          centerPlayIcon.style.display = "block";
-          centerLoadingIcon.style.display = "none";
-        }
-
-        if (video.paused) {
-          video.play().catch((e) => console.error("Video play blocked:", e));
-        } else {
-          video.pause();
-        }
-      }
-
-      centerPlayBtn.addEventListener("click", togglePlay);
-      playPauseBtn.addEventListener("click", togglePlay);
-      video.addEventListener("click", togglePlay);
-
-      dashVideo.addEventListener("play", () => {
-        iconPlay.style.display = "none";
-        iconPause.style.display = "block";
-        centerPlayBtn.classList.add("fade-out");
-        triggerUiHiding();
+      this.dashVideo.addEventListener("play", () => this.onPlay());
+      this.dashVideo.addEventListener("pause", () => this.onPause());
+      this.dashVideo.addEventListener("waiting", () =>
+        this.setCenterLoading(true),
+      );
+      this.dashVideo.addEventListener("playing", () => {
+        this.setCenterLoading(false);
+        this.centerPlayBtn.classList.add("fade-out");
       });
-
-      dashVideo.addEventListener("pause", () => {
-        iconPlay.style.display = "block";
-        iconPause.style.display = "none";
-        centerPlayBtn.classList.remove("fade-out");
-        player.classList.add("show-ui");
+      this.dashVideo.addEventListener("loadedmetadata", () => {
+        this.timeDuration.textContent = formatTime(this.video.duration);
       });
-
-      dashVideo.addEventListener("waiting", () => {
-        centerPlayBtn.classList.remove("fade-out");
-        centerPlayIcon.style.display = "none";
-        centerLoadingIcon.style.display = "block";
+      this.dashVideo.addEventListener("timeupdate", () => {
+        this.timeCurrent.textContent = formatTime(this.video.currentTime);
+        this.updateProgressAndBuffer();
       });
+      this.dashVideo.addEventListener("progress", () =>
+        this.updateProgressAndBuffer(),
+      );
+      this.dashVideo.addEventListener("volumechange", () =>
+        this.updateVolumeUi(),
+      );
+      this.dashVideo.addEventListener("shakaready", () =>
+        this.populateQualityMenu(),
+      );
 
-      dashVideo.addEventListener("playing", () => {
-        centerPlayIcon.style.display = "block";
-        centerLoadingIcon.style.display = "none";
-        centerPlayBtn.classList.add("fade-out");
-      });
-
-      dashVideo.addEventListener("loadedmetadata", () => {
-        timeDuration.textContent = formatTime(video.duration);
-      });
-
-      function updateProgressAndBuffer() {
-        if (!video.duration) return;
-        const percent = (video.currentTime / video.duration) * 100;
-        timeline.value = percent;
-        progressBar.style.setProperty("--progress", `${percent}%`);
-        // also set on container so the CSS thumb pseudo-element can read it
-        timelineContainer.style.setProperty("--progress", `${percent}%`);
-
-        if (video.buffered.length > 0) {
-          let bufEnd = 0;
-          for (let i = 0; i < video.buffered.length; i++) {
-            if (
-              video.buffered.start(i) <= video.currentTime &&
-              video.buffered.end(i) >= video.currentTime
-            ) {
-              bufEnd = video.buffered.end(i);
-              break;
-            }
-          }
-          if (bufEnd === 0 && video.buffered.length > 0) {
-            bufEnd = video.buffered.end(video.buffered.length - 1);
-          }
-          const bufPercent = (bufEnd / video.duration) * 100;
-          progressBar.style.setProperty("--buffer", `${bufPercent}%`);
-        }
-      }
-
-      dashVideo.addEventListener("timeupdate", () => {
-        timeCurrent.textContent = formatTime(video.currentTime);
-        updateProgressAndBuffer();
-      });
-
-      dashVideo.addEventListener("progress", updateProgressAndBuffer);
-
-      timeline.addEventListener("input", (e) => {
-        if (video.duration) {
-          const time = (e.target.value / 100) * video.duration;
-          video.currentTime = time;
+      this.timeline.addEventListener("input", (e) => {
+        if (this.video.duration) {
+          this.video.currentTime = (e.target.value / 100) * this.video.duration;
         }
       });
 
-      function updateVolumeUi() {
-        const vol = video.muted ? 0 : video.volume;
-        volumeSlider.value = vol;
-        volumeSlider.style.setProperty("--vol", `${vol * 100}%`);
-        if (video.volume === 0 || video.muted) {
-          iconVol.style.display = "none";
-          iconMuted.style.display = "block";
-        } else {
-          iconVol.style.display = "block";
-          iconMuted.style.display = "none";
-        }
-      }
-
-      muteBtn.addEventListener("click", () => {
-        video.muted = !video.muted;
-        volumeSlider.value = video.muted ? 0 : video.volume;
-        updateVolumeUi();
+      this.muteBtn.addEventListener("click", () => {
+        this.video.muted = !this.video.muted;
+        this.volumeSlider.value = this.video.muted ? 0 : this.video.volume;
+        this.updateVolumeUi();
       });
 
-      volumeSlider.addEventListener("input", (e) => {
-        video.volume = e.target.value;
-        video.muted = video.volume === 0;
-        updateVolumeUi();
+      this.volumeSlider.addEventListener("input", (e) => {
+        this.video.volume = e.target.value;
+        this.video.muted = this.video.volume === 0;
+        this.updateVolumeUi();
       });
 
-      dashVideo.addEventListener("volumechange", updateVolumeUi);
-
-      dashVideo.addEventListener("shakaready", () => {
-        const tracks = dashVideo.getTracks();
-        if (tracks && tracks.length > 0) {
-          const seenHeights = new Set();
-          const uniqueTracks = tracks
-            .filter((t) => {
-              if (t.height && !seenHeights.has(t.height)) {
-                seenHeights.add(t.height);
-                return true;
-              }
-              return false;
-            })
-            .sort((a, b) => b.height - a.height);
-
-          if (uniqueTracks.length > 1) {
-            qualityMenu.innerHTML = '<li data-value="auto" class="selected">Auto</li>';
-            uniqueTracks.forEach((t) => {
-              const li = document.createElement("li");
-              li.dataset.value = t.id;
-              li.textContent = `${t.height}p`;
-              qualityMenu.appendChild(li);
-            });
-            qualityContainer.style.display = "flex";
-          }
-        }
-      });
-
-      qualityBtn?.addEventListener("click", (e) => {
+      this.qualityBtn?.addEventListener("click", (e) => {
         e.stopPropagation();
-        qualityMenu.classList.toggle("open");
+        this.qualityMenu.classList.toggle("open");
       });
 
-      qualityMenu?.addEventListener("click", (e) => {
+      this.qualityMenu?.addEventListener("click", (e) => {
         const li = e.target.closest("li");
         if (!li) return;
-        qualityMenu.querySelectorAll("li").forEach((el) => el.classList.remove("selected"));
+        this.qualityMenu
+          .querySelectorAll("li")
+          .forEach((el) => el.classList.remove("selected"));
         li.classList.add("selected");
-        qualityBtn.textContent = li.textContent;
-        qualityMenu.classList.remove("open");
-        dashVideo.selectTrack(li.dataset.value);
+        this.qualityBtn.textContent = li.textContent;
+        this.qualityMenu.classList.remove("open");
+        this.dashVideo.selectTrack(li.dataset.value);
       });
 
       document.addEventListener("click", () => {
-        qualityMenu?.classList.remove("open");
+        this.qualityMenu?.classList.remove("open");
       });
 
-      fullscreenBtn.addEventListener("click", () => {
-        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        if (isFs) {
-          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-        } else if (player.requestFullscreen) {
-          player.requestFullscreen().catch((err) => {
-            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-          });
-        } else if (player.webkitRequestFullscreen) {
-          player.webkitRequestFullscreen();
-        } else if (video.webkitEnterFullscreen) {
-          // iOS Safari: only <video> itself can go fullscreen
-          video.webkitEnterFullscreen();
-        }
-      });
+      this.fullscreenBtn.addEventListener("click", () =>
+        this.toggleFullscreen(),
+      );
 
-      function onFullscreenChange() {
-        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        iconFullscreen.style.display = isFs ? "none" : "block";
-        iconFullscreenExit.style.display = isFs ? "block" : "none";
+      const onFsChange = () => this.updateFullscreenIcon();
+      document.addEventListener("fullscreenchange", onFsChange);
+      document.addEventListener("webkitfullscreenchange", onFsChange);
+
+      // iOS fires these on <video> when using webkitEnterFullscreen
+      this.video.addEventListener("webkitbeginfullscreen", () => {
+        showOnly(this.iconFullscreenExit, this.iconFullscreen);
+      });
+      this.video.addEventListener("webkitendfullscreen", () => {
+        showOnly(this.iconFullscreen, this.iconFullscreenExit);
+      });
+    }
+
+    scheduleUiHide() {
+      clearTimeout(this.hideUiTimeout);
+      this.player.classList.add("show-ui");
+      if (!this.video.paused) {
+        this.hideUiTimeout = setTimeout(() => {
+          this.player.classList.remove("show-ui");
+        }, 3000);
       }
-      document.addEventListener("fullscreenchange", onFullscreenChange);
-      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    }
 
-      // iOS fires these on the video element when using webkitEnterFullscreen
-      video.addEventListener("webkitbeginfullscreen", () => {
-        iconFullscreen.style.display = "none";
-        iconFullscreenExit.style.display = "block";
+    setCenterLoading(loading) {
+      if (loading) {
+        this.centerPlayBtn.classList.remove("fade-out");
+        showOnly(this.centerLoadingIcon, this.centerPlayIcon);
+      } else {
+        showOnly(this.centerPlayIcon, this.centerLoadingIcon);
+      }
+    }
+
+    async togglePlay() {
+      if (!this.isVideoLoaded) {
+        this.setCenterLoading(true);
+        await this.dashVideo.loadVideo(this.manifest, this.src);
+        this.isVideoLoaded = true;
+        this.setCenterLoading(false);
+      }
+      if (this.video.paused) {
+        this.video.play().catch((e) => console.error("Video play blocked:", e));
+      } else {
+        this.video.pause();
+      }
+    }
+
+    onPlay() {
+      showOnly(this.iconPause, this.iconPlay);
+      this.centerPlayBtn.classList.add("fade-out");
+      this.scheduleUiHide();
+    }
+
+    onPause() {
+      showOnly(this.iconPlay, this.iconPause);
+      this.centerPlayBtn.classList.remove("fade-out");
+      this.player.classList.add("show-ui");
+    }
+
+    updateProgressAndBuffer() {
+      if (!this.video.duration) return;
+      const percent = (this.video.currentTime / this.video.duration) * 100;
+      this.timeline.value = percent;
+      this.progressBar.style.setProperty("--progress", `${percent}%`);
+      // Container also reads --progress for the CSS thumb pseudo-element.
+      this.timelineContainer.style.setProperty("--progress", `${percent}%`);
+
+      const buffered = this.video.buffered;
+      if (buffered.length === 0) return;
+
+      let bufEnd = 0;
+      for (let i = 0; i < buffered.length; i++) {
+        if (
+          buffered.start(i) <= this.video.currentTime &&
+          buffered.end(i) >= this.video.currentTime
+        ) {
+          bufEnd = buffered.end(i);
+          break;
+        }
+      }
+      if (bufEnd === 0) {
+        bufEnd = buffered.end(buffered.length - 1);
+      }
+      const bufPercent = (bufEnd / this.video.duration) * 100;
+      this.progressBar.style.setProperty("--buffer", `${bufPercent}%`);
+    }
+
+    updateVolumeUi() {
+      const vol = this.video.muted ? 0 : this.video.volume;
+      this.volumeSlider.value = vol;
+      this.volumeSlider.style.setProperty("--vol", `${vol * 100}%`);
+      if (this.video.volume === 0 || this.video.muted) {
+        showOnly(this.iconMuted, this.iconVol);
+      } else {
+        showOnly(this.iconVol, this.iconMuted);
+      }
+    }
+
+    populateQualityMenu() {
+      const tracks = this.dashVideo.getTracks();
+      if (!tracks || tracks.length === 0) return;
+
+      const seenHeights = new Set();
+      const uniqueTracks = tracks
+        .filter((t) => {
+          if (t.height && !seenHeights.has(t.height)) {
+            seenHeights.add(t.height);
+            return true;
+          }
+          return false;
+        })
+        .sort((a, b) => b.height - a.height);
+
+      if (uniqueTracks.length <= 1) return;
+
+      this.qualityMenu.innerHTML =
+        '<li data-value="auto" class="selected">Auto</li>';
+      uniqueTracks.forEach((t) => {
+        const li = document.createElement("li");
+        li.dataset.value = t.id;
+        li.textContent = `${t.height}p`;
+        this.qualityMenu.appendChild(li);
       });
-      video.addEventListener("webkitendfullscreen", () => {
-        iconFullscreen.style.display = "block";
-        iconFullscreenExit.style.display = "none";
-      });
+      this.qualityContainer.style.display = "flex";
+    }
 
-      player.classList.add("show-ui");
+    toggleFullscreen() {
+      if (isFullscreen()) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(
+          document,
+        );
+      } else if (this.player.requestFullscreen) {
+        this.player.requestFullscreen().catch((err) => {
+          console.error(
+            `Error attempting to enable full-screen mode: ${err.message}`,
+          );
+        });
+      } else if (this.player.webkitRequestFullscreen) {
+        this.player.webkitRequestFullscreen();
+      } else if (this.video.webkitEnterFullscreen) {
+        // iOS Safari: only <video> itself can go fullscreen
+        this.video.webkitEnterFullscreen();
+      }
+    }
 
-      if (src && !manifest) {
-        video.src = src;
+    updateFullscreenIcon() {
+      const fs = isFullscreen();
+      this.iconFullscreen.style.display = fs ? "none" : "block";
+      this.iconFullscreenExit.style.display = fs ? "block" : "none";
+    }
+  }
+
+  function setupVideoPlayers() {
+    document.querySelectorAll(".video-player").forEach((player) => {
+      if (!player._controller) {
+        player._controller = new VideoController(player);
       }
     });
   }
