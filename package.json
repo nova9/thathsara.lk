@@ -10,6 +10,7 @@
     "download": "node --env-file=.env npm-run/download.js",
     "video": "node npm-run/download-video.js",
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
+    "thumbnail": "node npm-run/extract-thumbnail.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js"
   },
   "dependencies": {
