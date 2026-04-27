@@ -2,7 +2,6 @@
 import { siteConfig } from "@/lib/site";
 import packageJson from "../../package.json";
 import "../styles/main.scss";
-import { toDateLabel } from "@/lib/utils";
 import Navigation from "@/components/Navigation.astro";
 import MusicPlayer from "@/components/MusicPlayer.astro";
 import RetroCounter from "@/components/RetroCounter.astro";
@@ -55,8 +54,8 @@ const structuredData = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href={new URL('/favicon.svg', Astro.url)} />
-    <link rel="icon" type="image/png" sizes="48x48" href={new URL('/favicon.png', Astro.url)} />
+    <link rel="icon" type="image/svg+xml" href={`/favicon.svg?v=${packageJson.version}`} />
+    <link rel="icon" type="image/png" sizes="48x48" href={`/favicon.png?v=${packageJson.version}`} />
     <link rel="canonical" href={canonicalURL} />
 
     <title>{pageTitle}</title>
