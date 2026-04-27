@@ -1,5 +1,6 @@
 ---
 import Loader from "./Loader.astro";
+import PlayIcon from "./icons/PlayIcon.astro";
 
 export interface Props {
   src?: string;
@@ -26,18 +27,7 @@ const id = Math.random().toString(36).substring(2, 11);
 
   <!-- Center Play Button -->
   <button type="button" class="video-center-play" aria-label="Play Video">
-    <svg
-      class="icon-play-large"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.75"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M8 5.5v13l11-6.5z"></path>
-    </svg>
+    <PlayIcon class="icon-play-large" />
     <Loader size="2rem" hidden />
   </button>
 
@@ -63,18 +53,7 @@ const id = Math.random().toString(36).substring(2, 11);
         class="video-btn play-pause-btn"
         aria-label="Play/Pause"
       >
-        <svg
-          class="icon-play"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.75"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M8 5.5v13l11-6.5z"></path>
-        </svg>
+        <PlayIcon class="icon-play" />
         <svg
           class="icon-pause"
           xmlns="http://www.w3.org/2000/svg"
@@ -277,6 +256,7 @@ const id = Math.random().toString(36).substring(2, 11);
     border-radius: 50%;
     width: 4.5rem;
     height: 4.5rem;
+    padding: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,7 +267,6 @@ const id = Math.random().toString(36).substring(2, 11);
       background 0.2s ease,
       border-color 0.2s ease,
       opacity 0.25s ease;
-    padding: 0;
 
     @media (hover: hover) {
       &:hover {
@@ -315,7 +294,7 @@ const id = Math.random().toString(36).substring(2, 11);
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 4rem 0.875rem 0.625rem;
+    padding: 0rem 0.5rem 0.5rem;
     background: linear-gradient(
       to top,
       rgba(0, 0, 0, 0.88) 0%,
@@ -638,8 +617,9 @@ const id = Math.random().toString(36).substring(2, 11);
     }
 
     .video-center-play {
-      width: 3.75rem;
-      height: 3.75rem;
+      width: 4rem;
+      height: 4rem;
+      padding: 1rem;
 
       svg {
         width: 1.625rem;
@@ -729,9 +709,18 @@ const id = Math.random().toString(36).substring(2, 11);
       });
 
       const toggle = () => this.togglePlay();
-      this.centerPlayBtn.addEventListener("click", toggle);
-      this.playPauseBtn.addEventListener("click", toggle);
-      this.video.addEventListener("click", toggle);
+      this.centerPlayBtn.addEventListener("click", () => {
+        console.log("center play clicked");
+        toggle();
+      });
+      this.playPauseBtn.addEventListener("click", () => {
+        console.log("play/pause clicked");
+        toggle();
+      });
+      this.video.addEventListener("click", () => {
+        console.log("video clicked");
+        toggle();
+      });
 
       this.dashVideo.addEventListener("play", () => this.onPlay());
       this.dashVideo.addEventListener("pause", () => this.onPause());

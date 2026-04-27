@@ -7,7 +7,7 @@
   overflow-wrap: break-word;
 
   @media (max-width: bp.$bp-mobile-max) {
-    padding-inline: 0.7rem;
+    padding-inline: var(--content-padding-mobile);
   }
 }
 

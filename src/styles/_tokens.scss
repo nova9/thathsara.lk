@@ -12,18 +12,18 @@ $hue-cool: 220;
 
 :root {
   // Surfaces: warm parchment.
-  --color-paper:     #{warm(96%, 55%)};
-  --color-bg:        #{warm(93%, 42%)};
-  --color-rule:      #{warm(78%, 30%)};
+  --color-paper: #{warm(96%, 55%)};
+  --color-bg: #{warm(93%, 42%)};
+  --color-rule: #{warm(78%, 30%)};
 
   // Text: cool navy ink ladder.
-  --color-ink:       #{cool(12%, 55%)};
-  --color-ink-mid:   #{cool(30%, 35%)};
+  --color-ink: #{cool(12%, 55%)};
+  --color-ink-mid: #{cool(30%, 35%)};
   --color-ink-light: #{cool(48%, 22%)};
 
   // Accents.
-  --color-gold:      #{warm(48%, 72%)};
-  --color-red:       #{hsl(0, 70%, 38%)};
+  --color-gold: #{warm(48%, 72%)};
+  --color-red: #{hsl(0, 70%, 38%)};
 
   // Aliases for existing code compatibility
   --color-primary: var(--color-gold);
@@ -43,7 +43,8 @@ $hue-cool: 220;
   // Layout
   --content-max-width: 760px;
   --content-padding: 2rem;
-  --border-radius: 2px;
+  --content-padding-mobile: 0.7rem;
+  --border-radius: 5px;
   --font-size-base: 18px;
   --line-height-base: 1.75;
   --line-height-content: 1.85;
@@ -52,17 +53,17 @@ $hue-cool: 220;
 @media (prefers-color-scheme: dark) {
   :root {
     // Surfaces: deep navy hood.
-    --color-bg:        #{cool( 6%, 50%)};
-    --color-paper:     #{cool(10%, 40%)};
-    --color-rule:      #{cool(20%, 35%)};
+    --color-bg: #{cool(6%, 50%)};
+    --color-paper: #{cool(10%, 40%)};
+    --color-rule: #{cool(20%, 35%)};
 
     // Text: warm cream highlights.
-    --color-ink:       #{warm(88%, 45%)};
-    --color-ink-mid:   #{warm(70%, 30%)};
+    --color-ink: #{warm(88%, 45%)};
+    --color-ink-mid: #{warm(70%, 30%)};
     --color-ink-light: #{warm(58%, 22%)};
 
     // Accents.
-    --color-gold:      #{warm(58%, 75%)};
-    --color-red:       #{hsl(0, 75%, 62%)};
+    --color-gold: #{warm(58%, 75%)};
+    --color-red: #{hsl(0, 75%, 62%)};
   }
 }
