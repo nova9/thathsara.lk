@@ -38,6 +38,7 @@
 
 .article-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
   color: var(--color-ink-light);
@@ -47,7 +48,7 @@
 
   @media (max-width: 600px) {
     gap: 0.5rem;
-    letter-spacing: 0.04em;
+    letter-spacing: 0
   }
 }
 
