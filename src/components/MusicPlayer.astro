@@ -422,6 +422,11 @@ const tracks = await getMusicTracks();
       this.audio.addEventListener("play", () => {
         this.isPlaying = true;
         this.updateUI();
+        document.dispatchEvent(
+          new CustomEvent("media-playback-started", {
+            detail: { source: "music" },
+          }),
+        );
       });
       this.audio.addEventListener("playing", () => {
         this.isLoading = false;
@@ -536,6 +541,23 @@ const tracks = await getMusicTracks();
         this.infoPanel.classList.remove("is-scrolling");
       }, 2000);
     }
+  }
+
+  if (!window.__mediaCoordinatorInstalled) {
+    window.__mediaCoordinatorInstalled = true;
+    document.addEventListener("media-playback-started", (e) => {
+      const detail = e.detail || {};
+      if (detail.source !== "music") {
+        const audio = document.getElementById("bg-audio");
+        if (audio && !audio.paused) audio.pause();
+      }
+      document.querySelectorAll(".video-player").forEach((p) => {
+        const v = p.querySelector("video");
+        if (!v || v.paused) return;
+        if (detail.source === "video" && detail.id === p.id) return;
+        v.pause();
+      });
+    });
   }
 
   function setupPlayer() {
