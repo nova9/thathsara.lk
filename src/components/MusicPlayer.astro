@@ -130,7 +130,6 @@ const tracks = await getMusicTracks();
       transform: scale(1.05);
       background: var(--color-primary, #555);
       color: var(--color-background, #fff);
-      --loader-inner-color: var(--color-bg, #fff);
     }
 
     @media (hover: hover) {
@@ -138,7 +137,6 @@ const tracks = await getMusicTracks();
         transform: scale(1.05);
         background: var(--color-primary, #555);
         color: var(--color-background, #fff);
-        --loader-inner-color: var(--color-bg, #fff);
       }
 
       &:active {
@@ -255,12 +253,12 @@ const tracks = await getMusicTracks();
   }
 
   .music-volume:focus-visible + .music-volume-hint {
-    opacity: 0.7;
+    opacity: 1;
   }
 
   @media (hover: hover) {
     .music-volume-wrap:hover .music-volume-hint {
-      opacity: 0.7;
+      opacity: 1;
     }
   }
 
@@ -519,16 +517,15 @@ const tracks = await getMusicTracks();
 
       // prettier-ignore
       const map = {
-        loading: { play: "none",  pause: "none",  loader: "block", disabled: true  },
-        playing: { play: "none",  pause: "block", loader: "none",  disabled: false },
-        paused:  { play: "block", pause: "none",  loader: "none",  disabled: false },
+        loading: { play: "none",  pause: "none",  loader: "block" },
+        playing: { play: "none",  pause: "block", loader: "none"  },
+        paused:  { play: "block", pause: "none",  loader: "none"  },
       };
       const c = map[state];
 
       this.iconPlay.style.display = c.play;
       this.iconPause.style.display = c.pause;
       this.iconLoading.style.display = c.loader;
-      this.btn.disabled = c.disabled;
     }
 
     handleScroll() {
