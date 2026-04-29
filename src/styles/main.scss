@@ -153,7 +153,7 @@ body::after {
 }
 
 // =============================================================================
-// Base — document, typography, headings, images, code, tables
+// Base — document, typography, headings, images
 // =============================================================================
 
 html {
@@ -289,10 +289,9 @@ figure {
   display: inline-block;
   margin: 0;
   max-inline-size: 100%;
+  padding-inline: 2.5rem;
 
-  @media screen and (min-width: $bp-mobile-max) {
-    padding-inline: 2.5rem;
-  }
+  @include mobile { padding-inline: 0; }
 
   img {
     max-block-size: 500px;
@@ -303,128 +302,6 @@ figure {
     margin: 0 0 1em;
     font-family: var(--font-ui);
     font-style: italic;
-  }
-}
-
-// ── Code ─────────────────────────────────────────────────────────────────────
-
-code {
-  background-color: var(--color-paper);
-  border: 1px solid var(--color-rule);
-  padding: 0.1em 0.3em;
-  border-radius: var(--border-radius);
-  font-size: 0.85em;
-  font-family: "Fira Mono", "Consolas", monospace;
-}
-
-pre {
-  background-color: var(--color-paper);
-  border: 1px solid var(--color-rule);
-  line-height: 1.4;
-  overflow-x: auto;
-  padding: 1.25em;
-  border-radius: var(--border-radius);
-}
-
-pre code {
-  background-color: transparent;
-  border: none;
-  color: inherit;
-  font-size: 100%;
-  padding: 0;
-}
-
-// Language badges. Each entry: (label, aliases, bg, fg). Aliases are matched
-// as `[class*="language-{alias}"]`, so a substring is enough — `js` covers
-// `language-javascript` too. Order matters when prefixes overlap (json after js).
-$languages: (
-  ("js", ("js"), #f7df1e, #000),
-  ("ts", ("ts"), #3178c6, #fff),
-  ("python", ("py"), #3776ab, #fff),
-  ("go", ("go"), #00add8, #fff),
-  ("css", ("css"), #1572b6, #fff),
-  ("html", ("html"), #e34f26, #fff),
-  ("json", ("json"), var(--color-ink), var(--color-bg)),
-  ("yaml", ("yml", "yaml"), #cc1018, #fff),
-  ("shell", ("shell", "bash", "sh"), #4eaa25, #fff),
-  ("markdown", ("md"), #083fa1, #fff)
-);
-
-.highlight {
-  position: relative;
-  -webkit-overflow-scrolling: touch;
-  border-radius: var(--border-radius);
-  overflow: hidden;
-
-  pre ::selection {
-    background: rgba(255, 255, 255, 0.2);
-    color: inherit;
-  }
-
-  pre code[class*="language-"] {
-    -webkit-overflow-scrolling: touch;
-
-    &::before {
-      background: var(--color-ink);
-      border-radius: 0 0 0.25rem 0.25rem;
-      color: var(--color-bg);
-      font-size: 0.7rem;
-      font-weight: bold;
-      font-family: var(--font-ui);
-      letter-spacing: 0.1em;
-      padding: 0.1rem 0.5rem;
-      position: absolute;
-      inset-inline-end: 1rem;
-      inset-block-start: 0;
-      text-transform: uppercase;
-    }
-  }
-
-  @each $entry in $languages {
-    $label: nth($entry, 1);
-    $aliases: nth($entry, 2);
-    $bg: nth($entry, 3);
-    $fg: nth($entry, 4);
-    $sel: ();
-    @each $a in $aliases {
-      $sel: append(
-        $sel,
-        unquote('pre code[class*="language-#{$a}"]::before'),
-        comma
-      );
-    }
-    #{$sel} {
-      content: $label;
-      background: $bg;
-      color: $fg;
-    }
-  }
-}
-
-// ── Tables ───────────────────────────────────────────────────────────────────
-
-table {
-  border-spacing: 0;
-  border-collapse: collapse;
-  inline-size: 100%;
-  margin-block: 1.5rem;
-  border: 1px solid var(--color-rule);
-
-  th,
-  td {
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-rule);
-    text-align: start;
-  }
-
-  th {
-    @include caps(0.75em, 0.15em);
-    font-weight: 600;
-    background-color: var(--color-paper);
-  }
-
-  tr:nth-child(even) {
-    background-color: var(--color-paper);
   }
 }
 
@@ -960,84 +837,6 @@ table {
 
     @include hover {
       color: var(--color-gold);
-    }
-  }
-}
-
-// =============================================================================
-// Search (Pagefind)
-// =============================================================================
-
-.post-search {
-  margin-block: 2rem;
-
-  input {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid var(--color-rule);
-    border-radius: 0;
-    background-color: var(--color-paper);
-    color: var(--color-ink);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    font-style: italic;
-    transition: border-color 0.2s;
-
-    &::placeholder {
-      color: var(--color-ink-light);
-      font-style: italic;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: var(--color-gold);
-    }
-  }
-
-  .search-status {
-    @include ui(0.7em, 0.1em);
-    margin-block: 0.5rem 0;
-    min-height: 1.2em;
-
-    &:empty {
-      display: none;
-    }
-  }
-
-  .search-results {
-    list-style: none;
-    padding-inline-start: 0;
-    margin-block: 1rem 0;
-
-    > li {
-      margin-block: 0.8rem;
-      padding-block-end: 0.8rem;
-      border-block-end: 1px solid var(--color-rule);
-
-      &:last-child {
-        border-block-end: 0;
-        padding-block-end: 0;
-      }
-
-      a {
-        font-family: var(--font-display);
-        font-size: 1.1rem;
-        font-weight: 700;
-        text-decoration: none;
-        color: var(--color-ink);
-
-        @include hover {
-          color: var(--color-gold);
-          text-decoration: none;
-        }
-      }
-
-      p {
-        margin-block: 0.35rem 0;
-        color: var(--color-ink-mid);
-        font-size: 0.9em;
-        font-style: italic;
-      }
     }
   }
 }
