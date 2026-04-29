@@ -1,13 +1,9 @@
 // =============================================================================
-// Breakpoints
+// Breakpoints, palette, helpers
 // =============================================================================
 
 $bp-mobile-max: 37.4em;
 $bp-desktop-min: 60em;
-
-// =============================================================================
-// Design tokens
-// =============================================================================
 
 // Gilded-parchment palette: warm gold and cool navy as complements (40° + 220°).
 $hue-warm: 40;
@@ -16,10 +12,57 @@ $hue-cool: 220;
 @function warm($l, $s) {
   @return hsl($hue-warm, $s, $l);
 }
-
 @function cool($l, $s) {
   @return hsl($hue-cool, $s, $l);
 }
+
+@mixin mobile {
+  @media (max-width: $bp-mobile-max) {
+    @content;
+  }
+}
+@mixin desktop {
+  @media (min-width: $bp-desktop-min) {
+    @content;
+  }
+}
+@mixin hover {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+}
+
+@mixin gold-link {
+  color: var(--color-gold);
+  text-decoration-color: var(--color-gold);
+}
+
+// UI text — small monospaced-feeling label. `caps` is the uppercase variant.
+@mixin ui($size: 10px, $tracking: 0.2em, $color: var(--color-ink-light)) {
+  font-family: var(--font-ui);
+  font-size: $size;
+  letter-spacing: $tracking;
+  color: $color;
+}
+
+@mixin caps($size: 10px, $tracking: 0.2em, $color: var(--color-ink-light)) {
+  @include ui($size, $tracking, $color);
+  text-transform: uppercase;
+}
+
+// Flex divider rule — hr inside section headers / article dividers.
+%flex-rule {
+  flex: 1;
+  border: none;
+  border-top: 1px solid var(--color-rule);
+  margin: 0;
+}
+
+// =============================================================================
+// Design tokens
+// =============================================================================
 
 :root {
   // Surfaces: warm parchment.
@@ -87,9 +130,6 @@ $hue-cool: 220;
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-* {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -97,14 +137,13 @@ $hue-cool: 220;
   background: var(--color-gold);
   color: var(--color-bg);
 }
-
 ::-moz-selection {
   background: var(--color-gold);
   color: var(--color-bg);
 }
 
 body::after {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
@@ -134,7 +173,9 @@ html {
 body {
   margin: 0;
   background-color: var(--color-bg);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 // ── Typography ───────────────────────────────────────────────────────────────
@@ -166,23 +207,24 @@ a {
   text-decoration-thickness: 1px;
   text-decoration-color: var(--color-rule);
   text-underline-offset: 0.12em;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
 
-  &:focus-visible,
-  &:active {
-    color: var(--color-gold);
-    text-decoration-color: var(--color-gold);
+  // Active state can't use @extend (would cross media queries), so we use a
+  // local mixin to share the body between focus/active and hover.
+  @mixin -active {
+    @include gold-link;
     background-color: transparent;
     outline: none;
   }
 
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-gold);
-      text-decoration-color: var(--color-gold);
-      background-color: transparent;
-      outline: none;
-    }
+  &:focus-visible,
+  &:active {
+    @include -active;
+  }
+  @include hover {
+    @include -active;
   }
 }
 
@@ -192,10 +234,7 @@ ul {
 }
 
 time {
-  color: var(--color-ink-light);
-  font-family: var(--font-ui);
-  font-size: 0.7em;
-  letter-spacing: 0.1em;
+  @include ui(0.7em, 0.1em);
 }
 
 // ── Headings ─────────────────────────────────────────────────────────────────
@@ -216,7 +255,7 @@ h6 {
 h1 {
   font-size: clamp(1.8rem, 3.5vw, 2.8rem);
   font-weight: 900;
-  margin-block: 1rem 1rem;
+  margin-block: 1rem;
 }
 
 h2 {
@@ -261,8 +300,7 @@ figure {
 
   h4 {
     font-size: 1rem;
-    margin: 0;
-    margin-block-end: 1em;
+    margin: 0 0 1em;
     font-family: var(--font-ui);
     font-style: italic;
   }
@@ -276,7 +314,7 @@ code {
   padding: 0.1em 0.3em;
   border-radius: var(--border-radius);
   font-size: 0.85em;
-  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-family: "Fira Mono", "Consolas", monospace;
 }
 
 pre {
@@ -295,6 +333,22 @@ pre code {
   font-size: 100%;
   padding: 0;
 }
+
+// Language badges. Each entry: (label, aliases, bg, fg). Aliases are matched
+// as `[class*="language-{alias}"]`, so a substring is enough — `js` covers
+// `language-javascript` too. Order matters when prefixes overlap (json after js).
+$languages: (
+  ("js", ("js"), #f7df1e, #000),
+  ("ts", ("ts"), #3178c6, #fff),
+  ("python", ("py"), #3776ab, #fff),
+  ("go", ("go"), #00add8, #fff),
+  ("css", ("css"), #1572b6, #fff),
+  ("html", ("html"), #e34f26, #fff),
+  ("json", ("json"), var(--color-ink), var(--color-bg)),
+  ("yaml", ("yml", "yaml"), #cc1018, #fff),
+  ("shell", ("shell", "bash", "sh"), #4eaa25, #fff),
+  ("markdown", ("md"), #083fa1, #fff)
+);
 
 .highlight {
   position: relative;
@@ -326,70 +380,24 @@ pre code {
     }
   }
 
-  pre code[class*="language-js"]::before,
-  pre code[class="language-javascript"]::before {
-    content: "js";
-    background: #f7df1e;
-    color: #000;
-  }
-
-  pre code[class*="language-ts"]::before {
-    content: "ts";
-    background: #3178c6;
-    color: #fff;
-  }
-
-  pre code[class*="language-py"]::before,
-  pre code[class*="language-python"]::before {
-    content: "python";
-    background: #3776ab;
-    color: #fff;
-  }
-
-  pre code[class*="language-go"]::before {
-    content: "go";
-    background: #00add8;
-    color: #fff;
-  }
-
-  pre code[class*="language-css"]::before {
-    content: "css";
-    background: #1572b6;
-    color: #fff;
-  }
-
-  pre code[class*="language-html"]::before {
-    content: "html";
-    background: #e34f26;
-    color: #fff;
-  }
-
-  pre code[class*="language-json"]::before {
-    content: "json";
-    background: var(--color-ink);
-    color: var(--color-bg);
-  }
-
-  pre code[class*="language-yml"]::before,
-  pre code[class*="language-yaml"]::before {
-    content: "yaml";
-    background: #cc1018;
-    color: #fff;
-  }
-
-  pre code[class*="language-shell"]::before,
-  pre code[class*="language-bash"]::before,
-  pre code[class*="language-sh"]::before {
-    content: "shell";
-    background: #4eaa25;
-    color: #fff;
-  }
-
-  pre code[class*="language-md"]::before,
-  pre code[class*="language-markdown"]::before {
-    content: "markdown";
-    background: #083fa1;
-    color: #fff;
+  @each $entry in $languages {
+    $label: nth($entry, 1);
+    $aliases: nth($entry, 2);
+    $bg: nth($entry, 3);
+    $fg: nth($entry, 4);
+    $sel: ();
+    @each $a in $aliases {
+      $sel: append(
+        $sel,
+        unquote('pre code[class*="language-#{$a}"]::before'),
+        comma
+      );
+    }
+    #{$sel} {
+      content: $label;
+      background: $bg;
+      color: $fg;
+    }
   }
 }
 
@@ -410,12 +418,8 @@ table {
   }
 
   th {
-    font-family: var(--font-ui);
-    font-size: 0.75em;
+    @include caps(0.75em, 0.15em);
     font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--color-ink-light);
     background-color: var(--color-paper);
   }
 
@@ -434,7 +438,7 @@ table {
   padding: 1rem var(--content-padding) 5rem;
   overflow-wrap: break-word;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     padding-inline: var(--content-padding-mobile);
   }
 }
@@ -447,7 +451,7 @@ table {
   color: var(--color-ink);
   padding-top: 3rem;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     padding-top: 1.5rem;
   }
 }
@@ -458,33 +462,22 @@ table {
   gap: 1.2rem;
   margin-bottom: 1rem;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     margin-bottom: 0.5rem;
   }
 
   hr {
-    flex: 1;
-    border: none;
-    border-top: 1px solid var(--color-rule);
-    margin: 0;
+    @extend %flex-rule;
   }
 }
 
 .section-lbl {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
+  @include caps(9px, 0.35em);
   white-space: nowrap;
 }
 
 .label-tag {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--color-red);
+  @include caps(9px, 0.35em, var(--color-red));
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
@@ -501,11 +494,7 @@ table {
 }
 
 .read-link {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--color-ink);
+  @include caps(10px, 0.25em, var(--color-ink));
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -517,13 +506,11 @@ table {
   border-bottom: 1px solid var(--color-rule);
   padding-bottom: 4px;
 
-  @media (hover: hover) {
-    &:hover {
-      gap: 16px;
-      border-bottom-color: var(--color-gold);
-      color: var(--color-gold);
-      text-decoration: none;
-    }
+  @include hover {
+    gap: 16px;
+    border-bottom-color: var(--color-gold);
+    color: var(--color-gold);
+    text-decoration: none;
   }
 }
 
@@ -539,12 +526,10 @@ table {
 // Post list — hero, post cards, tag cloud
 // =============================================================================
 
-// ── Hero ─────────────────────────────────────────────────────────────────────
-
 .hero {
   margin-bottom: 3.5rem;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     padding: 1.5rem 0 1rem;
     margin-bottom: 2rem;
   }
@@ -557,10 +542,9 @@ table {
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0 0 1.25rem;
-  font-style: normal;
   color: var(--color-ink);
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     font-size: 1.8rem;
   }
 }
@@ -586,18 +570,15 @@ table {
   color: inherit;
   transition: opacity 0.15s;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     padding: 1.25rem 0;
   }
 
-  @media (hover: hover) {
-    &:hover {
-      opacity: 0.85;
-      text-decoration: none;
-
-      .post-title {
-        color: var(--color-gold);
-      }
+  @include hover {
+    opacity: 0.85;
+    text-decoration: none;
+    .post-title {
+      color: var(--color-gold);
     }
   }
 }
@@ -611,33 +592,22 @@ table {
 }
 
 .post-date {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--color-ink-light);
+  @include ui(10px, 0.1em);
 }
 
-.post-tag {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-gold);
+.post-tag,
+.post-tag-inline {
+  @include caps(9px, 0.2em, var(--color-gold));
   text-decoration: none;
 
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-red);
-      text-decoration: none;
-    }
+  @include hover {
+    color: var(--color-red);
+    text-decoration: none;
   }
 }
 
 .post-read-time {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  color: var(--color-ink-light);
-  letter-spacing: 0.05em;
+  @include ui(10px, 0.05em);
   margin-left: auto;
 }
 
@@ -666,59 +636,36 @@ table {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 2rem;
-  margin-bottom: 3rem;
+  margin: 2rem 0 3rem;
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     gap: 0.5rem;
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
+    margin: 1rem 0 1.5rem;
   }
 }
 
 .tag-pill {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  @include caps(10px, 0.2em, var(--color-ink-mid));
   padding: 8px 18px;
   border: 1px solid var(--color-rule);
   background: none;
-  color: var(--color-ink-mid);
   text-decoration: none;
   transition: all 0.2s;
   display: inline-block;
 
-  &.active {
+  // Active state — applied via .active modifier or hover (when supported).
+  @mixin -filled {
     background: var(--color-ink);
     color: var(--color-bg);
     border-color: var(--color-ink);
     text-decoration: none;
   }
 
-  @media (hover: hover) {
-    &:hover {
-      background: var(--color-ink);
-      color: var(--color-bg);
-      border-color: var(--color-ink);
-      text-decoration: none;
-    }
+  &.active {
+    @include -filled;
   }
-}
-
-.post-tag-inline {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  text-decoration: none;
-
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-red);
-      text-decoration: none;
-    }
+  @include hover {
+    @include -filled;
   }
 }
 
@@ -727,11 +674,7 @@ table {
 // =============================================================================
 
 .post-back {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
+  @include caps(10px, 0.2em);
   background: none;
   border: none;
   text-decoration: none;
@@ -742,11 +685,9 @@ table {
   margin-bottom: 1rem;
   transition: color 0.15s;
 
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-gold);
-      text-decoration: none;
-    }
+  @include hover {
+    color: var(--color-gold);
+    text-decoration: none;
   }
 }
 
@@ -765,18 +706,15 @@ table {
 }
 
 .article-meta {
+  @include ui(14px, 0.1em);
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
-  color: var(--color-ink-light);
-  font-size: 14px;
-  font-family: var(--font-ui);
-  letter-spacing: 0.1em;
 
   @media (max-width: 600px) {
     gap: 0.5rem;
-    letter-spacing: 0
+    letter-spacing: 0;
   }
 }
 
@@ -788,10 +726,7 @@ table {
   margin: 2rem 0;
 
   hr {
-    flex: 1;
-    border: none;
-    border-top: 1px solid var(--color-rule);
-    margin: 0;
+    @extend %flex-rule;
   }
 }
 
@@ -804,15 +739,7 @@ table {
     margin-bottom: 1.6em;
   }
 
-  h2 {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 700;
-    font-style: italic;
-    color: var(--color-ink);
-    margin: 2.5em 0 0.75em;
-    letter-spacing: -0.01em;
-  }
+  // h2 styling matches the global h2; no override needed.
 
   h3 {
     font-family: var(--font-display);
@@ -832,14 +759,11 @@ table {
   }
 
   a {
-    color: var(--color-gold);
-    text-decoration-color: var(--color-gold);
+    @include gold-link;
 
-    @media (hover: hover) {
-      &:hover {
-        color: var(--color-red);
-        text-decoration-color: var(--color-red);
-      }
+    @include hover {
+      color: var(--color-red);
+      text-decoration-color: var(--color-red);
     }
   }
 
@@ -896,7 +820,7 @@ table {
 
   &::before,
   &::after {
-    content: '✦';
+    content: "✦";
     position: absolute;
     top: -12px;
     font-size: var(--font-size-base);
@@ -908,12 +832,11 @@ table {
   &::before {
     left: 2rem;
   }
-
   &::after {
     right: 2rem;
   }
 
-  @media (max-width: $bp-mobile-max) {
+  @include mobile {
     padding: 2rem 1.5rem;
   }
 }
@@ -957,33 +880,26 @@ table {
   &:focus {
     border-color: var(--color-gold);
   }
-
   &::placeholder {
     color: var(--color-ink-light);
   }
 }
 
 .newsletter-btn {
+  @include caps(9px, 0.25em, var(--color-bg));
   background: var(--color-ink);
   border: 1px solid var(--color-ink);
   padding: 10px 20px;
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--color-bg);
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 0;
   white-space: nowrap;
 
-  @media (hover: hover) {
-    &:hover {
-      background: var(--color-gold);
-      border-color: var(--color-gold);
-      box-shadow: none;
-      transform: none;
-    }
+  @include hover {
+    background: var(--color-gold);
+    border-color: var(--color-gold);
+    box-shadow: none;
+    transform: none;
   }
 }
 
@@ -993,7 +909,7 @@ table {
 }
 
 // =============================================================================
-// Footer
+// Footer (Socials.astro)
 // =============================================================================
 
 .site-footer {
@@ -1002,71 +918,6 @@ table {
   text-align: center;
   margin-top: 2rem;
 }
-
-.site-footer-socials {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.footer-soc {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
-  text-decoration: none;
-  transition: color 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-gold);
-      text-decoration: none;
-    }
-  }
-
-  svg {
-    width: 0.85rem;
-    height: 0.85rem;
-  }
-}
-
-.footer-divider {
-  color: var(--color-rule);
-  font-size: 12px;
-}
-
-.site-footer-copy {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
-  line-height: 1.8;
-
-  em {
-    font-style: normal;
-    color: var(--color-gold);
-  }
-
-  a {
-    color: var(--color-ink-light);
-    text-decoration: none;
-
-    @media (hover: hover) {
-      &:hover {
-        color: var(--color-gold);
-      }
-    }
-  }
-}
-
-// ── Legacy socials (Socials.astro compatibility) ───────────────────────────────
 
 .footer-links {
   display: flex;
@@ -1077,22 +928,16 @@ table {
 }
 
 .soc {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
+  @include caps(9px, 0.2em);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   transition: color 0.2s;
 
-  @media (hover: hover) {
-    &:hover {
-      color: var(--color-gold);
-      text-decoration: none;
-    }
+  @include hover {
+    color: var(--color-gold);
+    text-decoration: none;
   }
 }
 
@@ -1107,19 +952,14 @@ table {
 }
 
 .footer-info {
-  font-family: var(--font-ui);
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--color-ink-light);
+  @include ui(10px, 0.15em);
   line-height: 1.8;
 
   a {
     color: var(--color-ink-light);
 
-    @media (hover: hover) {
-      &:hover {
-        color: var(--color-gold);
-      }
+    @include hover {
+      color: var(--color-gold);
     }
   }
 }
@@ -1155,11 +995,8 @@ table {
   }
 
   .search-status {
+    @include ui(0.7em, 0.1em);
     margin-block: 0.5rem 0;
-    color: var(--color-ink-light);
-    font-family: var(--font-ui);
-    font-size: 0.7em;
-    letter-spacing: 0.1em;
     min-height: 1.2em;
 
     &:empty {
@@ -1189,11 +1026,9 @@ table {
         text-decoration: none;
         color: var(--color-ink);
 
-        @media (hover: hover) {
-          &:hover {
-            color: var(--color-gold);
-            text-decoration: none;
-          }
+        @include hover {
+          color: var(--color-gold);
+          text-decoration: none;
         }
       }
 
@@ -1227,10 +1062,8 @@ table {
     font-style: italic;
   }
 
-  @media (hover: hover) {
-    &:hover {
-      border-color: var(--color-gold);
-    }
+  @include hover {
+    border-color: var(--color-gold);
   }
 
   &:focus {
@@ -1247,26 +1080,22 @@ table {
 }
 
 %buttons {
+  @include caps(0.85rem, 0.1em, var(--color-bg));
   padding: 0.7rem 1.5rem;
   border: 1px solid var(--color-ink);
   border-radius: var(--border-radius);
   background-color: var(--color-ink);
-  color: var(--color-bg);
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
 
-  @media (hover: hover) {
-    &:hover {
-      background-color: var(--color-gold);
-      border-color: var(--color-gold);
-      box-shadow: none;
-      transform: none;
-    }
+  @include hover {
+    background-color: var(--color-gold);
+    border-color: var(--color-gold);
+    box-shadow: none;
+    transform: none;
   }
 
   &:focus {
@@ -1283,14 +1112,10 @@ table {
 }
 
 label {
+  @include caps(0.8rem, 0.1em);
   display: block;
   margin-block-end: 0.5rem;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-ink-light);
 }
 
 input[type="text"],
@@ -1317,22 +1142,4 @@ input[type="submit"],
 input[type="reset"],
 input[type="button"] {
   @extend %buttons;
-}
-
-@media (prefers-color-scheme: dark) {
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="tel"],
-  input[type="url"],
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  textarea,
-  select {
-    color: var(--color-ink);
-    background-color: var(--color-paper);
-    border-color: var(--color-rule);
-  }
 }
