@@ -137,10 +137,6 @@ $hue-cool: 220;
   background: var(--color-gold);
   color: var(--color-bg);
 }
-::-moz-selection {
-  background: var(--color-gold);
-  color: var(--color-bg);
-}
 
 body::after {
   content: "";
@@ -211,20 +207,18 @@ a {
     color 0.2s ease,
     text-decoration-color 0.2s ease;
 
-  // Active state can't use @extend (would cross media queries), so we use a
-  // local mixin to share the body between focus/active and hover.
-  @mixin -active {
+  // Active/keyboard focus and hover styles. Use native selectors rather than
+  // a local mixin so the states apply predictably across input methods.
+  &:is(:focus-visible, :active) {
     @include gold-link;
     background-color: transparent;
     outline: none;
   }
 
-  &:focus-visible,
-  &:active {
-    @include -active;
-  }
   @include hover {
-    @include -active;
+    @include gold-link;
+    background-color: transparent;
+    outline: none;
   }
 }
 
@@ -291,7 +285,9 @@ figure {
   max-inline-size: 100%;
   padding-inline: 2.5rem;
 
-  @include mobile { padding-inline: 0; }
+  @include mobile {
+    padding-inline: 0;
+  }
 
   img {
     max-block-size: 500px;
@@ -530,19 +526,19 @@ figure {
   transition: all 0.2s;
   display: inline-block;
 
-  // Active state — applied via .active modifier or hover (when supported).
-  @mixin -filled {
+  // Active/filled state — applied via `.active` modifier or hover (when
+  // supported). Use native selectors instead of a local mixin.
+  &.active {
     background: var(--color-ink);
     color: var(--color-bg);
     border-color: var(--color-ink);
     text-decoration: none;
   }
-
-  &.active {
-    @include -filled;
-  }
   @include hover {
-    @include -filled;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    border-color: var(--color-ink);
+    text-decoration: none;
   }
 }
 
