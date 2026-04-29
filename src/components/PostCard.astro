@@ -9,7 +9,7 @@ interface Props {
 const { post } = Astro.props;
 
 const tags = post.data.tags ?? [];
-const excerpt =
+const rawExcerpt =
   post.data.excerpt ??
   post.body
     ?.replace(/^---[\s\S]*?---/, "")
@@ -17,8 +17,9 @@ const excerpt =
     .replace(/<[^>]+>/g, "")
     .replace(/[#*`_[\]]/g, "")
     .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 200) ?? "";
+    .trim() ?? "";
+const excerpt =
+  rawExcerpt.length > 200 ? rawExcerpt.slice(0, 200).trimEnd() + "…" : rawExcerpt;
 
 const wordCount = post.body?.split(/\s+/).length ?? 0;
 const readMinutes = Math.max(1, Math.round(wordCount / 200));
