@@ -51,7 +51,8 @@ a {
   text-underline-offset: 0.12em;
   transition: color 0.2s ease, text-decoration-color 0.2s ease;
 
-  &:focus-visible {
+  &:focus-visible,
+  &:active {
     color: var(--color-gold);
     text-decoration-color: var(--color-gold);
     background-color: transparent;
