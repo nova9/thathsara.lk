@@ -486,15 +486,22 @@ const tracks = await getMusicTracks();
         this.audio.pause();
         return;
       }
+      // Capture the user-activation gesture synchronously. Once we await the
+      // Shaka manifest load, the gesture is gone and Safari/Chrome will reject
+      // the later play(). The first call rejects (no src yet) — we ignore it;
+      // it marks the element as user-activated for the real play() below.
+      const primer = this.audio.play().catch(() => {});
       if (!this.isTrackLoaded && this.tracks.length > 0) {
+        this.isLoading = true;
+        this.updateUI();
         await this.loadTrack(this.tracks[this.currentTrackIndex]);
         this.isTrackLoaded = true;
       }
-      // preload="none" defers buffering until play; show loading until we have data.
       if (this.audio.readyState < 3) {
         this.isLoading = true;
         this.updateUI();
       }
+      await primer;
       this.audio
         .play()
         .catch((e) => console.error("Audio playback prevented:", e));
@@ -502,12 +509,14 @@ const tracks = await getMusicTracks();
 
     async playNext() {
       if (this.tracks.length === 0) return;
+      const primer = this.audio.play().catch(() => {});
       this.currentTrackIndex =
         (this.currentTrackIndex + 1) % this.tracks.length;
       const track = this.tracks[this.currentTrackIndex];
       await this.loadTrack(track);
       this.isTrackLoaded = true;
       this.setInfo(track);
+      await primer;
       this.audio
         .play()
         .catch((e) => console.error("Audio playback prevented:", e));
