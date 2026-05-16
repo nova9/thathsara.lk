@@ -1,8 +1,8 @@
 ---
 // Easter egg: tracks which posts the reader has scrolled to the bottom of.
-// Sets `localStorage["egg:unlocked"] = "1"` once every visible post is read.
+// Sets `localStorage["reader:unlocked"] = "1"` once every visible post is read.
 //
-// The reward itself lives elsewhere — read `egg:unlocked` from wherever you
+// The reward itself lives elsewhere — read `reader:unlocked` from wherever you
 // want to render it.
 //
 // Reward ideas (subtle, on-brand):
@@ -37,8 +37,8 @@ const allPostIds = (await getVisiblePosts()).map((p) => p.id);
 </div>
 
 <script>
-  const READ_KEY = "egg:read";
-  const UNLOCKED_KEY = "egg:unlocked";
+  const READ_KEY = "reader:read";
+  const UNLOCKED_KEY = "reader:unlocked";
 
   const getRead = (): string[] =>
     JSON.parse(localStorage.getItem(READ_KEY) || "[]");

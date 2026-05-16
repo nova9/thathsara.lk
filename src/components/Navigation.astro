@@ -162,7 +162,7 @@ function isActive(href: string) {
   }
 
   function revealColophonLink() {
-    const unlocked = !!localStorage.getItem("egg:unlocked");
+    const unlocked = !!localStorage.getItem("reader:unlocked");
     const glyph = document.querySelector(".masthead-glyph");
     const link = glyph?.querySelector<HTMLAnchorElement>(".glyph-link");
     const banner = document.getElementById("nav-banner");

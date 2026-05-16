@@ -32,9 +32,11 @@ const searchText = [post.data.title, excerpt, ...tags].join(" ").toLowerCase();
   href={`/posts/${post.id}/`}
   class="post-card"
   data-search={searchText}
+  data-post-id={post.id}
 >
   <div class="post-meta">
     <span class="post-date">{toDateLabel(post.data.date)}</span>
+    <span class="post-unread" hidden>Unread</span>
     {tags.map((tag) => (
       <span class="post-tag">#{tag}</span>
     ))}
@@ -43,3 +45,35 @@ const searchText = [post.data.title, excerpt, ...tags].join(" ").toLowerCase();
   <div class="post-title">{post.data.title}</div>
   {excerpt && <p class="post-excerpt-text">{excerpt}</p>}
 </a>
+
+<script>
+  function markUnreadPosts() {
+    const read: string[] = JSON.parse(localStorage.getItem("reader:read") || "[]");
+
+    document.querySelectorAll<HTMLElement>(".post-card").forEach((card) => {
+      const postId = card.dataset.postId;
+      if (!postId || read.includes(postId)) return;
+      const badge = card.querySelector<HTMLElement>(".post-unread");
+      if (badge) badge.hidden = false;
+    });
+  }
+
+  document.addEventListener("astro:page-load", markUnreadPosts);
+</script>
+
+<style lang="scss">
+  .post-unread {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-paper);
+    background: var(--color-gold);
+    padding: 2px 6px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+</style>
