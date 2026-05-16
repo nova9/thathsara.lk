@@ -63,7 +63,7 @@ function isActive(href: string) {
 <LottiePrefetch />
 
 <div class="nav-banner" id="nav-banner" hidden>
-  <span>✦ All posts read. Check why the star sparkles above ✦</span>
+  <span>✦ Check why the star sparkles above ✦</span>
 </div>
 
 <nav class="nav-bar">
@@ -157,6 +157,10 @@ function isActive(href: string) {
     });
   }
 
+  function isBannerHidden() {
+    return localStorage.getItem("easter-egg-banner-hidden") === "true";
+  }
+
   function revealColophonLink() {
     const unlocked = isUnlocked();
     const glyph = document.querySelector(".masthead-glyph");
@@ -169,7 +173,7 @@ function isActive(href: string) {
         link.hidden = false;
         glyph.classList.add("masthead-glyph--unlocked");
       }
-      if (banner) banner.hidden = false;
+      if (banner) banner.hidden = isBannerHidden();
     } else {
       if (glyph && link) {
         link.hidden = true;
@@ -179,6 +183,13 @@ function isActive(href: string) {
       if (banner) banner.hidden = true;
     }
   }
+
+  document.addEventListener("easter-egg-banner-toggled", (e) => {
+    const banner = document.getElementById("nav-banner");
+    if (!banner) return;
+    const hidden = (e as CustomEvent<{ hidden: boolean }>).detail.hidden;
+    banner.hidden = hidden || !isUnlocked();
+  });
 
   const LATE_PHRASES = [
     "Reading at this hour?",
