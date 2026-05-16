@@ -1,0 +1,260 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="About">
+  <article class="about">
+    <header class="about__header">
+      <h1 class="about__title">About</h1>
+    </header>
+
+    <figure class="about__figure">
+      <picture>
+        <source srcset="/images/the_fool/1x.avif" type="image/avif" />
+        <img src="/images/the_fool/1x.jpg" alt="The Fool Tarot Card" />
+      </picture>
+    </figure>
+
+    <p class="about__quote">
+      This space is for things in between &mdash; the quiet, the contradictory,
+      the uncompiled.
+    </p>
+
+    <section
+      id="fool-download"
+      class="reward reward--unlocked"
+      aria-labelledby="reward-title"
+      hidden
+    >
+      <p class="reward__eyebrow">A gift for the patient reader</p>
+      <h2 id="reward-title" class="reward__title">
+        The Fool, in full resolution
+      </h2>
+      <p class="reward__body">
+        You&rsquo;ve read everything here. As thanks, take the original scan
+        of <em>The Fool</em> with you.
+      </p>
+      <a
+        download="the_fool.png"
+        class="reward__button"
+      >
+        <span class="reward__button-text">Download original PNG</span>
+        <span class="reward__button-size">64&nbsp;MB</span>
+      </a>
+    </section>
+
+    <section
+      id="fool-download-locked"
+      class="reward reward--locked"
+      aria-label="Hidden reward"
+    >
+      <p class="reward__eyebrow">Something waits here</p>
+      <p class="reward__body">
+        Read every post on this site and a high&nbsp;resolution scan of
+        <em>The Fool</em> appears in this spot, yours to keep.
+        It&rsquo;s a 64&nbsp;MB PNG, so come prepared.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style lang="scss">
+  @use "../styles/main.scss" as *;
+
+  .about {
+    text-align: center;
+  }
+
+  .about__header {
+    margin-block-end: 2rem;
+  }
+
+  .about__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 900;
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    margin: 0;
+  }
+
+  .about__figure {
+    display: block;
+    padding: 0;
+    margin: 2rem auto 2.5rem;
+    inline-size: 100%;
+    max-inline-size: none;
+
+    picture,
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    img {
+      max-block-size: none;
+      border: 1px solid var(--color-rule);
+      border-radius: var(--border-radius);
+      box-shadow:
+        0 1px 0 var(--color-paper),
+        0 18px 40px -20px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  .about__quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--color-ink-mid);
+    margin: 0 auto 4rem;
+  }
+
+  // ── Reward card ──────────────────────────────────────────────────────────────
+
+  .reward {
+    position: relative;
+    margin: 4rem auto 0;
+    padding: 2.75rem 2rem 2.25rem;
+    inline-size: 100%;
+    background: var(--color-paper);
+    border: 1px solid var(--color-rule);
+    text-align: center;
+
+    @include mobile {
+      padding: 2.25rem 1.25rem 1.75rem;
+    }
+
+    &::before,
+    &::after {
+      content: "✦";
+      position: absolute;
+      top: -12px;
+      font-size: var(--font-size-base);
+      background: var(--color-bg);
+      padding: 0 8px;
+      color: var(--color-gold);
+    }
+
+    &::before {
+      left: 2rem;
+    }
+    &::after {
+      right: 2rem;
+    }
+  }
+
+  .reward__eyebrow {
+    @include caps(9px, 0.35em, var(--color-gold));
+    margin: 0 0 0.75rem;
+  }
+
+  .reward__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin: 0 0 0.75rem;
+    color: var(--color-ink);
+  }
+
+  .reward__body {
+    font-size: 15.5px;
+    color: var(--color-ink-mid);
+    font-style: italic;
+    line-height: 1.65;
+    margin: 0 auto 1.5rem;
+    max-inline-size: 38ch;
+  }
+
+  .reward__button {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.75rem 1.4rem;
+    border: 1px solid var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    text-decoration: none;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s,
+      color 0.2s;
+
+    @include hover {
+      background: var(--color-gold);
+      border-color: var(--color-gold);
+      color: var(--color-bg);
+      text-decoration: none;
+    }
+
+    &:is(:focus-visible, :active) {
+      background: var(--color-gold);
+      border-color: var(--color-gold);
+      color: var(--color-bg);
+      outline: none;
+    }
+  }
+
+  .reward__button-text {
+    @include caps(10px, 0.25em, currentColor);
+  }
+
+  .reward__button-size {
+    @include ui(10px, 0.1em, currentColor);
+    opacity: 0.7;
+
+    &::before {
+      content: "·";
+      margin-right: 0.6rem;
+      opacity: 0.7;
+    }
+  }
+
+  // ── Locked variant ───────────────────────────────────────────────────────────
+
+  .reward--locked {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--color-rule);
+
+    &::before,
+    &::after {
+      content: "·";
+      color: var(--color-ink-light);
+    }
+
+    .reward__eyebrow {
+      color: var(--color-ink-light);
+    }
+
+    .reward__body {
+      color: var(--color-ink-light);
+    }
+  }
+</style>
+
+<script>
+  import { isUnlocked } from "@/lib/readerState";
+
+  function reveal() {
+    const unlocked = isUnlocked();
+    const gift = document.getElementById("fool-download");
+    const locked = document.getElementById("fool-download-locked");
+    if (gift) {
+      gift.hidden = !unlocked;
+      if (unlocked) {
+        const link = gift.querySelector("a.reward__button");
+        if (link && !link.getAttribute("href")) {
+          link.setAttribute(
+            "href",
+            atob("L2ltYWdlcy90aGVfZm9vbC8yYTUyZWE1Ny5wbmc="),
+          );
+        }
+      }
+    }
+    if (locked) locked.hidden = unlocked;
+  }
+
+  document.addEventListener("astro:page-load", reveal);
+</script>
