@@ -1,15 +1,10 @@
 ---
-// Shared per-reader state, kept in localStorage and reconciled on every page.
+// Reconciles `reader:unlocked` against the current set of visible posts.
+// If a newly published post means the claim no longer holds, clear it.
+// `reader:read` is preserved — returning readers don't re-scroll posts
+// they've already finished.
 //
-//   reader:read       — post ids the reader has scrolled to the bottom of
-//   reader:unlocked   — set once the reader has read every visible post
-//                       (drives the colophon glyph + nav banner)
-//
-// This component clears `reader:unlocked` when a newly published post means
-// the claim no longer holds. `reader:read` is preserved — returning readers
-// don't re-scroll posts they've already finished.
-//
-// The earning side of `reader:unlocked` lives in EasterEgg.astro.
+// The earning side of `reader:unlocked` lives in ReaderSentinel.astro.
 
 import { getVisiblePosts } from "@/lib/utils";
 
@@ -19,18 +14,16 @@ const allPostIds = (await getVisiblePosts()).map((p) => p.id);
 <div id="reader-state" data-all-posts={JSON.stringify(allPostIds)} hidden></div>
 
 <script>
+  import { isUnlocked, hasReadAll, clearUnlocked } from "@/lib/readerState";
+
   function reconcile() {
-    if (!localStorage.getItem("reader:unlocked")) return;
+    if (!isUnlocked()) return;
 
     const el = document.getElementById("reader-state");
     if (!el) return;
 
     const allPosts: string[] = JSON.parse(el.dataset.allPosts || "[]");
-    const read: string[] = JSON.parse(localStorage.getItem("reader:read") || "[]");
-
-    if (!allPosts.every((id) => read.includes(id))) {
-      localStorage.removeItem("reader:unlocked");
-    }
+    if (!hasReadAll(allPosts)) clearUnlocked();
   }
 
   document.addEventListener("astro:page-load", reconcile);

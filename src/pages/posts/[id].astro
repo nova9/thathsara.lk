@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import EasterEgg from "@/components/EasterEgg.astro";
+import ReaderSentinel from "@/components/ReaderSentinel.astro";
 import { getSummary, getVisiblePosts, toDateLabel } from "@/lib/utils";
 import { render } from "astro:content";
 
@@ -77,6 +77,6 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
       )
     }
 
-    <EasterEgg postId={post.id} />
+    <ReaderSentinel postId={post.id} />
   </article>
 </BaseLayout>

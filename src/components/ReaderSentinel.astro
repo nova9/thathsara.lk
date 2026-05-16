@@ -29,7 +29,7 @@ const allPostIds = (await getVisiblePosts()).map((p) => p.id);
 ---
 
 <div
-  id="egg-sentinel"
+  id="reader-sentinel"
   data-post-id={postId}
   data-all-posts={JSON.stringify(allPostIds)}
   aria-hidden="true"
@@ -37,38 +37,22 @@ const allPostIds = (await getVisiblePosts()).map((p) => p.id);
 </div>
 
 <script>
-  const READ_KEY = "reader:read";
-  const UNLOCKED_KEY = "reader:unlocked";
+  import { addRead, hasReadAll, setUnlocked } from "@/lib/readerState";
 
-  const getRead = (): string[] =>
-    JSON.parse(localStorage.getItem(READ_KEY) || "[]");
-  const addRead = (id: string) => {
-    const read = getRead();
-    if (!read.includes(id)) {
-      read.push(id);
-      localStorage.setItem(READ_KEY, JSON.stringify(read));
-    }
-  };
-
-  const setup = () => {
-    const sentinel = document.getElementById("egg-sentinel");
+  function setup() {
+    const sentinel = document.getElementById("reader-sentinel");
     if (!sentinel) return;
 
     const postId = sentinel.dataset.postId!;
     const allPosts: string[] = JSON.parse(sentinel.dataset.allPosts || "[]");
 
-    // The condition. Swap this out for a different unlock rule.
-    function isUnlocked() {
-      return allPosts.every((id) => getRead().includes(id));
-    }
-
     new IntersectionObserver((entries, obs) => {
       if (!entries[0].isIntersecting) return;
       addRead(postId);
-      if (isUnlocked()) localStorage.setItem(UNLOCKED_KEY, "1");
+      if (hasReadAll(allPosts)) setUnlocked();
       obs.disconnect();
     }).observe(sentinel);
-  };
+  }
 
   document.addEventListener("astro:page-load", setup);
 </script>

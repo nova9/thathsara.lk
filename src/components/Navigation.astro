@@ -57,7 +57,7 @@ function isActive(href: string) {
 </header>
 
 <div class="nav-banner" id="nav-banner" hidden>
-  <span>✦ You have read all the Posts ✦</span>
+  <span>✦ All posts read. Check why the star sparkles above ✦</span>
 </div>
 
 <nav class="nav-bar">
@@ -99,6 +99,8 @@ function isActive(href: string) {
 </div>
 
 <script>
+  import { isUnlocked } from "@/lib/readerState";
+
   function setupSearch() {
     const toggle = document.getElementById("search-toggle");
     const wrapper = document.getElementById("search-bar-wrapper");
@@ -162,7 +164,7 @@ function isActive(href: string) {
   }
 
   function revealColophonLink() {
-    const unlocked = !!localStorage.getItem("reader:unlocked");
+    const unlocked = isUnlocked();
     const glyph = document.querySelector(".masthead-glyph");
     const link = glyph?.querySelector<HTMLAnchorElement>(".glyph-link");
     const banner = document.getElementById("nav-banner");
