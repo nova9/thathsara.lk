@@ -92,7 +92,6 @@ const tracks = await getMusicTracks();
     font-size: 0.7rem;
     opacity: 1;
     transition: opacity 0.3s ease;
-    margin-bottom: 0.5rem;
 
     .music-title {
       font-weight: bold;
@@ -309,10 +308,15 @@ const tracks = await getMusicTracks();
     }
 
     .music-info {
+      font-size: 0.6rem;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
       transform: translateY(0.2rem);
+
+      .music-artist {
+        font-size: 0.5rem;
+      }
       transition:
         opacity 0.3s ease,
         transform 0.3s ease,
