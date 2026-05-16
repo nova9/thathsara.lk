@@ -1,0 +1,11 @@
+<script>
+  const load = () => import("@/scripts/dotlottie-player");
+  const schedule = () => {
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(load, { timeout: 1500 });
+    } else {
+      setTimeout(load, 0);
+    }
+  };
+  document.addEventListener("astro:page-load", schedule);
+</script>

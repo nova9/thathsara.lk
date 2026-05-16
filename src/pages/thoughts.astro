@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LottiePlayerLoader from "@/components/LottiePlayerLoaderScript.astro";
+
+const thoughts = [
+  "Is it even a good website if it doesn't load on 2G? I think not.",
+];
+---
+
+<BaseLayout title="Thoughts">
+  <h1>Thoughts</h1>
+  <ol>
+    {thoughts.map((thought) => <li>{thought}</li>)}
+  </ol>
+
+  <dotlottie-player
+    src="/images/cat-mascot/cat_crying.lottie"
+    autoplay
+    loop
+    style="width: 220px; height: 220px; display: block; margin: 0 auto;"
+  >
+  </dotlottie-player>
+
+  <LottiePlayerLoader />
+</BaseLayout>
