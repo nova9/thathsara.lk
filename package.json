@@ -7,10 +7,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "download": "node --env-file=.env npm-run/download.js",
-    "video": "node npm-run/download-video.js",
+    "ingest-music": "node --env-file=.env npm-run/ingest-music.js",
+    "download-video": "node npm-run/download-video.js",
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
-    "thumbnail": "node npm-run/extract-thumbnail.js",
+    "extract-thumbnail": "node npm-run/extract-thumbnail.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js",
     "upgrade-deps": "npx npm-check-updates -u && npm install"
   },

@@ -9,8 +9,8 @@ npm run dev          # start dev server (localhost:4321)
 npm run build        # astro build + pagefind search index generation
 npm run preview      # preview the production build locally
 
-npm run download     # download + tag music from YouTube (requires ffmpeg, yt-dlp, kid3-cli, OPENAI_API_KEY)
-npm run video        # download video for embedding
+npm run ingest-music   # download + tag music from YouTube (requires ffmpeg, yt-dlp, kid3-cli, OPENAI_API_KEY)
+npm run download-video # download video for embedding
 npm run purge-cache  # purge Cloudflare CDN cache after deploy (uses env vars)
 ```
 
@@ -33,7 +33,7 @@ npm run purge-cache  # purge Cloudflare CDN cache after deploy (uses env vars)
 
 **Client-side JS:** Astro View Transitions (`<ClientRouter />`) is enabled globally, making navigation SPA-like with a progress bar animation. `MusicPlayer` and `VideoPlayer` use `requestIdleCallback` to defer setup. Shaka Player (DASH audio/video) is loaded on-demand from jsDelivr only when the user initiates playback. Umami analytics is injected once on `astro:page-load`, production-only.
 
-**Music pipeline:** `public/music/` holds `.opus` files and MPEG-DASH manifests. `npm run download` uses `yt-dlp` + `ffmpeg` + `kid3-cli` to fetch, convert, and tag tracks, with OpenAI used for metadata generation. The URL queue is hardcoded in `npm-run/download.js`.
+**Music pipeline:** `public/music/` holds `.opus` files and MPEG-DASH manifests. `npm run ingest-music` uses `yt-dlp` + `ffmpeg` + `kid3-cli` to fetch, convert, and tag tracks, with OpenAI used for metadata generation. The URL queue is hardcoded in `npm-run/ingest-music.js`.
 
 **Search:** Pagefind runs as a post-build step (`astro build && pagefind --site dist`), generating a static search index in `dist/pagefind/`. The search UI is wired up in `settings.astro`.
 
@@ -60,5 +60,5 @@ draft: true              # optional; excludes from build
 ## Environment variables
 
 See `.env.example`. Required for utility scripts:
-- `OPENAI_API_KEY` / `OPENAI_MODEL` — used by `npm run download` for metadata generation
+- `OPENAI_API_KEY` / `OPENAI_MODEL` — used by `npm run ingest-music` for metadata generation
 - Cloudflare credentials — used by `npm run purge-cache`

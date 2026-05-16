@@ -21,7 +21,7 @@ const urlQueue = [
 
 if (!url && urlQueue.length === 0) {
   console.error(
-    "Usage: npm run download-and-tag -- <youtube_url> (or add URLs to urlQueue)",
+    "Usage: npm run ingest-music -- <youtube_url> (or add URLs to urlQueue)",
   );
   process.exit(1);
 }
