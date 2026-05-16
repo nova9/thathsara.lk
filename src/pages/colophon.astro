@@ -8,12 +8,12 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       <p class="colophon-eyebrow">✦ &nbsp; A quiet corner &nbsp; ✦</p>
       <h1 class="colophon-title">Colophon</h1>
       <div class="colophon-cat">
-        <dotlottie-wc
+        <dotlottie-player
           src="/images/cat_feeling_love.lottie"
           autoplay
           loop
-          style="width: 220px; height: 220px;"
-        ></dotlottie-wc>
+          style="width: 220px; height: 220px; display: block;"
+        ></dotlottie-player>
       </div>
       <p class="colophon-lede">
         You found this page by reading every post and clicking the&nbsp;✦ in the masthead.
@@ -54,7 +54,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 
     <section class="colophon-section">
       <h2>The palette</h2>
-      <p>Warm gold (40°) and cool navy (220°) — gilded parchment.</p>
+      <p style="text-align: center;">Warm gold (40°) and cool navy (220°) — gilded parchment.</p>
       <div class="swatches" aria-hidden="true">
         <span class="swatch swatch-gold"></span>
         <span class="swatch swatch-paper"></span>
@@ -74,10 +74,17 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
     </section>
   </article>
 
-  <script
-    is:inline
-    type="module"
-    src="https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js"></script>
+  <script>
+    const load = () => import("@/scripts/dotlottie-player");
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(load, { timeout: 1500 });
+      } else {
+        setTimeout(load, 0);
+      }
+    };
+    document.addEventListener("astro:page-load", schedule);
+  </script>
 </BaseLayout>
 
 <style lang="scss">

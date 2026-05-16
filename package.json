@@ -17,6 +17,7 @@
   "dependencies": {
     "@astrojs/mdx": "^5.0.6",
     "@astrojs/sitemap": "^3.7.2",
+    "@lottiefiles/dotlottie-web": "^0.72.1",
     "astro": "^6.3.3"
   },
   "devDependencies": {
