@@ -11,18 +11,19 @@
     "video": "node npm-run/download-video.js",
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
     "thumbnail": "node npm-run/extract-thumbnail.js",
-    "purge-cache": "node npm-run/purge-cloudflare-cache.js"
+    "purge-cache": "node npm-run/purge-cloudflare-cache.js",
+    "upgrade-deps": "npx npm-check-updates -u && npm install"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.3",
+    "@astrojs/mdx": "^5.0.6",
     "@astrojs/sitemap": "^3.7.2",
-    "astro": "^6.1.6"
+    "astro": "^6.3.3"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.8.0",
     "listr2": "^10.2.1",
     "music-metadata": "^11.12.3",
     "node-id3": "^0.2.9",
-    "sass": "^1.98.0"
+    "sass": "^1.99.0"
   }
 }
