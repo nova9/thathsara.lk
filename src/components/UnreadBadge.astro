@@ -1,0 +1,38 @@
+---
+interface Props {
+  postId: string;
+}
+
+const { postId } = Astro.props;
+---
+
+<span class="post-unread" data-unread-for={postId} hidden>Unread</span>
+
+<script>
+  function markUnread() {
+    const read: string[] = JSON.parse(localStorage.getItem("reader:read") || "[]");
+    document.querySelectorAll<HTMLElement>(".post-unread[data-unread-for]").forEach((badge) => {
+      const postId = badge.dataset.unreadFor;
+      if (!postId || read.includes(postId)) return;
+      badge.hidden = false;
+    });
+  }
+  document.addEventListener("astro:page-load", markUnread);
+</script>
+
+<style lang="scss">
+  .post-unread {
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-paper);
+    background: var(--color-gold);
+    padding: 2px 6px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+</style>
