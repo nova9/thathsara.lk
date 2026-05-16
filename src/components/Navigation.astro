@@ -1,7 +1,7 @@
 ---
 import { siteConfig } from "@/lib/site";
-import dotlottieWasmUrl from "@lottiefiles/dotlottie-web/dotlottie-player.wasm?url";
 import MastheadTitle from "./MastheadTitle.astro";
+import LottiePrefetch from "./LottiePrefetch.astro";
 
 const currentPath = Astro.url.pathname;
 
@@ -29,7 +29,7 @@ function isActive(href: string) {
   <div class="masthead-rule">
     <hr />
     <span class="masthead-glyph">
-      <a class="glyph-link" aria-label="Colophon" hidden data-dotlottie-wasm={dotlottieWasmUrl}>
+      <a class="glyph-link" aria-label="Colophon" hidden>
         ✦
         <svg class="glyph-sparks" viewBox="-20 -20 40 40" aria-hidden="true">
           <path
@@ -59,6 +59,8 @@ function isActive(href: string) {
     <hr />
   </div>
 </header>
+
+<LottiePrefetch />
 
 <div class="nav-banner" id="nav-banner" hidden>
   <span>✦ All posts read. Check why the star sparkles above ✦</span>
@@ -155,18 +157,6 @@ function isActive(href: string) {
     });
   }
 
-  function prefetchColophonAssets(wasmUrl: string | undefined) {
-    if (!wasmUrl) return;
-    const load = () => {
-      fetch(wasmUrl, { priority: "low" } as any).catch(() => {});
-    };
-    if ("requestIdleCallback" in window) {
-      (window as any).requestIdleCallback(load, { timeout: 5000 });
-    } else {
-      setTimeout(load, 5000);
-    }
-  }
-
   function revealColophonLink() {
     const unlocked = isUnlocked();
     const glyph = document.querySelector(".masthead-glyph");
@@ -178,7 +168,6 @@ function isActive(href: string) {
         link.href = "/colophon/";
         link.hidden = false;
         glyph.classList.add("masthead-glyph--unlocked");
-        prefetchColophonAssets(link.dataset.dotlottieWasm);
       }
       if (banner) banner.hidden = false;
     } else {
