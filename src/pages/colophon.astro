@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import LottiePlayerLoaderScript from "@/components/LottiePlayerLoaderScript.astro";
 ---
 
 <BaseLayout title="Colophon">
@@ -110,9 +109,11 @@ import LottiePlayerLoaderScript from "@/components/LottiePlayerLoaderScript.astr
       </div>
     </section>
   </article>
-
-  <LottiePlayerLoaderScript />
 </BaseLayout>
+
+<script>
+  import "@/scripts/dotlottie-player";
+</script>
 
 <style lang="scss">
   @use "../styles/main.scss" as *;

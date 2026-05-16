@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import LottiePlayerLoader from "@/components/LottiePlayerLoaderScript.astro";
 
 const thoughts = [
   "Is it even a good website if it doesn't load on 2G? I think not.",
@@ -20,6 +19,8 @@ const thoughts = [
     style="width: 220px; height: 220px; display: block; margin: 0 auto;"
   >
   </dotlottie-player>
-
-  <LottiePlayerLoader />
 </BaseLayout>
+
+<script>
+  import "@/scripts/dotlottie-player";
+</script>
