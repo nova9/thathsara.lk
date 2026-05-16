@@ -1,0 +1,95 @@
+---
+// Gold period in "thathsara.lk" grows an orbiting dot after the reader
+// returns on multiple distinct days — a quiet "the site remembers you."
+---
+
+<a href="/" class="masthead-title">
+  thathsara<em>.</em>lk
+</a>
+
+<script>
+  const VISIT_COUNT_KEY = "visit:count";
+  const VISIT_LAST_KEY = "visit:lastDate";
+  const ORBIT_THRESHOLD = 4;
+
+  function trackVisit() {
+    const title = document.querySelector<HTMLElement>(".masthead-title");
+    if (!title) return;
+    let count = 0;
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const last = localStorage.getItem(VISIT_LAST_KEY);
+      count = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || "0", 10) || 0;
+      if (last !== today) {
+        count += 1;
+        localStorage.setItem(VISIT_COUNT_KEY, String(count));
+        localStorage.setItem(VISIT_LAST_KEY, today);
+      }
+    } catch {
+      return;
+    }
+    if (count >= ORBIT_THRESHOLD) {
+      title.classList.add("masthead-title--orbit");
+    }
+  }
+
+  document.addEventListener("astro:page-load", trackVisit);
+</script>
+
+<style lang="scss">
+  .masthead-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--color-ink);
+    text-decoration: none;
+    display: inline-block;
+
+    em {
+      font-style: italic;
+      color: var(--color-gold);
+      position: relative;
+      display: inline-block;
+    }
+
+    &.masthead-title--orbit em::after {
+      content: "";
+      position: absolute;
+      top: 78%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      margin: -2px 0 0 -2px;
+      border-radius: 50%;
+      background: var(--color-gold);
+      opacity: 0.55;
+      animation: dot-orbit 7s linear infinite;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &.masthead-title--orbit em::after {
+        animation: none;
+        transform: translateX(10px);
+      }
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        text-decoration: none;
+        color: var(--color-ink);
+      }
+    }
+  }
+
+  @keyframes dot-orbit {
+    from {
+      transform: rotate(0deg) translateX(10px);
+    }
+    to {
+      transform: rotate(360deg) translateX(10px);
+    }
+  }
+</style>
