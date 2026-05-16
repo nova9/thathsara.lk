@@ -277,9 +277,8 @@ function isActive(href: string) {
   }
 
   .masthead-glyph--unlocked .glyph-link {
-    animation: glyph-shimmer 2.4s ease-in-out infinite;
-    filter: drop-shadow(0 0 6px var(--color-gold))
-      drop-shadow(0 0 12px rgba(212, 175, 55, 0.5));
+    animation: glyph-shimmer 3.2s ease-in-out infinite;
+    will-change: filter, opacity;
   }
 
   .masthead-glyph--unlocked .glyph-fallback {
@@ -357,10 +356,16 @@ function isActive(href: string) {
   @keyframes glyph-shimmer {
     0%,
     100% {
-      opacity: 0.95;
+      opacity: 0.92;
+      filter: drop-shadow(0 0 1.5px rgba(212, 175, 55, 0.7))
+        drop-shadow(0 0 6px rgba(212, 175, 55, 0.28))
+        drop-shadow(0 0 14px rgba(212, 175, 55, 0.12));
     }
     50% {
       opacity: 1;
+      filter: drop-shadow(0 0 2.5px rgba(212, 175, 55, 0.85))
+        drop-shadow(0 0 10px rgba(212, 175, 55, 0.4))
+        drop-shadow(0 0 22px rgba(212, 175, 55, 0.18));
     }
   }
 

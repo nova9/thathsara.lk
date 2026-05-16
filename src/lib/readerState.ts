@@ -31,7 +31,7 @@ export function clearUnlocked() {
   localStorage.removeItem(UNLOCKED_KEY);
 }
 
-export function hasReadAll(allPosts: string[]): boolean {
+export function hasReadAll(allPostIds: string[]): boolean {
   const read = getRead();
-  return allPosts.every((id) => read.includes(id));
+  return allPostIds.every((id) => read.includes(id));
 }
