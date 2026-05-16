@@ -291,11 +291,6 @@ function isActive(href: string) {
     }
   }
 
-  .masthead-glyph--unlocked .glyph-link {
-    animation: glyph-shimmer 3.2s ease-in-out infinite;
-    will-change: filter, opacity;
-  }
-
   .masthead-glyph--unlocked .glyph-fallback {
     display: none;
   }
@@ -368,22 +363,6 @@ function isActive(href: string) {
     animation-delay: 1.5s;
   }
 
-  @keyframes glyph-shimmer {
-    0%,
-    100% {
-      opacity: 0.92;
-      filter: drop-shadow(0 0 1.5px rgba(212, 175, 55, 0.7))
-        drop-shadow(0 0 6px rgba(212, 175, 55, 0.28))
-        drop-shadow(0 0 14px rgba(212, 175, 55, 0.12));
-    }
-    50% {
-      opacity: 1;
-      filter: drop-shadow(0 0 2.5px rgba(212, 175, 55, 0.85))
-        drop-shadow(0 0 10px rgba(212, 175, 55, 0.4))
-        drop-shadow(0 0 22px rgba(212, 175, 55, 0.18));
-    }
-  }
-
   // Most of the cycle the spark is invisible; it briefly flashes on, then fades.
   @keyframes glyph-spark {
     0%,
@@ -407,7 +386,6 @@ function isActive(href: string) {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .masthead-glyph--unlocked .glyph-link,
     .glyph-spark {
       animation: none;
     }
