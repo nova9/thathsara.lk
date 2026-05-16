@@ -18,7 +18,12 @@ function isActive(href: string) {
 ---
 
 <header class="masthead">
-  <div class="masthead-eyebrow">Est. 2024 · {siteConfig.subtitle}</div>
+  <div
+    class="masthead-eyebrow"
+    data-default={`Est. 2024 · ${siteConfig.subtitle}`}
+  >
+    Est. 2024 · {siteConfig.subtitle}
+  </div>
   <a href="/" class="masthead-title">
     thathsara<em>.</em>lk
   </a>
@@ -187,8 +192,27 @@ function isActive(href: string) {
     }
   }
 
+  const LATE_PHRASES = [
+    "Reading at this hour?",
+    "Still awake?",
+  ];
+
+  function tuneEyebrow() {
+    const el = document.querySelector<HTMLElement>(".masthead-eyebrow");
+    if (!el) return;
+    const hour = new Date().getHours();
+    const isLate = hour >= 1 && hour < 4;
+    if (isLate) {
+      const idx = Math.floor(Math.random() * LATE_PHRASES.length);
+      el.textContent = LATE_PHRASES[idx];
+    } else if (el.dataset.default) {
+      el.textContent = el.dataset.default;
+    }
+  }
+
   document.addEventListener("astro:page-load", setupSearch);
   document.addEventListener("astro:page-load", revealColophonLink);
+  document.addEventListener("astro:page-load", tuneEyebrow);
 </script>
 
 <style lang="scss">
