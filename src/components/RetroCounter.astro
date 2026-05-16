@@ -1,13 +1,12 @@
 ---
-// Use PUBLIC_START_TIME (or START_TIME) from .env, fallback to current time if missing
-const startTime =
-  import.meta.env.PUBLIC_START_TIME ||
-  import.meta.env.START_TIME ||
-  new Date().toISOString();
+const startTimes = ["2026-03-29T00:00:00+05:30", "2026-05-16T07:15:00+05:30"];
+
+const startTime = startTimes[startTimes.length - 1];
 ---
 
-<span class="retro-time" id="time-counter" data-start={startTime}>00:00:00</span
->
+<span class="retro-time" id="time-counter" data-start={startTime}>
+  00:00:00
+</span>
 
 <script>
   let interval: ReturnType<typeof setInterval> | undefined;
