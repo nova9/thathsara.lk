@@ -6,6 +6,7 @@ import mdx from "@astrojs/mdx";
 export default defineConfig({
   site: "https://thathsara.lk",
   trailingSlash: "always",
+  devToolbar: { enabled: false },
   integrations: [sitemap(), mdx()],
   fonts: [
     {
