@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import catSleepingUrl from "@/assets/lottie/cat_sleeping.lottie?url";
 
 const thoughts = [
   "Is it even a good website if it doesn't load on 2G? I think not.",
@@ -13,7 +14,7 @@ const thoughts = [
   </ol>
 
   <dotlottie-player
-    src="/images/cat-mascot/cat_sleeping.lottie"
+    src={catSleepingUrl}
     autoplay
     loop
     style="width: 220px; height: 220px; display: block; margin: 0 auto;"

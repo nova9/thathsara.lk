@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import catFeelingLoveUrl from "@/assets/lottie/cat_feeling_love.lottie?url";
 ---
 
 <BaseLayout title="Colophon">
@@ -101,7 +102,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       <p>To everyone who's read along, or just lingered.</p>
       <div class="colophon-cat">
         <dotlottie-player
-          src="/images/cat-mascot/cat_feeling_love.lottie"
+          src={catFeelingLoveUrl}
           autoplay
           loop
           style="width: 220px; height: 220px; display: block;"
