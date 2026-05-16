@@ -56,6 +56,10 @@ function isActive(href: string) {
   </div>
 </header>
 
+<div class="nav-banner" id="nav-banner" hidden>
+  <span>✦ You have read all the Posts ✦</span>
+</div>
+
 <nav class="nav-bar">
   {
     navItems.map((item, i) => (
@@ -158,14 +162,27 @@ function isActive(href: string) {
   }
 
   function revealColophonLink() {
-    if (!localStorage.getItem("egg:unlocked")) return;
+    const unlocked = !!localStorage.getItem("egg:unlocked");
     const glyph = document.querySelector(".masthead-glyph");
     const link = glyph?.querySelector<HTMLAnchorElement>(".glyph-link");
-    if (!glyph || !link) return;
-    link.href = "/colophon/";
-    link.hidden = false;
-    glyph.classList.add("masthead-glyph--unlocked");
-    prefetchColophonAssets(link.dataset.dotlottieWasm);
+    const banner = document.getElementById("nav-banner");
+
+    if (unlocked) {
+      if (glyph && link) {
+        link.href = "/colophon/";
+        link.hidden = false;
+        glyph.classList.add("masthead-glyph--unlocked");
+        prefetchColophonAssets(link.dataset.dotlottieWasm);
+      }
+      if (banner) banner.hidden = false;
+    } else {
+      if (glyph && link) {
+        link.hidden = true;
+        link.removeAttribute("href");
+        glyph.classList.remove("masthead-glyph--unlocked");
+      }
+      if (banner) banner.hidden = true;
+    }
   }
 
   document.addEventListener("astro:page-load", setupSearch);
@@ -375,6 +392,35 @@ function isActive(href: string) {
     .glyph-spark {
       opacity: 0.6;
       transform: scale(1);
+    }
+  }
+
+  // ── Nav banner ────────────────────────────────────────────────────────────────
+  .nav-banner {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px 1rem;
+
+    &[hidden] {
+      display: none;
+    }
+
+    a {
+      color: var(--color-gold);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      @media (hover: hover) {
+        &:hover {
+          color: var(--color-paper);
+        }
+      }
     }
   }
 

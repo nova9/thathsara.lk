@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site";
 import packageJson from "../../package.json";
 import "../styles/main.scss";
 import Navigation from "@/components/Navigation.astro";
+import EggState from "@/components/EggState.astro";
 import MusicPlayer from "@/components/MusicPlayer.astro";
 import RetroCounter from "@/components/Counter.astro";
 import { ClientRouter } from "astro:transitions";
@@ -167,6 +168,9 @@ const structuredData = {
       ? `--color-primary: ${accentColor}; --color-border: ${accentColor};`
       : undefined}
   >
+    <!-- Reconciles the easter-egg unlock flag before Nav reads it -->
+    <EggState />
+
     <!-- Full-width navigation: masthead + nav bar + search -->
     <Navigation />
 
