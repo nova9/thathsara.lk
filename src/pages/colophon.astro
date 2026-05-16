@@ -1,0 +1,300 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Colophon">
+  <article class="colophon">
+    <header class="colophon-header">
+      <p class="colophon-eyebrow">✦ &nbsp; A quiet corner &nbsp; ✦</p>
+      <h1 class="colophon-title">Colophon</h1>
+      <div class="colophon-cat">
+        <dotlottie-wc
+          src="/images/cat_feeling_love.lottie"
+          autoplay
+          loop
+          style="width: 220px; height: 220px;"
+        ></dotlottie-wc>
+      </div>
+      <p class="colophon-lede">
+        You found this page by reading every post and clicking the&nbsp;✦ in the masthead.
+        Thank you — that's a quiet thing to do on the internet in 2026.
+      </p>
+    </header>
+
+    <div class="colophon-rule"><span>✦</span></div>
+
+    <section class="colophon-section">
+      <h2>What's a colophon?</h2>
+      <p>
+        An old bookmaking tradition — a short note at the back of a book where the printer listed
+        the tools they used: the typeface, the paper, the press. This is the website version: not
+        what's on the site, but how the site itself was built.
+      </p>
+    </section>
+
+    <div class="colophon-rule"><span>✦</span></div>
+
+    <section class="colophon-section">
+      <h2>How this site is made</h2>
+      <ul class="colophon-list">
+        <li><span><strong>Astro 6</strong>, static-generated. Zero JS framework runtime.</span></li>
+        <li><span><strong>Hand-written SCSS.</strong> Tokens in <code>main.scss</code>, dark mode in <code>dark.scss</code>.</span></li>
+        <li><span><strong>MDX</strong> for posts that need components, plain Markdown otherwise.</span></li>
+        <li><span><strong>DM Sans</strong> for body, system mono for UI labels.</span></li>
+        <li><span><strong>View Transitions</strong> for SPA-like navigation, with a thin progress bar to mark the page change.</span></li>
+        <li><span><strong>Shaka Player</strong> lazy-loaded for the music and video players — never shipped unless you press play.</span></li>
+        <li><span><strong>GitHub Pages</strong> behind Cloudflare. Deploys on push to <code>main</code>, with the CDN cache purged on the way out.</span></li>
+      </ul>
+      <p class="colophon-coda">
+        The whole thing is built so that almost nothing runs in your browser unless you ask it to.
+      </p>
+    </section>
+
+    <div class="colophon-rule"><span>✦</span></div>
+
+    <section class="colophon-section">
+      <h2>The palette</h2>
+      <p>Warm gold (40°) and cool navy (220°) — gilded parchment.</p>
+      <div class="swatches" aria-hidden="true">
+        <span class="swatch swatch-gold"></span>
+        <span class="swatch swatch-paper"></span>
+        <span class="swatch swatch-rule"></span>
+        <span class="swatch swatch-ink-light"></span>
+        <span class="swatch swatch-ink-mid"></span>
+        <span class="swatch swatch-ink"></span>
+      </div>
+    </section>
+
+    <div class="colophon-rule"><span>✦</span></div>
+
+    <section class="colophon-section colophon-thanks">
+      <h2>Thanks</h2>
+      <p>To everyone who's read along, or just lingered.</p>
+      <p class="colophon-sign">✦</p>
+    </section>
+  </article>
+
+  <script
+    is:inline
+    type="module"
+    src="https://cdn.jsdelivr.net/npm/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js"></script>
+</BaseLayout>
+
+<style lang="scss">
+  @use "../styles/main.scss" as *;
+
+  .colophon {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem 0 4rem;
+  }
+
+  .colophon-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .colophon-eyebrow {
+    @include caps(10px, 0.4em, var(--color-gold));
+    margin: 0 0 1rem;
+    opacity: 0.85;
+  }
+
+  .colophon-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    margin: 0 0 1.25rem;
+    background: linear-gradient(
+      180deg,
+      var(--color-ink) 0%,
+      var(--color-ink-mid) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .colophon-cat {
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0 1.5rem;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  }
+
+  .colophon-lede {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--color-ink-mid);
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .colophon-rule {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0;
+    color: var(--color-gold);
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--color-rule) 50%,
+        transparent 100%
+      );
+    }
+
+    span {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      letter-spacing: 0.5em;
+      padding-left: 0.5em;
+    }
+  }
+
+  .colophon-section {
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-style: italic;
+      font-weight: 700;
+      margin: 0 0 1.25rem;
+      color: var(--color-ink);
+      text-align: center;
+
+      &::after {
+        content: "";
+        display: block;
+        width: 32px;
+        height: 1px;
+        background: var(--color-gold);
+        margin: 0.5rem auto 0;
+        opacity: 0.6;
+      }
+    }
+
+    p {
+      color: var(--color-ink-mid);
+      line-height: 1.75;
+    }
+
+    code {
+      font-family: var(--font-ui);
+      font-size: 0.85em;
+      background: var(--color-paper);
+      border: 1px solid var(--color-rule);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: var(--color-ink);
+    }
+  }
+
+  .colophon-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+
+    li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px dashed var(--color-rule);
+      color: var(--color-ink-mid);
+      line-height: 1.6;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: "✦";
+        flex-shrink: 0;
+        color: var(--color-gold);
+        font-size: 0.75em;
+        opacity: 0.8;
+      }
+
+      strong {
+        color: var(--color-ink);
+        font-weight: 700;
+      }
+    }
+  }
+
+  .colophon-coda {
+    font-style: italic;
+    text-align: center;
+    color: var(--color-ink-light);
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .swatches {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem auto 0;
+    width: fit-content;
+    border: 1px solid var(--color-rule);
+    border-radius: 999px;
+    padding: 6px;
+    background: transparent;
+  }
+
+  .swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    // border: 1px solid var(--color-rule);
+    position: relative;
+    z-index: 1;
+    transform: translateY(0);
+    transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+    will-change: transform;
+
+    &:not(:first-child) {
+      margin-left: -8px;
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      z-index: 2;
+    }
+  }
+
+  .swatch-gold { background: var(--color-gold); }
+  .swatch-paper { background: var(--color-paper); }
+  .swatch-rule { background: var(--color-rule); }
+  .swatch-ink-light { background: var(--color-ink-light); }
+  .swatch-ink-mid { background: var(--color-ink-mid); }
+  .swatch-ink { background: var(--color-ink); }
+
+  .colophon-thanks {
+    text-align: center;
+
+    h2::after {
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-style: italic;
+    }
+  }
+
+  .colophon-sign {
+    color: var(--color-gold);
+    font-size: 1.4rem;
+    letter-spacing: 1rem;
+    margin-top: 2rem;
+    opacity: 0.7;
+  }
+</style>

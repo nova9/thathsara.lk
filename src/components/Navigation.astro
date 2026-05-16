@@ -22,24 +22,60 @@ function isActive(href: string) {
     thathsara<em>.</em>lk
   </a>
   <div class="masthead-rule">
-    <hr />✦<hr />
+    <hr />
+    <span class="masthead-glyph">
+      <a class="glyph-link" aria-label="Colophon" hidden>
+        ✦
+        <svg class="glyph-sparks" viewBox="-20 -20 40 40" aria-hidden="true">
+          <path
+            class="glyph-spark glyph-spark--a"
+            d="M12,-12 L12.7,-10.3 L14.4,-9.6 L12.7,-8.9 L12,-7.2 L11.3,-8.9 L9.6,-9.6 L11.3,-10.3 Z"
+          ></path>
+          <path
+            class="glyph-spark glyph-spark--b"
+            d="M-13,10 L-12.4,11.4 L-11,12 L-12.4,12.6 L-13,14 L-13.6,12.6 L-15,12 L-13.6,11.4 Z"
+          ></path>
+          <path
+            class="glyph-spark glyph-spark--c"
+            d="M14,4 L14.5,5.2 L15.7,5.7 L14.5,6.2 L14,7.4 L13.5,6.2 L12.3,5.7 L13.5,5.2 Z"
+          ></path>
+          <path
+            class="glyph-spark glyph-spark--d"
+            d="M-6,-14 L-5.5,-12.8 L-4.3,-12.3 L-5.5,-11.8 L-6,-10.6 L-6.5,-11.8 L-7.7,-12.3 L-6.5,-12.8 Z"
+          ></path>
+          <path
+            class="glyph-spark glyph-spark--e"
+            d="M5,14 L5.5,15.2 L6.7,15.7 L5.5,16.2 L5,17.4 L4.5,16.2 L3.3,15.7 L4.5,15.2 Z"
+          ></path>
+        </svg>
+      </a>
+      <span class="glyph-fallback" aria-hidden="true">✦</span>
+    </span>
+    <hr />
   </div>
 </header>
 
 <nav class="nav-bar">
-  {navItems.map((item, i) => (
-    <>
-      {i > 0 && <span class="nav-divider">·</span>}
-      <a
-        href={item.href}
-        class:list={["nav-item", { active: isActive(item.href) }]}
-        aria-current={isActive(item.href) ? "page" : undefined}
-      >
-        {item.label}
-      </a>
-    </>
-  ))}
-  <button class="search-toggle" id="search-toggle" aria-label="Toggle search" style={currentPath !== "/" ? "display:none" : ""}>
+  {
+    navItems.map((item, i) => (
+      <>
+        {i > 0 && <span class="nav-divider">·</span>}
+        <a
+          href={item.href}
+          class:list={["nav-item", { active: isActive(item.href) }]}
+          aria-current={isActive(item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      </>
+    ))
+  }
+  <button
+    class="search-toggle"
+    id="search-toggle"
+    aria-label="Toggle search"
+    style={currentPath !== "/" ? "display:none" : ""}
+  >
     <span aria-hidden="true">⌕</span><span class="search-label"> Search</span>
   </button>
 </nav>
@@ -61,7 +97,9 @@ function isActive(href: string) {
   function setupSearch() {
     const toggle = document.getElementById("search-toggle");
     const wrapper = document.getElementById("search-bar-wrapper");
-    const input = document.getElementById("search-input") as HTMLInputElement | null;
+    const input = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement | null;
     const close = document.getElementById("search-close");
 
     if (!toggle || !wrapper || !input || !close) return;
@@ -106,7 +144,18 @@ function isActive(href: string) {
     });
   }
 
+  function revealColophonLink() {
+    if (!localStorage.getItem("egg:unlocked")) return;
+    const glyph = document.querySelector(".masthead-glyph");
+    const link = glyph?.querySelector<HTMLAnchorElement>(".glyph-link");
+    if (!glyph || !link) return;
+    link.href = "/colophon/";
+    link.hidden = false;
+    glyph.classList.add("masthead-glyph--unlocked");
+  }
+
   document.addEventListener("astro:page-load", setupSearch);
+  document.addEventListener("astro:page-load", revealColophonLink);
 </script>
 
 <style lang="scss">
@@ -143,7 +192,10 @@ function isActive(href: string) {
     }
 
     @media (hover: hover) {
-      &:hover { text-decoration: none; color: var(--color-ink); }
+      &:hover {
+        text-decoration: none;
+        color: var(--color-ink);
+      }
     }
   }
 
@@ -161,6 +213,152 @@ function isActive(href: string) {
       border: none;
       border-top: 1px solid var(--color-rule);
       margin: 0;
+    }
+  }
+
+  .masthead-glyph {
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transform-origin: center;
+  }
+
+  .masthead-glyph--unlocked {
+    animation: glyph-drift 12s ease-in-out infinite;
+  }
+
+  .glyph-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: var(--color-gold);
+    text-decoration: none;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .masthead-glyph--unlocked .glyph-link {
+    animation: glyph-shimmer 2.4s ease-in-out infinite;
+  }
+
+  .masthead-glyph--unlocked .glyph-fallback {
+    display: none;
+  }
+
+  @keyframes glyph-drift {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1) rotate(0deg);
+    }
+    40% {
+      opacity: 0.85;
+      transform: scale(1) rotate(0deg);
+    }
+    48% {
+      opacity: 1;
+      transform: scale(1.18) rotate(8deg);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1) rotate(0deg);
+    }
+    60% {
+      opacity: 0.75;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .masthead-glyph--unlocked {
+      animation: none;
+    }
+  }
+
+  .glyph-sparks {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 32px;
+    height: 32px;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .glyph-spark {
+    fill: var(--color-gold);
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    animation: glyph-spark 2s ease-in-out infinite;
+  }
+  .glyph-spark--a {
+    animation-duration: 1.8s;
+    animation-delay: 0s;
+  }
+  .glyph-spark--b {
+    animation-duration: 2.3s;
+    animation-delay: 0.7s;
+  }
+  .glyph-spark--c {
+    animation-duration: 2s;
+    animation-delay: 1.2s;
+  }
+  .glyph-spark--d {
+    animation-duration: 2.6s;
+    animation-delay: 0.3s;
+  }
+  .glyph-spark--e {
+    animation-duration: 1.9s;
+    animation-delay: 1.5s;
+  }
+
+  @keyframes glyph-shimmer {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  // Most of the cycle the spark is invisible; it briefly flashes on, then fades.
+  @keyframes glyph-spark {
+    0%,
+    55%,
+    100% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    65% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    75% {
+      opacity: 0.6;
+      transform: scale(0.8);
+    }
+    85% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .masthead-glyph--unlocked .glyph-link,
+    .glyph-spark {
+      animation: none;
+    }
+    .glyph-spark {
+      opacity: 0.6;
+      transform: scale(1);
     }
   }
 
@@ -186,7 +384,9 @@ function isActive(href: string) {
     color: var(--color-ink-mid);
     padding: 12px 18px;
     border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-color 0.2s;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
     text-decoration: none;
     display: inline-block;
 
@@ -250,7 +450,9 @@ function isActive(href: string) {
     background: var(--color-paper);
     border-bottom: 1px solid var(--color-rule);
 
-    &[hidden] { display: none; }
+    &[hidden] {
+      display: none;
+    }
   }
 
   .search-bar-inner {
@@ -280,9 +482,14 @@ function isActive(href: string) {
     caret-color: var(--color-gold);
     padding: 0;
 
-    &::placeholder { color: var(--color-ink-light); }
+    &::placeholder {
+      color: var(--color-ink-light);
+    }
 
-    &:focus { border-color: transparent; box-shadow: none; }
+    &:focus {
+      border-color: transparent;
+      box-shadow: none;
+    }
   }
 
   .search-esc {
@@ -320,7 +527,9 @@ function isActive(href: string) {
       gap: 0;
       scrollbar-width: none;
 
-      &::-webkit-scrollbar { display: none; }
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
 
     .nav-item {
@@ -338,12 +547,18 @@ function isActive(href: string) {
       line-height: 1;
 
       @media (hover: hover) {
-        &:hover { transform: none; }
+        &:hover {
+          transform: none;
+        }
       }
     }
 
-    .search-label { display: none; }
+    .search-label {
+      display: none;
+    }
 
-    .masthead { padding: 1.5rem 1.25rem 1rem; }
+    .masthead {
+      padding: 1.5rem 1.25rem 1rem;
+    }
   }
 </style>
