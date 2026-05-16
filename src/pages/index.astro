@@ -17,13 +17,10 @@ const rest = posts.filter((p) => !p.data.featured);
         Featured Dispatch
         <UnreadBadge postId={featured.id} />
       </div>
-      <h1 class="hero-title">{featured.data.title}</h1>
+      <h1 class="hero-title"><a href={`/posts/${featured.id}/`}>{featured.data.title}</a></h1>
       {featured.data.excerpt && (
         <p class="hero-excerpt">{featured.data.excerpt}</p>
       )}
-      <a class="read-link" href={`/posts/${featured.id}/`}>
-        Read in full →
-      </a>
     </section>
   ))}
 
