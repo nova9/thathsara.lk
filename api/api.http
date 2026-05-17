@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:3000
+###
+GET {{baseUrl}}/health
+
+HTTP/1.1 200  - OK
+content-type: application/json
+vary: origin, access-control-request-method, access-control-request-headers
+access-control-allow-origin: *
+access-control-expose-headers: *
+content-length: 15
+connection: close
+date: Sun, 17 May 2026 13:42:33 GMT
