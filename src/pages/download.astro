@@ -1,0 +1,289 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Download" description="Download videos from YouTube, TikTok, Instagram, Twitter/X, and more.">
+  <div class="download-page">
+    <div class="page-header">
+      <h1>Download</h1>
+      <p>Paste a link from YouTube, TikTok, Instagram, Twitter/X, Reddit, and more.</p>
+    </div>
+
+    <div class="download-card">
+      <form id="download-form" autocomplete="off">
+        <div class="input-row">
+          <input
+            id="url-input"
+            type="url"
+            placeholder="https://..."
+            spellcheck="false"
+            required
+          />
+          <button type="submit" id="submit-btn">Download</button>
+        </div>
+      </form>
+
+      <div id="result" hidden></div>
+    </div>
+
+    <p class="note">No files pass through this site.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  interface DownloadResponse {
+    status: "tunnel" | "redirect" | "picker" | "error";
+    url?: string;
+    filename?: string;
+    picker?: Array<{ url: string; thumb?: string; type?: string }>;
+    error?: { code: string };
+  }
+
+  async function fetchDownload(url: string): Promise<DownloadResponse> {
+    // TODO: replace with real backend call
+    await new Promise((r) => setTimeout(r, 800));
+    return {
+      status: "redirect",
+      url: url,
+      filename: "video.mp4",
+    };
+  }
+
+  function filenameFromUrl(url: string): string {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split("/").filter(Boolean);
+      return parts[parts.length - 1] || "video";
+    } catch {
+      return "video";
+    }
+  }
+
+  function buildResult(data: DownloadResponse, inputUrl: string): HTMLElement {
+    const wrap = document.createElement("div");
+    wrap.className = "result-inner";
+
+    if (data.status === "error") {
+      wrap.innerHTML = `<p class="result-error">Could not fetch this link. Make sure it's a public post and the URL is correct. (${data.error?.code ?? "unknown"})</p>`;
+      return wrap;
+    }
+
+    const links: Array<{ url: string; label: string }> = [];
+
+    if (data.status === "picker" && data.picker) {
+      data.picker.forEach((item, i) => {
+        links.push({ url: item.url, label: `File ${i + 1}` });
+      });
+    } else if (data.url) {
+      links.push({
+        url: data.url,
+        label: data.filename ?? filenameFromUrl(inputUrl),
+      });
+    }
+
+    if (links.length === 0) {
+      wrap.innerHTML = `<p class="result-error">No downloadable files found for this link.</p>`;
+      return wrap;
+    }
+
+    const heading = document.createElement("p");
+    heading.className = "result-label";
+    heading.textContent = links.length === 1 ? "Ready to download" : `${links.length} files found`;
+    wrap.appendChild(heading);
+
+    const list = document.createElement("div");
+    list.className = "result-links";
+
+    links.forEach(({ url, label }) => {
+      const a = document.createElement("a");
+      a.href = url;
+      a.textContent = label;
+      a.className = "result-link";
+      a.setAttribute("download", "");
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+      list.appendChild(a);
+    });
+
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    const form = document.getElementById("download-form") as HTMLFormElement | null;
+    const input = document.getElementById("url-input") as HTMLInputElement | null;
+    const btn = document.getElementById("submit-btn") as HTMLButtonElement | null;
+    const result = document.getElementById("result") as HTMLDivElement | null;
+
+    if (!form || !input || !btn || !result) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = input.value.trim();
+      if (!url) return;
+
+      btn.disabled = true;
+      btn.textContent = "Fetching...";
+      result.hidden = true;
+      result.innerHTML = "";
+
+      try {
+        const data = await fetchDownload(url);
+        result.appendChild(buildResult(data, url));
+      } catch {
+        result.innerHTML = `<div class="result-inner"><p class="result-error">Network error. Check your connection and try again.</p></div>`;
+      } finally {
+        result.hidden = false;
+        btn.disabled = false;
+        btn.textContent = "Download";
+      }
+    });
+  });
+</script>
+
+<style lang="scss">
+  .download-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem 0 3rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+
+    h1 {
+      margin: 0 0 0.4rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--color-ink-mid);
+      font-size: 1rem;
+    }
+  }
+
+  .download-card {
+    background: var(--color-paper);
+    border: 1px solid var(--color-rule);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.6rem;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+  }
+
+  input[type="url"] {
+    flex: 1;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--color-rule);
+    border-radius: 8px;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: 0.95rem;
+    font-family: var(--font-ui, monospace);
+    outline: none;
+    transition: border-color 0.15s;
+    min-width: 0;
+
+    &::placeholder {
+      color: var(--color-ink-light);
+    }
+
+    &:focus {
+      border-color: var(--color-gold);
+    }
+  }
+
+  button[type="submit"] {
+    padding: 0.65rem 1.3rem;
+    background: var(--color-primary, var(--color-gold));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: var(--font-ui, sans-serif);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+
+    &:hover:not(:disabled) {
+      opacity: 0.88;
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+  }
+
+  #result {
+    margin-top: 1.25rem;
+  }
+
+  .result-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-label {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-ink-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--font-ui, monospace);
+  }
+
+  .result-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-link {
+    display: block;
+    padding: 0.7rem 1rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-rule);
+    border-radius: 8px;
+    color: var(--color-ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    word-break: break-all;
+    transition: border-color 0.15s, color 0.15s;
+
+    &:hover {
+      border-color: var(--color-gold);
+      color: var(--color-gold);
+    }
+  }
+
+  .result-error {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    background: hsl(0, 60%, 96%);
+    border: 1px solid hsl(0, 50%, 85%);
+    border-radius: 8px;
+    color: hsl(0, 55%, 35%);
+    font-size: 0.9rem;
+  }
+
+  .note {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-ink-light);
+    text-align: center;
+
+    a {
+      color: inherit;
+    }
+  }
+</style>
