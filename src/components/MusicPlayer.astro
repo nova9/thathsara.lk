@@ -457,6 +457,11 @@ const tracks = await getMusicTracks();
       });
 
       window.addEventListener("scroll", () => this.handleScroll());
+      window.addEventListener("resize", () => {
+        if (window.matchMedia("(max-width: 37.4em)").matches) return;
+        this.panel.style.transform = "";
+        this.isAtBottom = false;
+      });
     }
 
     setInfo(track) {
