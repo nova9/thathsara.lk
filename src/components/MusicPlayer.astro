@@ -301,6 +301,7 @@ const tracks = await getMusicTracks();
     .music-panel {
       bottom: 1rem;
       right: 1rem;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .music-volume-wrap {
@@ -392,6 +393,7 @@ const tracks = await getMusicTracks();
       this.isPlaying = !this.audio.paused;
       this.isLoading = false;
       this.scrollTimeout = null;
+      this.isAtBottom = false;
 
       const storedVolume = parseFloat(
         localStorage.getItem(VOLUME_STORAGE_KEY) ?? "0.9",
@@ -548,11 +550,27 @@ const tracks = await getMusicTracks();
 
     handleScroll() {
       if (!window.matchMedia("(max-width: 37.4em)").matches) return;
+
       this.infoPanel.classList.add("is-scrolling");
       clearTimeout(this.scrollTimeout);
       this.scrollTimeout = setTimeout(() => {
         this.infoPanel.classList.remove("is-scrolling");
       }, 2000);
+
+      const atBottom =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 40;
+
+      if (atBottom === this.isAtBottom) return;
+      this.isAtBottom = atBottom;
+
+      if (atBottom) {
+        const panelHeight = this.panel.offsetHeight;
+        const naturalTop = window.innerHeight - panelHeight - 32;
+        this.panel.style.transform = `translateY(${-naturalTop}px)`;
+      } else {
+        this.panel.style.transform = "";
+      }
     }
   }
 
