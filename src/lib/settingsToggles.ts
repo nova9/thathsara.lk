@@ -1,5 +1,5 @@
 export class Toggle {
-  static bind(btn: HTMLButtonElement, eventName: string) {
+  static bind(btn: HTMLButtonElement, eventName: string, signal?: AbortSignal) {
     const isOff = localStorage.getItem(btn.id) === "true";
     btn.setAttribute("aria-checked", String(!isOff));
 
@@ -10,7 +10,7 @@ export class Toggle {
       document.dispatchEvent(
         new CustomEvent(eventName, { detail: { on: isNowOn } }),
       );
-    });
+    }, { signal });
   }
 
   static onChange(eventName: string, cb: (isOn: boolean) => void) {
