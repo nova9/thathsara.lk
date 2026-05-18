@@ -634,7 +634,8 @@ const id = Math.random().toString(36).substring(2, 11);
   import "@/scripts/dash-video.js";
 </script>
 
-<script is:inline>
+<script>
+  // @ts-nocheck
   function showOnly(showEl, hideEl) {
     showEl.style.display = "block";
     hideEl.style.display = "none";
