@@ -78,63 +78,17 @@ import { siteConfig } from "@/lib/site";
 
 <script>
   import { isUnlocked } from "@/lib/readerState";
+  import { Toggle } from "@/lib/settingsToggles";
 
   document.addEventListener("astro:page-load", () => {
     const appearanceGroup = document.getElementById("appearance-group");
     if (appearanceGroup) appearanceGroup.hidden = !isUnlocked();
 
-    const toggleBtn = document.getElementById("music-toggle-setting");
-    if (toggleBtn) {
-      // By default, if it's not strictly "true", the music player is effectively enabled
-      const isPlayerDisabled =
-        localStorage.getItem("music-player-disabled") === "true";
+    const musicBtn = document.getElementById("music-toggle-setting") as HTMLButtonElement | null;
+    if (musicBtn) Toggle.bind(musicBtn, "music-player-toggled");
 
-      // If disabled is false, the toggle is ON (aria-checked="true")
-      toggleBtn.setAttribute("aria-checked", String(!isPlayerDisabled));
-
-      toggleBtn.addEventListener("click", () => {
-        const isCurrentlyOn = toggleBtn.getAttribute("aria-checked") === "true";
-        const isNowOn = !isCurrentlyOn;
-        const isNowDisabled = !isNowOn;
-
-        // Visual update
-        toggleBtn.setAttribute("aria-checked", String(isNowOn));
-
-        // Save state and notify player
-        localStorage.setItem("music-player-disabled", String(isNowDisabled));
-        document.dispatchEvent(
-          new CustomEvent("music-player-toggled", {
-            detail: { disabled: isNowDisabled },
-          }),
-        );
-      });
-    }
-
-    const bannerBtn = document.getElementById("banner-toggle-setting");
-    if (bannerBtn) {
-      const isBannerHidden =
-        localStorage.getItem("easter-egg-banner-hidden") === "true";
-
-      bannerBtn.setAttribute("aria-checked", String(!isBannerHidden));
-
-      bannerBtn.addEventListener("click", () => {
-        const isCurrentlyOn =
-          bannerBtn.getAttribute("aria-checked") === "true";
-        const isNowOn = !isCurrentlyOn;
-        const isNowHidden = !isNowOn;
-
-        bannerBtn.setAttribute("aria-checked", String(isNowOn));
-        localStorage.setItem(
-          "easter-egg-banner-hidden",
-          String(isNowHidden),
-        );
-        document.dispatchEvent(
-          new CustomEvent("easter-egg-banner-toggled", {
-            detail: { hidden: isNowHidden },
-          }),
-        );
-      });
-    }
+    const bannerBtn = document.getElementById("banner-toggle-setting") as HTMLButtonElement | null;
+    if (bannerBtn) Toggle.bind(bannerBtn, "easter-egg-banner-toggled");
   });
 </script>
 

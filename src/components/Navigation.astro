@@ -124,6 +124,7 @@ function isActive(href: string) {
 
 <script>
   import { isUnlocked } from "@/lib/readerState";
+  import { Toggle } from "@/lib/settingsToggles";
 
   function setupSearch() {
     const toggle = document.getElementById("search-toggle");
@@ -176,7 +177,7 @@ function isActive(href: string) {
   }
 
   function isBannerHidden() {
-    return localStorage.getItem("easter-egg-banner-hidden") === "true";
+    return localStorage.getItem("banner-toggle-setting") === "true";
   }
 
   function revealColophonLink() {
@@ -202,11 +203,10 @@ function isActive(href: string) {
     }
   }
 
-  document.addEventListener("easter-egg-banner-toggled", (e) => {
+  Toggle.onChange("easter-egg-banner-toggled", (isOn) => {
     const banner = document.getElementById("nav-banner");
     if (!banner) return;
-    const hidden = (e as CustomEvent<{ hidden: boolean }>).detail.hidden;
-    banner.hidden = hidden || !isUnlocked();
+    banner.hidden = !isOn || !isUnlocked();
   });
 
   const LATE_PHRASES = ["Reading at this hour?", "Still awake?"];
