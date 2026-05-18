@@ -172,6 +172,9 @@ body {
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
 // ── Typography ───────────────────────────────────────────────────────────────
@@ -306,6 +309,7 @@ figure {
 // =============================================================================
 
 .page-content {
+  flex: 1;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: 1rem var(--content-padding) 5rem;
