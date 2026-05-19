@@ -357,6 +357,7 @@ figure {
   @include caps(9px, 0.35em, var(--color-red));
   margin-bottom: 1.25rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   text-decoration: none;
