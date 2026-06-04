@@ -13,6 +13,11 @@ export class Toggle {
     }, { signal });
   }
 
+  static dispatch(eventName: string, on: boolean, storageKey?: string) {
+    if (storageKey) localStorage.setItem(storageKey, String(!on));
+    document.dispatchEvent(new CustomEvent(eventName, { detail: { on } }));
+  }
+
   static onChange(eventName: string, cb: (isOn: boolean) => void) {
     document.addEventListener(eventName, (e) => {
       cb((e as CustomEvent<{ on: boolean }>).detail.on);
