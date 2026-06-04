@@ -62,7 +62,11 @@ function isActive(href: string) {
 
 <div class="nav-banner" id="nav-banner" hidden>
   <span>✦ Check why the star sparkles above ✦</span>
-  <button class="nav-banner-settings" id="nav-banner-close" aria-label="Dismiss banner">
+  <button
+    class="nav-banner-settings"
+    id="nav-banner-close"
+    aria-label="Dismiss banner"
+  >
     <svg
       width="14"
       height="14"
@@ -167,13 +171,19 @@ function isActive(href: string) {
       if (e.key === "Escape") closeSearch();
     });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !wrapper.hidden) closeSearch();
-    }, { signal });
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape" && !wrapper.hidden) closeSearch();
+      },
+      { signal },
+    );
   }
 
   function isBannerHidden() {
-    return localStorage.getItem("banner-toggle-setting") === "true";
+    const temp = localStorage.getItem("banner-toggle-setting") === "false";
+    console.log("is banner hidden", temp);
+    return temp;
   }
 
   function revealColophonLink() {
@@ -206,7 +216,13 @@ function isActive(href: string) {
   });
 
   document.getElementById("nav-banner-close")?.addEventListener("click", () => {
-    Toggle.dispatch("easter-egg-banner-toggled", false, "banner-toggle-setting");
+    console.log("x clicked");
+
+    Toggle.dispatch(
+      "easter-egg-banner-toggled",
+      false,
+      "banner-toggle-setting",
+    );
   });
 
   const LATE_PHRASES = ["Reading at this hour?", "Still awake?"];
@@ -231,9 +247,24 @@ function isActive(href: string) {
     ac = new AbortController();
   });
 
-  document.addEventListener("astro:page-load", () => setupSearch(ac.signal));
-  document.addEventListener("astro:page-load", revealColophonLink);
-  document.addEventListener("astro:page-load", tuneEyebrow);
+  document.addEventListener("astro:page-load", () => {
+    setupSearch(ac.signal);
+
+    revealColophonLink();
+    tuneEyebrow();
+
+    // 3. Move your click event listener here so it re-binds to the new DOM elements
+    document
+      .getElementById("nav-banner-close")
+      ?.addEventListener("click", () => {
+        console.log("x clicked");
+        Toggle.dispatch(
+          "easter-egg-banner-toggled",
+          false,
+          "banner-toggle-setting",
+        );
+      });
+  });
 </script>
 
 <style lang="scss">
