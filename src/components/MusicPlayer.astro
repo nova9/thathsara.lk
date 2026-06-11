@@ -338,8 +338,8 @@ const tracks = await getMusicTracks();
 
 <script>
   import "@/scripts/dash-audio.js";
-  import { Toggle } from "@/lib/settingsToggles";
-  
+  import { store } from "@/lib/store";
+
   const VOLUME_STEP = 0.1;
   const VOLUME_STORAGE_KEY = "music-player-volume";
   const NON_TEXT_INPUT_TYPES = new Set([
@@ -365,7 +365,6 @@ const tracks = await getMusicTracks();
     interface Window { __mediaCoordinatorInstalled?: boolean; }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   type DashAudio = any;
 
   interface Track { title: string; artist: string; manifestUrl: string; url: string; }
@@ -631,7 +630,7 @@ const tracks = await getMusicTracks();
   }
 
   function setupPlayer() {
-    if (localStorage.getItem("music-toggle-setting") === "true") return;
+    if (!store.get("musicPlayer")) return;
     const panel = getPanel();
     if (!panel) return;
     panel.style.display = "flex";
@@ -652,7 +651,7 @@ const tracks = await getMusicTracks();
   document.addEventListener("DOMContentLoaded", initWhenIdle);
   document.addEventListener("astro:page-load", initWhenIdle);
 
-  Toggle.onChange("music-player-toggled", (isOn) => {
+  store.subscribe("musicPlayer", (isOn) => {
     const panel = getPanel();
     if (!panel) return;
     if (!isOn) {

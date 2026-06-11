@@ -78,7 +78,7 @@ import { siteConfig } from "@/lib/site";
 
 <script>
   import { isUnlocked } from "@/lib/readerState";
-  import { Toggle } from "@/lib/settingsToggles";
+  import { store, type AppState } from "@/lib/store";
 
   let ac = new AbortController();
 
@@ -87,15 +87,27 @@ import { siteConfig } from "@/lib/site";
     ac = new AbortController();
   });
 
+  function bindSwitch(id: string, key: keyof AppState, signal: AbortSignal) {
+    const btn = document.getElementById(id) as HTMLButtonElement | null;
+    if (!btn) return;
+
+    const render = (on: boolean) => btn.setAttribute("aria-checked", String(on));
+    render(store.get(key));
+
+    btn.addEventListener("click", () => store.set(key, !store.get(key)), {
+      signal,
+    });
+
+    const unsubscribe = store.subscribe(key, render);
+    signal.addEventListener("abort", unsubscribe);
+  }
+
   document.addEventListener("astro:page-load", () => {
     const appearanceGroup = document.getElementById("appearance-group");
     if (appearanceGroup) appearanceGroup.hidden = !isUnlocked();
 
-    const musicBtn = document.getElementById("music-toggle-setting") as HTMLButtonElement | null;
-    if (musicBtn) Toggle.bind(musicBtn, "music-player-toggled", ac.signal);
-
-    const bannerBtn = document.getElementById("banner-toggle-setting") as HTMLButtonElement | null;
-    if (bannerBtn) Toggle.bind(bannerBtn, "easter-egg-banner-toggled", ac.signal);
+    bindSwitch("music-toggle-setting", "musicPlayer", ac.signal);
+    bindSwitch("banner-toggle-setting", "easterEggBanner", ac.signal);
   });
 </script>
 

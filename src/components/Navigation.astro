@@ -124,7 +124,7 @@ function isActive(href: string) {
 
 <script>
   import { isUnlocked } from "@/lib/readerState";
-  import { Toggle } from "@/lib/settingsToggles";
+  import { store } from "@/lib/store";
 
   function setupSearch(signal: AbortSignal) {
     const toggle = document.getElementById("search-toggle");
@@ -180,12 +180,6 @@ function isActive(href: string) {
     );
   }
 
-  function isBannerHidden() {
-    const temp = localStorage.getItem("banner-toggle-setting") === "false";
-    console.log("is banner hidden", temp);
-    return temp;
-  }
-
   function revealColophonLink() {
     const unlocked = isUnlocked();
     const glyph = document.querySelector(".masthead-glyph");
@@ -198,7 +192,7 @@ function isActive(href: string) {
         link.hidden = false;
         glyph.classList.add("masthead-glyph--unlocked");
       }
-      if (banner) banner.hidden = isBannerHidden();
+      if (banner) banner.hidden = !store.get("easterEggBanner");
     } else {
       if (glyph && link) {
         link.hidden = true;
@@ -209,20 +203,10 @@ function isActive(href: string) {
     }
   }
 
-  Toggle.onChange("easter-egg-banner-toggled", (isOn) => {
+  store.subscribe("easterEggBanner", (isOn) => {
     const banner = document.getElementById("nav-banner");
     if (!banner) return;
     banner.hidden = !isOn || !isUnlocked();
-  });
-
-  document.getElementById("nav-banner-close")?.addEventListener("click", () => {
-    console.log("x clicked");
-
-    Toggle.dispatch(
-      "easter-egg-banner-toggled",
-      false,
-      "banner-toggle-setting",
-    );
   });
 
   const LATE_PHRASES = ["Reading at this hour?", "Still awake?"];
@@ -253,16 +237,11 @@ function isActive(href: string) {
     revealColophonLink();
     tuneEyebrow();
 
-    // 3. Move your click event listener here so it re-binds to the new DOM elements
+    // Re-bind on every navigation: the banner element is replaced by the swap
     document
       .getElementById("nav-banner-close")
       ?.addEventListener("click", () => {
-        console.log("x clicked");
-        Toggle.dispatch(
-          "easter-egg-banner-toggled",
-          false,
-          "banner-toggle-setting",
-        );
+        store.set("easterEggBanner", false);
       });
   });
 </script>
