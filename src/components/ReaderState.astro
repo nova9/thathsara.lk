@@ -14,16 +14,16 @@ const allPostIds = (await getVisiblePosts()).map((p) => p.id);
 <div id="reader-state" data-all-posts={JSON.stringify(allPostIds)} hidden></div>
 
 <script>
-  import { isUnlocked, hasReadAll, clearUnlocked } from "@/lib/readerState";
+  import { unlocked, hasReadAll } from "@/lib/readerState";
 
   function reconcile() {
-    if (!isUnlocked()) return;
+    if (!unlocked.get()) return;
 
     const el = document.getElementById("reader-state");
     if (!el) return;
 
     const allPosts: string[] = JSON.parse(el.dataset.allPosts || "[]");
-    if (!hasReadAll(allPosts)) clearUnlocked();
+    if (!hasReadAll(allPosts)) unlocked.set(false);
   }
 
   document.addEventListener("astro:page-load", reconcile);

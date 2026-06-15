@@ -338,10 +338,9 @@ const tracks = await getMusicTracks();
 
 <script>
   import "@/scripts/dash-audio.js";
-  import { store } from "@/lib/store";
+  import { musicPlayer, musicVolume } from "@/lib/store";
 
   const VOLUME_STEP = 0.1;
-  const VOLUME_STORAGE_KEY = "music-player-volume";
   const NON_TEXT_INPUT_TYPES = new Set([
     "range",
     "checkbox",
@@ -422,9 +421,7 @@ const tracks = await getMusicTracks();
       this.scrollTimeout = null;
       this.isAtBottom = false;
 
-      const storedVolume = parseFloat(
-        localStorage.getItem(VOLUME_STORAGE_KEY) ?? "0.9",
-      );
+      const storedVolume = musicVolume.get();
       this.volume =
         Number.isFinite(storedVolume) && storedVolume >= 0 && storedVolume <= 1
           ? storedVolume
@@ -502,7 +499,7 @@ const tracks = await getMusicTracks();
 
     setVolume(value: number) {
       this.volume = Math.max(0, Math.min(1, value));
-      localStorage.setItem(VOLUME_STORAGE_KEY, String(this.volume));
+      musicVolume.set(this.volume);
       this.applyVolume();
     }
 
@@ -630,7 +627,7 @@ const tracks = await getMusicTracks();
   }
 
   function setupPlayer() {
-    if (!store.get("musicPlayer")) return;
+    if (!musicPlayer.get()) return;
     const panel = getPanel();
     if (!panel) return;
     panel.style.display = "flex";
@@ -651,7 +648,7 @@ const tracks = await getMusicTracks();
   document.addEventListener("DOMContentLoaded", initWhenIdle);
   document.addEventListener("astro:page-load", initWhenIdle);
 
-  store.subscribe("musicPlayer", (isOn) => {
+  musicPlayer.subscribe((isOn) => {
     const panel = getPanel();
     if (!panel) return;
     if (!isOn) {

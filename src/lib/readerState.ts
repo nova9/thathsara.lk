@@ -1,37 +1,27 @@
-// Per-reader state, kept in localStorage.
+// Per-reader state, built on the same reactive store as everything else.
 //
-//   reader:read       — post ids the reader has scrolled to the bottom of
-//   reader:unlocked   — set once the reader has read every visible post
-//                       (drives the colophon glyph + nav banner)
+//   readPosts  (reader:read)     — post ids the reader has scrolled to the bottom of
+//   unlocked   (reader:unlocked) — set once every visible post has been read
+//                                  (drives the colophon glyph + nav banner)
 
-export const READ_KEY = "reader:read";
-export const UNLOCKED_KEY = "reader:unlocked";
+import { persisted } from "./store";
 
-export function getRead(): string[] {
-  return JSON.parse(localStorage.getItem(READ_KEY) || "[]");
-}
+export const readPosts = persisted<string[]>("reader:read", []);
+
+// Legacy format: "1" when unlocked, absent/"" otherwise.
+export const unlocked = persisted(
+  "reader:unlocked",
+  false,
+  (raw) => raw === "1",
+  (value) => (value ? "1" : ""),
+);
 
 export function addRead(id: string) {
-  const read = getRead();
-  if (!read.includes(id)) {
-    read.push(id);
-    localStorage.setItem(READ_KEY, JSON.stringify(read));
-  }
-}
-
-export function isUnlocked(): boolean {
-  return !!localStorage.getItem(UNLOCKED_KEY);
-}
-
-export function setUnlocked() {
-  localStorage.setItem(UNLOCKED_KEY, "1");
-}
-
-export function clearUnlocked() {
-  localStorage.removeItem(UNLOCKED_KEY);
+  const read = readPosts.get();
+  if (!read.includes(id)) readPosts.set([...read, id]);
 }
 
 export function hasReadAll(allPostIds: string[]): boolean {
-  const read = getRead();
+  const read = readPosts.get();
   return allPostIds.every((id) => read.includes(id));
 }

@@ -1,72 +1,61 @@
-// Global app settings, persisted to localStorage (one key per setting).
-// Read with store.get, write with store.set; subscribers fire on change,
-// including changes made from other tabs.
+// Reactive localStorage cell: get / set / subscribe, synced across tabs.
+// Every piece of global, persisted state in the app is one of these — read
+// with .get(), write with .set(), react with .subscribe(). Never touch
+// localStorage directly.
 
-export interface AppState {
-  musicPlayer: boolean;
-  easterEggBanner: boolean;
+type Subscriber<T> = (value: T) => void;
+
+export interface Cell<T> {
+  get(): T;
+  set(value: T): void;
+  subscribe(cb: Subscriber<T>): () => void;
 }
 
-const DEFAULTS: AppState = {
-  musicPlayer: true,
-  easterEggBanner: true,
-};
+export function persisted<T>(
+  key: string,
+  initial: T,
+  parse: (raw: string) => T = JSON.parse,
+  stringify: (value: T) => string = JSON.stringify,
+): Cell<T> {
+  const subs = new Set<Subscriber<T>>();
 
-// Storage key names predate the store; kept so existing visitors'
-// saved choices survive.
-const STORAGE_KEYS: Record<keyof AppState, string> = {
-  musicPlayer: "music-toggle-setting",
-  easterEggBanner: "banner-toggle-setting",
-};
-
-type Subscriber = (value: boolean) => void;
-
-class SettingsStore {
-  private subs = new Map<keyof AppState, Set<Subscriber>>();
-
-  constructor() {
-    if (typeof window !== "undefined") {
-      window.addEventListener("storage", (e) => {
-        const entry = (
-          Object.entries(STORAGE_KEYS) as [keyof AppState, string][]
-        ).find(([, storageKey]) => storageKey === e.key);
-        if (entry) this.notify(entry[0], e.newValue === "true");
-      });
-    }
-  }
-
-  get(key: keyof AppState): boolean {
+  const get = (): T => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEYS[key]);
-      return raw === null ? DEFAULTS[key] : raw === "true";
+      const raw = localStorage.getItem(key);
+      return raw === null ? initial : parse(raw);
     } catch {
-      return DEFAULTS[key];
+      return initial;
     }
+  };
+
+  // Mirror changes made in other tabs.
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (e) => {
+      if (e.key === key) subs.forEach((cb) => cb(get()));
+    });
   }
 
-  set(key: keyof AppState, value: boolean): void {
-    if (this.get(key) === value) return;
-    try {
-      localStorage.setItem(STORAGE_KEYS[key], String(value));
-    } catch {
-      // Private browsing or storage disabled; still notify so the UI reacts.
-    }
-    this.notify(key, value);
-  }
-
-  subscribe(key: keyof AppState, cb: Subscriber): () => void {
-    let set = this.subs.get(key);
-    if (!set) {
-      set = new Set();
-      this.subs.set(key, set);
-    }
-    set.add(cb);
-    return () => set.delete(cb);
-  }
-
-  private notify(key: keyof AppState, value: boolean): void {
-    this.subs.get(key)?.forEach((cb) => cb(value));
-  }
+  return {
+    get,
+    set(value) {
+      try {
+        localStorage.setItem(key, stringify(value));
+      } catch {
+        // Private browsing or storage disabled; still notify so the UI reacts.
+      }
+      subs.forEach((cb) => cb(value));
+    },
+    subscribe(cb) {
+      subs.add(cb);
+      return () => subs.delete(cb);
+    },
+  };
 }
 
-export const store = new SettingsStore();
+// Default JSON codec already produces the legacy "true"/"false" strings these
+// keys predate the store with, so existing visitors' choices survive.
+export const musicPlayer = persisted("music-toggle-setting", true);
+export const easterEggBanner = persisted("banner-toggle-setting", true);
+
+// Number cell; legacy format is a bare float string, e.g. "0.9".
+export const musicVolume = persisted("music-player-volume", 0.9, parseFloat, String);

@@ -9,8 +9,10 @@ const { postId } = Astro.props;
 <span class="post-unread" data-unread-for={postId} hidden>Unread</span>
 
 <script>
+  import { readPosts } from "@/lib/readerState";
+
   function markUnread() {
-    const read: string[] = JSON.parse(localStorage.getItem("reader:read") || "[]");
+    const read = readPosts.get();
     document.querySelectorAll<HTMLElement>(".post-unread[data-unread-for]").forEach((badge) => {
       const postId = badge.dataset.unreadFor;
       if (!postId || read.includes(postId)) return;

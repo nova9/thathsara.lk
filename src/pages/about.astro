@@ -235,15 +235,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </style>
 
 <script>
-  import { isUnlocked } from "@/lib/readerState";
+  import { unlocked } from "@/lib/readerState";
 
   function reveal() {
-    const unlocked = isUnlocked();
+    const isUnlocked = unlocked.get();
     const gift = document.getElementById("fool-download");
     const locked = document.getElementById("fool-download-locked");
     if (gift) {
-      gift.hidden = !unlocked;
-      if (unlocked) {
+      gift.hidden = !isUnlocked;
+      if (isUnlocked) {
         const link = gift.querySelector("a.reward__button");
         if (link && !link.getAttribute("href")) {
           link.setAttribute(
@@ -253,7 +253,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         }
       }
     }
-    if (locked) locked.hidden = unlocked;
+    if (locked) locked.hidden = isUnlocked;
   }
 
   document.addEventListener("astro:page-load", reveal);

@@ -123,8 +123,8 @@ function isActive(href: string) {
 </div>
 
 <script>
-  import { isUnlocked } from "@/lib/readerState";
-  import { store } from "@/lib/store";
+  import { unlocked } from "@/lib/readerState";
+  import { easterEggBanner } from "@/lib/store";
 
   function setupSearch(signal: AbortSignal) {
     const toggle = document.getElementById("search-toggle");
@@ -181,18 +181,18 @@ function isActive(href: string) {
   }
 
   function revealColophonLink() {
-    const unlocked = isUnlocked();
+    const isUnlocked = unlocked.get();
     const glyph = document.querySelector(".masthead-glyph");
     const link = glyph?.querySelector<HTMLAnchorElement>(".glyph-link");
     const banner = document.getElementById("nav-banner");
 
-    if (unlocked) {
+    if (isUnlocked) {
       if (glyph && link) {
         link.href = "/colophon/";
         link.hidden = false;
         glyph.classList.add("masthead-glyph--unlocked");
       }
-      if (banner) banner.hidden = !store.get("easterEggBanner");
+      if (banner) banner.hidden = !easterEggBanner.get();
     } else {
       if (glyph && link) {
         link.hidden = true;
@@ -203,10 +203,10 @@ function isActive(href: string) {
     }
   }
 
-  store.subscribe("easterEggBanner", (isOn) => {
+  easterEggBanner.subscribe((isOn) => {
     const banner = document.getElementById("nav-banner");
     if (!banner) return;
-    banner.hidden = !isOn || !isUnlocked();
+    banner.hidden = !isOn || !unlocked.get();
   });
 
   const LATE_PHRASES = ["Reading at this hour?", "Still awake?"];
@@ -241,7 +241,7 @@ function isActive(href: string) {
     document
       .getElementById("nav-banner-close")
       ?.addEventListener("click", () => {
-        store.set("easterEggBanner", false);
+        easterEggBanner.set(false);
       });
   });
 </script>
