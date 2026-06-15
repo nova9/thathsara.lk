@@ -15,16 +15,16 @@
     "upgrade-deps": "npx npm-check-updates -u && npm install"
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.6",
-    "@astrojs/sitemap": "^3.7.2",
-    "@lottiefiles/dotlottie-web": "^0.72.1",
-    "astro": "^6.3.3"
+    "@astrojs/mdx": "^6.0.3",
+    "@astrojs/sitemap": "^3.7.3",
+    "@lottiefiles/dotlottie-web": "^0.74.0",
+    "astro": "^6.4.6"
   },
   "devDependencies": {
-    "@types/node": "^25.8.0",
+    "@types/node": "^25.9.3",
     "listr2": "^10.2.1",
-    "music-metadata": "^11.12.3",
+    "music-metadata": "^11.13.0",
     "node-id3": "^0.2.9",
-    "sass": "^1.99.0"
+    "sass": "^1.101.0"
   }
 }
