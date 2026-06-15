@@ -645,7 +645,6 @@ const tracks = await getMusicTracks();
   }
 
   // Run on first load when browser is idle to prevent Lighthouse blocking time
-  document.addEventListener("DOMContentLoaded", initWhenIdle);
   document.addEventListener("astro:page-load", initWhenIdle);
 
   musicPlayer.subscribe((isOn) => {
