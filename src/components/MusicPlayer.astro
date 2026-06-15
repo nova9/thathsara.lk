@@ -339,6 +339,7 @@ const tracks = await getMusicTracks();
 <script>
   import "@/scripts/dash-audio.js";
   import { musicPlayer, musicVolume } from "@/lib/store";
+  import { announcePlayback } from "@/lib/mediaCoordinator";
 
   const VOLUME_STEP = 0.1;
   const NON_TEXT_INPUT_TYPES = new Set([
@@ -358,10 +359,6 @@ const tracks = await getMusicTracks();
       return !NON_TEXT_INPUT_TYPES.has(target.type);
     }
     return false;
-  }
-
-  declare global {
-    interface Window { __mediaCoordinatorInstalled?: boolean; }
   }
 
   type DashAudio = any;
@@ -452,11 +449,7 @@ const tracks = await getMusicTracks();
       this.audio.addEventListener("play", () => {
         this.isPlaying = true;
         this.updateUI();
-        document.dispatchEvent(
-          new CustomEvent("media-playback-started", {
-            detail: { source: "music" },
-          }),
-        );
+        announcePlayback("music");
       });
       this.audio.addEventListener("playing", () => {
         this.isLoading = false;
@@ -601,23 +594,6 @@ const tracks = await getMusicTracks();
         this.panel.style.transform = "";
       }
     }
-  }
-
-  if (!window.__mediaCoordinatorInstalled) {
-    window.__mediaCoordinatorInstalled = true;
-    document.addEventListener("media-playback-started", (e) => {
-      const detail = (e as CustomEvent).detail || {};
-      if (detail.source !== "music") {
-        const audio = document.getElementById("bg-audio") as HTMLMediaElement | null;
-        if (audio && !audio.paused) audio.pause();
-      }
-      document.querySelectorAll(".video-player").forEach((p) => {
-        const v = p.querySelector("video");
-        if (!v || v.paused) return;
-        if (detail.source === "video" && detail.id === p.id) return;
-        v.pause();
-      });
-    });
   }
 
   const controllers = new WeakMap<HTMLElement, MusicController>();

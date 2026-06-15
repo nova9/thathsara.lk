@@ -632,6 +632,7 @@ const id = Math.random().toString(36).substring(2, 11);
 
 <script>
   import "@/scripts/dash-video.js";
+  import { announcePlayback } from "@/lib/mediaCoordinator";
 </script>
 
 <script>
@@ -834,11 +835,7 @@ const id = Math.random().toString(36).substring(2, 11);
       showOnly(this.iconPause, this.iconPlay);
       this.centerPlayBtn.classList.add("fade-out");
       this.scheduleUiHide();
-      document.dispatchEvent(
-        new CustomEvent("media-playback-started", {
-          detail: { source: "video", id: this.player.id },
-        }),
-      );
+      announcePlayback("video", this.player.id);
     }
 
     onPause() {
