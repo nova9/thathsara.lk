@@ -631,12 +631,9 @@ const id = Math.random().toString(36).substring(2, 11);
 </style>
 
 <script>
+  // @ts-nocheck
   import "@/scripts/dash-video.js";
   import { announcePlayback } from "@/lib/mediaCoordinator";
-</script>
-
-<script>
-  // @ts-nocheck
   function showOnly(showEl, hideEl) {
     showEl.style.display = "block";
     hideEl.style.display = "none";
