@@ -6,46 +6,34 @@ const startTimes = [
 const startTime = startTimes[startTimes.length - 1];
 ---
 
-<span class="retro-time" id="time-counter" data-start={startTime}>
-  00:00:00
-</span>
+<time-counter data-start={startTime} class="retro-time">00:00:00</time-counter>
 
 <script>
-  let interval: ReturnType<typeof setInterval> | undefined;
+  class TimeCounter extends HTMLElement {
+    #interval?: ReturnType<typeof setInterval>;
 
-  function updateTime() {
-    const counterEl = document.getElementById("time-counter");
-    if (!counterEl) return;
+    connectedCallback() {
+      this.#update();
+      this.#interval = setInterval(() => this.#update(), 1000);
+    }
 
-    // Parse the start time and calculate elapsed seconds
-    const startStr =
-      counterEl.getAttribute("data-start") || new Date().toISOString();
-    const start = new Date(startStr).getTime();
-    const diff = Math.max(0, Math.floor((Date.now() - start) / 1000));
+    disconnectedCallback() {
+      clearInterval(this.#interval);
+    }
 
-    // Format to DD:HH:MM:SS
-    const days = Math.floor(diff / 86400)
-      .toString()
-      .padStart(2, "0");
-    const hours = Math.floor((diff % 86400) / 3600)
-      .toString()
-      .padStart(2, "0");
-    const minutes = Math.floor((diff % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
-    const seconds = (diff % 60).toString().padStart(2, "0");
-
-    counterEl.innerText = `${days}:${hours}:${minutes}:${seconds}`;
+    #update() {
+      const start = new Date(
+        this.dataset.start || new Date().toISOString()
+      ).getTime();
+      const diff = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      const p = (n: number) => Math.floor(n).toString().padStart(2, "0");
+      this.textContent = `${p(diff / 86400)}:${p((diff % 86400) / 3600)}:${p((diff % 3600) / 60)}:${p(diff % 60)}`;
+    }
   }
 
-  document.addEventListener("astro:page-load", () => {
-    updateTime();
-    interval = setInterval(updateTime, 1000);
-  });
-
-  document.addEventListener("astro:before-swap", () => {
-    if (interval) clearInterval(interval);
-  });
+  if (!customElements.get("time-counter")) {
+    customElements.define("time-counter", TimeCounter);
+  }
 </script>
 
 <style lang="scss">
