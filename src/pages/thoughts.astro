@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import catSleepingUrl from "@/assets/lottie/cat_sleeping.lottie?url";
 
 const thoughts = [
   "Is it even a good website if it doesn't load on 2G? I think not.",
@@ -13,7 +12,3 @@ const thoughts = [
     {thoughts.map((thought) => <li>{thought}</li>)}
   </ol>
 </BaseLayout>
-
-<script>
-  import "@/scripts/dotlottie-player";
-</script>
