@@ -27,7 +27,7 @@ export function toDateLabel(value: string | Date | undefined): string {
 }
 
 export function getSummary(content?: string): string {
-  return `${content?.slice(0, 300) || ""}${(content?.length ?? 0) > 200 ? "..." : ""}`;
+  return `${content?.slice(0, 300) || ""}${(content?.length ?? 0) > 300 ? "..." : ""}`;
 }
 
 export async function getVisiblePosts(): Promise<CollectionEntry<"posts">[]> {
