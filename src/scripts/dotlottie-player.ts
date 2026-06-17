@@ -19,7 +19,7 @@ class DotLottiePlayer extends HTMLElement {
   private canvas: HTMLCanvasElement;
   private spinner: HTMLDivElement;
   private instance: DotLottieInstance | null = null;
-  private ready = false;
+  private observer: IntersectionObserver | null = null;
 
   constructor() {
     super();
@@ -64,15 +64,35 @@ class DotLottiePlayer extends HTMLElement {
   }
 
   attributeChangedCallback() {
-    if (this.ready) this.render();
+    // Only re-render once the player has actually been loaded; before that the
+    // IntersectionObserver owns the (deferred) first render.
+    if (this.instance) this.render();
   }
 
   connectedCallback() {
-    this.render();
-    this.ready = true;
+    // Defer the heavy player module + wasm until the element is near the
+    // viewport, so it never blocks initial render or LCP. The animations live
+    // below the fold, so on most visits they cost nothing.
+    if ("IntersectionObserver" in window) {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            this.observer?.disconnect();
+            this.observer = null;
+            this.render();
+          }
+        },
+        { rootMargin: "200px" },
+      );
+      this.observer.observe(this);
+    } else {
+      this.render();
+    }
   }
 
   disconnectedCallback() {
+    this.observer?.disconnect();
+    this.observer = null;
     this.instance?.destroy();
     this.instance = null;
   }
