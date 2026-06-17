@@ -12,13 +12,13 @@
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
     "extract-thumbnail": "node npm-run/extract-thumbnail.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js",
-    "upgrade-deps": "npx npm-check-updates -u && npm install"
+    "upgrade-deps": "pnpm dlx npm-check-updates -u && pnpm install"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",
     "@astrojs/sitemap": "^3.7.3",
     "@lottiefiles/dotlottie-web": "^0.74.0",
-    "astro": "^6.4.6"
+    "astro": "^6.4.7"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
