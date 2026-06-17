@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ReaderSentinel from "@/components/reader/ReaderSentinel.astro";
+import ReadingProgress from "@/components/reader/ReadingProgress.astro";
 import { getSummary, getVisiblePosts, toDateLabel } from "@/lib/utils";
 import { render } from "astro:content";
 
@@ -24,6 +25,8 @@ const readMinutes = Math.max(1, Math.round(wordCount / 200));
   title={post.data.title}
   description={post.data.excerpt ?? getSummary(post.body)}
 >
+  <ReadingProgress />
+
   <article>
     <a class="post-back" href="/">← Archive</a>
 
