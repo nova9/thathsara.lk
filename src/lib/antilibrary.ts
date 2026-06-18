@@ -11,6 +11,8 @@ export interface Book {
   acquired: string;
   /** Why it waits, or what draws me to it. The soul of the entry. */
   note: string;
+  /** Optional link to the book (e.g. the publisher's page). */
+  link?: string;
 }
 
 export const antilibrary: Book[] = [
@@ -20,5 +22,6 @@ export const antilibrary: Book[] = [
     subject: "Machine Learning",
     acquired: "2026-06-10",
     note: "Code a GPT from nothing but PyTorch. From scratch is my style.",
+    link: "https://www.manning.com/books/build-a-large-language-model-from-scratch",
   },
 ];

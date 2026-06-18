@@ -160,6 +160,12 @@ const structuredData = {
           }, 400);
         }
       });
+      // Safety net: a navigation to a non-HTML resource (e.g. a PDF) leaves
+      // 'is-loading' set without ever firing astro:page-load. Clear it when the
+      // page is shown again, including bfcache restores on back-navigation.
+      window.addEventListener('pageshow', () => {
+        document.documentElement.classList.remove('is-loading', 'is-loaded');
+      });
     </script>
   </head>
 

@@ -39,6 +39,19 @@ const count = books.length;
             <p class="book__note">{book.note}</p>
             <p class="book__meta">
               Acquired {toDateLabel(book.acquired)}
+              {book.link && (
+                <>
+                  {" · "}
+                  <a
+                    class="book__link"
+                    href={encodeURI(book.link)}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    View
+                  </a>
+                </>
+              )}
             </p>
           </li>
         ))
@@ -139,6 +152,17 @@ const count = books.length;
   .book__meta {
     @include ui(9px, 0.2em, var(--color-ink-light));
     margin: 1rem 0 0;
+  }
+
+  .book__link {
+    color: var(--color-gold);
+    text-decoration: none;
+    border-block-end: 1px solid transparent;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-block-end-color: var(--color-gold);
+    }
   }
 
   @include mobile {
