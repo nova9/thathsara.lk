@@ -1,0 +1,154 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { antilibrary } from "@/lib/antilibrary";
+import { toDateLabel } from "@/lib/utils";
+
+const books = [...antilibrary].sort(
+  (a, b) => new Date(b.acquired).valueOf() - new Date(a.acquired).valueOf(),
+);
+const count = books.length;
+---
+
+<BaseLayout
+  title="Antilibrary"
+  description="Books I own but have not read. The unread shelf is the more honest one."
+>
+  <article class="antilib">
+    <header class="antilib__header">
+      <p class="antilib__eyebrow">The unread shelf</p>
+      <h1 class="antilib__title">Antilibrary</h1>
+      <p class="antilib__lede">
+        Read books are what I already know. These are the ones still waiting,
+        a standing measure of what I don&rsquo;t. The good sign is when this
+        list grows faster than the other one.
+      </p>
+      <p class="antilib__count">
+        {count} unread {count === 1 ? "volume" : "volumes"}
+      </p>
+    </header>
+
+    <ol class="antilib__list">
+      {
+        books.map((book) => (
+          <li class="book">
+            <div class="book__head">
+              <h2 class="book__title">{book.title}</h2>
+              <span class="book__subject">{book.subject}</span>
+            </div>
+            <p class="book__author">{book.author}</p>
+            <p class="book__note">{book.note}</p>
+            <p class="book__meta">
+              Acquired {toDateLabel(book.acquired)}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </article>
+</BaseLayout>
+
+<style lang="scss">
+  @use "../styles/main.scss" as *;
+
+  .antilib__header {
+    text-align: center;
+    margin-block-end: 3rem;
+  }
+
+  .antilib__eyebrow {
+    @include caps(9px, 0.35em, var(--color-gold));
+    margin: 0 0 0.75rem;
+  }
+
+  .antilib__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 900;
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    margin: 0;
+  }
+
+  .antilib__lede {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--color-ink-mid);
+    margin: 1.25rem auto 0;
+    max-inline-size: 46ch;
+  }
+
+  .antilib__count {
+    @include ui(10px, 0.25em, var(--color-ink-light));
+    margin: 1.5rem 0 0;
+  }
+
+  .antilib__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .book {
+    padding-block: 1.75rem;
+    border-block-start: 1px solid var(--color-rule);
+
+    &:last-child {
+      border-block-end: 1px solid var(--color-rule);
+    }
+  }
+
+  .book__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .book__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.4rem;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .book__subject {
+    @include caps(9px, 0.2em, var(--color-gold));
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding-block-start: 0.35rem;
+  }
+
+  .book__author {
+    @include ui(11px, 0.15em, var(--color-ink-mid));
+    margin: 0.4rem 0 0;
+  }
+
+  .book__note {
+    font-style: italic;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--color-ink-mid);
+    margin: 0.9rem 0 0;
+    max-inline-size: 52ch;
+  }
+
+  .book__meta {
+    @include ui(9px, 0.2em, var(--color-ink-light));
+    margin: 1rem 0 0;
+  }
+
+  @include mobile {
+    .book__head {
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .book__subject {
+      padding-block-start: 0;
+    }
+  }
+</style>
