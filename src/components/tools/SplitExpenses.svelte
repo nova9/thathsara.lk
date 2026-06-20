@@ -23,6 +23,9 @@
     typeof location !== "undefined" ? location.hash.slice(1) : "";
 
   function loadLocal(): SplitState {
+    // Runs during SSR too (client:load). There's no storage on the server, and
+    // touching Node's experimental global localStorage prints a warning, so bail.
+    if (typeof window === "undefined") return emptyState();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
