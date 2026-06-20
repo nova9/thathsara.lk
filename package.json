@@ -11,6 +11,7 @@
     "download-video": "node npm-run/download-video.js",
     "mov-to-mp4": "node npm-run/mov-to-mp4.js",
     "extract-thumbnail": "node npm-run/extract-thumbnail.js",
+    "generate-og": "node npm-run/generate-og.js",
     "purge-cache": "node npm-run/purge-cloudflare-cache.js",
     "upgrade-deps": "pnpm dlx npm-check-updates -u && pnpm install"
   },
