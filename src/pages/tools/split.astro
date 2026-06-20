@@ -1,12 +1,78 @@
 ---
 import ToolLayout from "@/layouts/ToolLayout.astro";
 import SplitExpenses from "@/components/tools/SplitExpenses.svelte";
+
+const title = "Split Expenses";
+const description =
+  "Split shared expenses across a group and get the smallest set of payments to settle up. Free, no sign-up, runs entirely in your browser.";
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Split Expenses",
+    url: canonical,
+    description,
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Any (web browser)",
+    browserRequirements: "Requires JavaScript.",
+    inLanguage: "en",
+    isAccessibleForFree: true,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    featureList: [
+      "Split shared expenses across a group",
+      "Unequal splits and custom shares",
+      "Minimal set of payments to settle up",
+      "Works offline, no data leaves your browser",
+    ],
+    author: {
+      "@type": "Person",
+      name: "Thathsara",
+      url: new URL("/", Astro.site).toString(),
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Tools",
+        item: new URL("/tools/", Astro.site).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Split Expenses",
+        item: canonical,
+      },
+    ],
+  },
+];
 ---
 
 <ToolLayout
-  title="Split Expenses"
-  description="Split shared expenses across a group and get the smallest set of payments to settle up. Runs entirely in your browser."
+  title={title}
+  description={description}
   icon="💸"
+  image="/og/split-expenses.png"
+  keywords={[
+    "split expenses",
+    "expense splitter",
+    "split bills",
+    "settle up",
+    "shared expenses calculator",
+    "group expenses",
+    "who owes who",
+    "bill splitter",
+  ]}
+  structuredData={structuredData}
 >
   <SplitExpenses client:only="svelte" />
 </ToolLayout>

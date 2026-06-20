@@ -9,14 +9,26 @@ interface Props {
   title?: string;
   description?: string;
   icon?: string;
+  keywords?: string[];
+  image?: string;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description, icon = "🧮" } = Astro.props;
+const {
+  title,
+  description,
+  icon = "🧮",
+  keywords,
+  image = "/favicon.png",
+  structuredData,
+} = Astro.props;
 const pageTitle = title ? `${title} · Tools` : "Tools";
 const pageDescription = description ?? "Small tools that run in your browser.";
 const canonicalURL = Astro.site
   ? new URL(Astro.url.pathname, Astro.site)
   : undefined;
+const siteURL = Astro.site ?? canonicalURL;
+const socialImageURL = siteURL ? new URL(image, siteURL) : undefined;
 ---
 
 <!doctype html>
@@ -29,17 +41,53 @@ const canonicalURL = Astro.site
       type="image/svg+xml"
       href={`/favicon.svg?v=${packageJson.version}`}
     />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href={`/favicon.png?v=${packageJson.version}`}
+    />
+    {siteURL && <link rel="apple-touch-icon" href={new URL("/favicon.png", siteURL)} />}
     {canonicalURL && <link rel="canonical" href={canonicalURL} />}
+
     <title>{pageTitle}</title>
+    <meta name="title" content={pageTitle} />
     <meta name="description" content={pageDescription} />
+    {keywords && keywords.length > 0 && (
+      <meta name="keywords" content={keywords.join(", ")} />
+    )}
+    <meta name="author" content={siteConfig.title} />
+    <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14151f" media="(prefers-color-scheme: dark)" />
-    <meta name="robots" content="index,follow" />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     {canonicalURL && <meta property="og:url" content={canonicalURL} />}
+    {socialImageURL && (
+      <>
+        <meta property="og:image" content={socialImageURL} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={pageTitle} />
+      </>
+    )}
+
+    <meta property="twitter:card" content="summary_large_image" />
+    {canonicalURL && <meta property="twitter:url" content={canonicalURL} />}
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={pageDescription} />
+    {socialImageURL && <meta property="twitter:image" content={socialImageURL} />}
+
+    {structuredData && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData)}
+      />
+    )}
 
     <Font cssVariable="--font-dm-sans" preload />
 
