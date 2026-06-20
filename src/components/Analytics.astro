@@ -1,0 +1,33 @@
+---
+// Umami analytics loader. Two load strategies: layouts with the View Transitions
+// client (`spa`) hook `astro:page-load`; standalone layouts inject immediately.
+interface Props {
+  spa?: boolean;
+}
+const { spa = false } = Astro.props;
+---
+
+{
+  import.meta.env.PROD && (
+    spa ? (
+      <>
+        <link rel="preconnect" href="https://api-gateway.umami.dev" />
+        <script is:inline>
+          document.addEventListener('astro:page-load', () => {
+            if (document.querySelector('script[data-website-id]')) return;
+            const script = document.createElement('script');
+            script.src = "https://cloud.umami.is/script.js";
+            script.async = true;
+            script.setAttribute('data-website-id', 'd1647069-5a04-45c8-b5ca-18a0ffa9410c');
+            script.setAttribute('data-domains', 'thathsara.lk');
+            document.head.appendChild(script);
+          }, { once: true });
+        </script>
+      </>
+    ) : (
+      <script is:inline>
+        {`(function(){var s=document.createElement('script');s.src='https://cloud.umami.is/script.js';s.async=true;s.setAttribute('data-website-id','d1647069-5a04-45c8-b5ca-18a0ffa9410c');s.setAttribute('data-domains','thathsara.lk');document.head.appendChild(s);})();`}
+      </script>
+    )
+  )
+}

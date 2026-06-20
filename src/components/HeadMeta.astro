@@ -1,0 +1,106 @@
+---
+// Shared <head> SEO/meta block for site layouts. Each layout computes its own
+// title/description/url/image/theme in frontmatter and passes the results here,
+// so the duplicated favicon/canonical/OG/Twitter/JSON-LD boilerplate lives once.
+import packageJson from "../../package.json";
+import { Font } from "astro:assets";
+
+interface Props {
+  pageTitle: string;
+  pageDescription: string;
+  siteName: string;
+  canonicalURL?: URL;
+  siteURL?: URL;
+  socialImageURL?: URL;
+  keywords?: string[];
+  // Single theme-color, or a light/dark pair (mutually exclusive in practice).
+  themeColor?: string;
+  themeColorLight?: string;
+  themeColorDark?: string;
+  // Emit og:image width/height/alt alongside the image.
+  ogImageSize?: boolean;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  pageTitle,
+  pageDescription,
+  siteName,
+  canonicalURL,
+  siteURL,
+  socialImageURL,
+  keywords,
+  themeColor,
+  themeColorLight,
+  themeColorDark,
+  ogImageSize = false,
+  structuredData,
+} = Astro.props;
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link
+  rel="icon"
+  type="image/svg+xml"
+  href={`/favicon.svg?v=${packageJson.version}`}
+/>
+<link
+  rel="icon"
+  type="image/png"
+  sizes="48x48"
+  href={`/favicon.png?v=${packageJson.version}`}
+/>
+{siteURL && <link rel="apple-touch-icon" href={new URL("/favicon.png", siteURL)} />}
+{canonicalURL && <link rel="canonical" href={canonicalURL} />}
+
+<title>{pageTitle}</title>
+<meta name="title" content={pageTitle} />
+<meta name="description" content={pageDescription} />
+{keywords && keywords.length > 0 && (
+  <meta name="keywords" content={keywords.join(", ")} />
+)}
+<meta name="author" content={siteName} />
+<meta name="robots" content="index,follow" />
+{themeColorLight && themeColorDark ? (
+  <>
+    <meta name="theme-color" content={themeColorLight} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={themeColorDark} media="(prefers-color-scheme: dark)" />
+  </>
+) : themeColor && (
+  <meta name="theme-color" content={themeColor} />
+)}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={pageDescription} />
+{canonicalURL && <meta property="og:url" content={canonicalURL} />}
+{socialImageURL && (
+  ogImageSize ? (
+    <>
+      <meta property="og:image" content={socialImageURL} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={pageTitle} />
+    </>
+  ) : (
+    <meta property="og:image" content={socialImageURL} />
+  )
+)}
+
+<meta property="twitter:card" content="summary_large_image" />
+{canonicalURL && <meta property="twitter:url" content={canonicalURL} />}
+<meta property="twitter:title" content={pageTitle} />
+<meta property="twitter:description" content={pageDescription} />
+{socialImageURL && <meta property="twitter:image" content={socialImageURL} />}
+
+{structuredData && (
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(structuredData)}
+  />
+)}
+
+<Font cssVariable="--font-dm-sans" preload />

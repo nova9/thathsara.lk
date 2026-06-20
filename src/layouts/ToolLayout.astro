@@ -2,8 +2,8 @@
 // Standalone, app-like layout for browser tools. Deliberately unrelated to the
 // editorial site chrome: own palette, own shell, no masthead/footer/music.
 import { siteConfig } from "@/lib/site";
-import packageJson from "../../package.json";
-import { Font } from "astro:assets";
+import HeadMeta from "@/components/HeadMeta.astro";
+import Analytics from "@/components/Analytics.astro";
 
 interface Props {
   title?: string;
@@ -34,70 +34,20 @@ const socialImageURL = siteURL ? new URL(image, siteURL) : undefined;
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href={`/favicon.svg?v=${packageJson.version}`}
+    <HeadMeta
+      pageTitle={pageTitle}
+      pageDescription={pageDescription}
+      siteName={siteConfig.title}
+      canonicalURL={canonicalURL}
+      siteURL={siteURL}
+      socialImageURL={socialImageURL}
+      keywords={keywords}
+      themeColorLight="#6366f1"
+      themeColorDark="#14151f"
+      ogImageSize
+      structuredData={structuredData}
     />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="48x48"
-      href={`/favicon.png?v=${packageJson.version}`}
-    />
-    {siteURL && <link rel="apple-touch-icon" href={new URL("/favicon.png", siteURL)} />}
-    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
-
-    <title>{pageTitle}</title>
-    <meta name="title" content={pageTitle} />
-    <meta name="description" content={pageDescription} />
-    {keywords && keywords.length > 0 && (
-      <meta name="keywords" content={keywords.join(", ")} />
-    )}
-    <meta name="author" content={siteConfig.title} />
-    <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#14151f" media="(prefers-color-scheme: dark)" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content={siteConfig.title} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDescription} />
-    {canonicalURL && <meta property="og:url" content={canonicalURL} />}
-    {socialImageURL && (
-      <>
-        <meta property="og:image" content={socialImageURL} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={pageTitle} />
-      </>
-    )}
-
-    <meta property="twitter:card" content="summary_large_image" />
-    {canonicalURL && <meta property="twitter:url" content={canonicalURL} />}
-    <meta property="twitter:title" content={pageTitle} />
-    <meta property="twitter:description" content={pageDescription} />
-    {socialImageURL && <meta property="twitter:image" content={socialImageURL} />}
-
-    {structuredData && (
-      <script
-        type="application/ld+json"
-        set:html={JSON.stringify(structuredData)}
-      />
-    )}
-
-    <Font cssVariable="--font-dm-sans" preload />
-
-    {
-      import.meta.env.PROD && (
-        <script is:inline>
-          {`(function(){var s=document.createElement('script');s.src='https://cloud.umami.is/script.js';s.async=true;s.setAttribute('data-website-id','d1647069-5a04-45c8-b5ca-18a0ffa9410c');s.setAttribute('data-domains','thathsara.lk');document.head.appendChild(s);})();`}
-        </script>
-      )
-    }
+    <Analytics />
   </head>
 
   <body>

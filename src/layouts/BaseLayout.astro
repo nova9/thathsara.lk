@@ -2,12 +2,13 @@
 import { siteConfig } from "@/lib/site";
 import packageJson from "../../package.json";
 import "../styles/main.scss";
+import HeadMeta from "@/components/HeadMeta.astro";
+import Analytics from "@/components/Analytics.astro";
 import Navigation from "@/components/nav/Navigation.astro";
 import ReaderState from "@/components/reader/ReaderState.astro";
 import MusicPlayer from "@/components/media/MusicPlayer.astro";
 import RetroCounter from "@/components/Counter.astro";
 import { ClientRouter } from "astro:transitions";
-import { Font } from "astro:assets";
 import GitHubIcon from "@/components/icons/GitHubIcon.astro";
 import InstagramIcon from "@/components/icons/InstagramIcon.astro";
 
@@ -53,56 +54,17 @@ const structuredData = {
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href={`/favicon.svg?v=${packageJson.version}`} />
-    <link rel="icon" type="image/png" sizes="48x48" href={`/favicon.png?v=${packageJson.version}`} />
-    <link rel="canonical" href={canonicalURL} />
-
-    <title>{pageTitle}</title>
-    <meta name="title" content={pageTitle} />
-    <meta name="description" content={pageDescription} />
-    <meta name="author" content={siteConfig.title} />
-    <meta name="robots" content="index,follow" />
-    <meta name="theme-color" content={themeColor} />
-    <link rel="apple-touch-icon" href={new URL('/favicon.png', siteURL)} />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:site_name" content={siteConfig.title} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDescription} />
-    <meta property="og:image" content={socialImageURL} />
-
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={pageTitle} />
-    <meta property="twitter:description" content={pageDescription} />
-    <meta property="twitter:image" content={socialImageURL} />
-
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
-
-    <Font cssVariable="--font-dm-sans" preload />
-
-    {
-      import.meta.env.PROD && (
-        <>
-          <link rel="preconnect" href="https://api-gateway.umami.dev" />
-          <script is:inline>
-            document.addEventListener('astro:page-load', () => {
-              if (document.querySelector('script[data-website-id]')) return;
-              const script = document.createElement('script');
-              script.src = "https://cloud.umami.is/script.js";
-              script.async = true;
-              script.setAttribute('data-website-id', 'd1647069-5a04-45c8-b5ca-18a0ffa9410c');
-              script.setAttribute('data-domains', 'thathsara.lk');
-              document.head.appendChild(script);
-            }, { once: true });
-          </script>
-        </>
-      )
-    }
+    <HeadMeta
+      pageTitle={pageTitle}
+      pageDescription={pageDescription}
+      siteName={siteConfig.title}
+      canonicalURL={canonicalURL}
+      siteURL={siteURL}
+      socialImageURL={socialImageURL}
+      themeColor={themeColor}
+      structuredData={structuredData}
+    />
+    <Analytics spa />
 
     <ClientRouter />
 
