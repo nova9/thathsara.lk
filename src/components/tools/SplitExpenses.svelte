@@ -209,7 +209,20 @@
 
 <section class="split">
   <header class="hero">
-    <div class="hero__icon">💸</div>
+    <div class="hero__icon" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <circle cx="12" cy="12" r="2.5" />
+        <path d="M6 10v4M18 10v4" />
+      </svg>
+    </div>
     <h1 class="hero__title">Split Expenses</h1>
     <p class="hero__sub">
       Add your group, log who paid for what, and get the fewest payments to
@@ -453,8 +466,14 @@
     padding: 0.75rem 0 0.25rem;
   }
   .hero__icon {
-    font-size: 1.9rem;
     line-height: 1;
+    color: var(--t-accent, currentColor);
+  }
+  .hero__icon svg {
+    width: 1.9rem;
+    height: 1.9rem;
+    display: block;
+    margin: 0 auto;
   }
   .hero__title {
     font-size: clamp(1.4rem, 4vw, 1.7rem);
