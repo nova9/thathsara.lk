@@ -7,6 +7,33 @@ const description =
   "Split shared expenses across a group and get the smallest set of payments to settle up. Free, no sign-up, runs entirely in your browser.";
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
+const faqs = [
+  {
+    q: "How do I split expenses with a group?",
+    a: "Add each person, then log who paid for every expense and who it should be split between. The calculator tracks each balance and shows who owes whom.",
+  },
+  {
+    q: "How does it settle up with the fewest payments?",
+    a: "After totalling each person's balance, it works out the smallest set of transfers that clears every debt, so the group makes as few payments as possible instead of everyone paying everyone.",
+  },
+  {
+    q: "Do I need an account or app to split bills?",
+    a: "No. It runs in your web browser with no sign-up, download, or login. Open the page and start adding people.",
+  },
+  {
+    q: "Is my expense data private?",
+    a: "Yes. Everything stays in your browser and nothing is sent to a server. Your group and expenses are saved locally on your own device.",
+  },
+  {
+    q: "Can I split an expense unequally or leave someone out?",
+    a: "Yes. For each expense you pick exactly who it is split between, so you can exclude anyone who was not part of that cost.",
+  },
+  {
+    q: "Can I share the split with the group?",
+    a: "Yes. The Copy link button creates a link that encodes the whole split, so anyone you send it to opens the same people, expenses, and balances.",
+  },
+];
+
 const structuredData = [
   {
     "@context": "https://schema.org",
@@ -54,6 +81,18 @@ const structuredData = [
       },
     ],
   },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.a,
+      },
+    })),
+  },
 ];
 ---
 
@@ -75,4 +114,89 @@ const structuredData = [
   structuredData={structuredData}
 >
   <SplitExpenses client:only="svelte" />
+
+  <aside class="about">
+    <section>
+      <h2>How to split expenses with a group</h2>
+      <ol>
+        <li>
+          <strong>Add everyone.</strong> List each person who shared the costs,
+          from a two-person trip to a whole group.
+        </li>
+        <li>
+          <strong>Log each expense.</strong> Enter who paid, how much, and who it
+          should be split between. You can split a bill unequally or leave anyone
+          out of a particular cost.
+        </li>
+        <li>
+          <strong>Settle up.</strong> The calculator totals every balance and
+          shows the fewest payments needed to clear all the debts.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Why use this expense splitter</h2>
+      <ul>
+        <li>No sign-up, download, or login. It runs straight in your browser.</li>
+        <li>Private by design. Nothing leaves your device.</li>
+        <li>Fewest payments to settle, so the group transfers money once, not in circles.</li>
+        <li>Shareable link that carries the whole split to anyone you send it to.</li>
+      </ul>
+    </section>
+
+    <section class="faq">
+      <h2>Frequently asked questions</h2>
+      {faqs.map((f) => (
+        <div class="faq__item">
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </div>
+      ))}
+    </section>
+  </aside>
 </ToolLayout>
+
+<style>
+  .about {
+    display: block;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--t-border);
+    color: var(--t-text);
+  }
+  .about section + section {
+    margin-top: 2rem;
+  }
+  .about h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.85rem;
+  }
+  .about h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 0.3rem;
+  }
+  .about p {
+    color: var(--t-muted);
+    margin: 0;
+  }
+  .about ol,
+  .about ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    color: var(--t-muted);
+  }
+  .about li strong {
+    color: var(--t-text);
+    font-weight: 600;
+  }
+  .faq__item + .faq__item {
+    margin-top: 1.2rem;
+  }
+</style>
