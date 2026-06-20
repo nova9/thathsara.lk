@@ -353,7 +353,7 @@
 
   <!-- 3. Settle up -->
   {#if showResults}
-    <section class="card card--settle">
+    <section class="card">
       <div class="card__head">
         <span class="step step--accent">3</span>
         <h2 class="card__title">Settle up</h2>
@@ -415,7 +415,21 @@
     </label>
     <div class="toolbar__actions">
       <button class="btn btn--soft" type="button" onclick={share}>
-        🔗 Copy link
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+          <path
+            d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+        Copy link
       </button>
       <button class="btn btn--ghost" type="button" onclick={reset}>Reset</button>
     </div>
@@ -436,16 +450,16 @@
   /* Hero */
   .hero {
     text-align: center;
-    padding: 1.5rem 0 0.5rem;
+    padding: 0.75rem 0 0.25rem;
   }
   .hero__icon {
-    font-size: 2.6rem;
+    font-size: 1.9rem;
     line-height: 1;
   }
   .hero__title {
-    font-size: clamp(1.7rem, 5vw, 2.2rem);
+    font-size: clamp(1.4rem, 4vw, 1.7rem);
     font-weight: 500;
-    margin: 0.6rem 0 0.4rem;
+    margin: 0.35rem 0 0.3rem;
     letter-spacing: -0.02em;
   }
   .hero__sub {
@@ -462,13 +476,6 @@
     border-radius: var(--t-radius);
     box-shadow: var(--t-shadow);
     padding: 1.35rem;
-  }
-  .card--settle {
-    background: linear-gradient(
-      180deg,
-      var(--t-accent-soft),
-      var(--t-surface) 60%
-    );
   }
   .card__head {
     display: flex;
@@ -666,6 +673,10 @@
 
   /* Buttons */
   .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     font-family: inherit;
     font-size: 15px;
     font-weight: 600;
@@ -682,6 +693,11 @@
   }
   .btn:active {
     transform: translateY(1px);
+  }
+  .btn__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
   }
   .btn--primary {
     background: var(--t-accent);

@@ -2,7 +2,7 @@
 // Standalone, app-like layout for browser tools. Deliberately unrelated to the
 // editorial site chrome: own palette, own shell, no masthead/footer/music.
 import { siteConfig } from "@/lib/site";
-import { toolThemeCss } from "@/lib/toolTheme";
+import { toolTheme, toolThemeCss } from "@/lib/toolTheme";
 import HeadMeta from "@/components/HeadMeta.astro";
 import Analytics from "@/components/Analytics.astro";
 
@@ -43,8 +43,8 @@ const socialImageURL = siteURL ? new URL(image, siteURL) : undefined;
       siteURL={siteURL}
       socialImageURL={socialImageURL}
       keywords={keywords}
-      themeColorLight="#6366f1"
-      themeColorDark="#14151f"
+      themeColorLight={toolTheme.light.accent}
+      themeColorDark={toolTheme.dark.bg}
       ogImageSize
       structuredData={structuredData}
     />
