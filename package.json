@@ -1,6 +1,6 @@
 {
   "name": "thathsara-lk-astro",
-  "version": "4.5.0",
+  "version": "5.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,8 +17,11 @@
   "dependencies": {
     "@astrojs/mdx": "^6.0.3",
     "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/svelte": "^8.1.2",
     "@lottiefiles/dotlottie-web": "^0.74.0",
-    "astro": "^6.4.7"
+    "astro": "^6.4.7",
+    "svelte": "^5.56.3",
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",

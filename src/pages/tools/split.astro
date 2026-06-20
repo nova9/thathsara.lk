@@ -1,0 +1,12 @@
+---
+import ToolLayout from "@/layouts/ToolLayout.astro";
+import SplitExpenses from "@/components/tools/SplitExpenses.svelte";
+---
+
+<ToolLayout
+  title="Split Expenses"
+  description="Split shared expenses across a group and get the smallest set of payments to settle up. Runs entirely in your browser."
+  icon="💸"
+>
+  <SplitExpenses client:only="svelte" />
+</ToolLayout>

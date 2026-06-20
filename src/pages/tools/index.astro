@@ -1,0 +1,114 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const tools = [
+  {
+    href: "/tools/split/",
+    name: "Split Expenses",
+    blurb:
+      "Divide shared costs across a group and get the fewest payments to settle up.",
+  },
+];
+---
+
+<BaseLayout
+  title="Tools"
+  description="Small, self-contained tools that run entirely in your browser."
+>
+  <section class="tools">
+    <header class="tools__head">
+      <p class="tools__eyebrow">Off-theme</p>
+      <h1 class="tools__title">Tools</h1>
+      <p class="tools__lede">
+        Small utilities, unrelated to the rest of this site. They run entirely
+        in your browser. No accounts, no servers.
+      </p>
+    </header>
+
+    <ul class="tools__list">
+      {
+        tools.map((t) => (
+          <li>
+            <a class="tool" href={t.href}>
+              <span class="tool__name">{t.name}</span>
+              <span class="tool__blurb">{t.blurb}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style lang="scss">
+  @use "@/styles/main.scss" as *;
+
+  .tools__head {
+    text-align: center;
+    margin-block-end: 2.5rem;
+  }
+
+  .tools__eyebrow {
+    @include caps(10px, 0.35em, var(--color-gold));
+    margin: 0 0 0.5rem;
+  }
+
+  .tools__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.1rem, 5vw, 3rem);
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .tools__lede {
+    color: var(--color-ink-mid);
+    font-size: 15.5px;
+    line-height: 1.6;
+    max-inline-size: 46ch;
+    margin: 0.75rem auto 0;
+  }
+
+  .tools__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tool {
+    display: block;
+    padding: 1.4rem 1.5rem;
+    background: var(--color-paper);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    transition:
+      border-color 0.18s,
+      transform 0.18s;
+
+    @include hover {
+      border-color: var(--color-gold);
+      text-decoration: none;
+    }
+  }
+
+  .tool__name {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--color-ink);
+  }
+
+  .tool__blurb {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--color-ink-mid);
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+</style>

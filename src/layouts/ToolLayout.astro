@@ -1,0 +1,209 @@
+---
+// Standalone, app-like layout for browser tools. Deliberately unrelated to the
+// editorial site chrome: own palette, own shell, no masthead/footer/music.
+import { siteConfig } from "@/lib/site";
+import packageJson from "../../package.json";
+import { Font } from "astro:assets";
+
+interface Props {
+  title?: string;
+  description?: string;
+  icon?: string;
+}
+
+const { title, description, icon = "🧮" } = Astro.props;
+const pageTitle = title ? `${title} · Tools` : "Tools";
+const pageDescription = description ?? "Small tools that run in your browser.";
+const canonicalURL = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site)
+  : undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href={`/favicon.svg?v=${packageJson.version}`}
+    />
+    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14151f" media="(prefers-color-scheme: dark)" />
+    <meta name="robots" content="index,follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    {canonicalURL && <meta property="og:url" content={canonicalURL} />}
+
+    <Font cssVariable="--font-dm-sans" preload />
+
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          {`(function(){var s=document.createElement('script');s.src='https://cloud.umami.is/script.js';s.async=true;s.setAttribute('data-website-id','d1647069-5a04-45c8-b5ca-18a0ffa9410c');s.setAttribute('data-domains','thathsara.lk');document.head.appendChild(s);})();`}
+        </script>
+      )
+    }
+  </head>
+
+  <body>
+    <div class="app">
+      <header class="app__bar">
+        <a class="app__back" href="/tools/" aria-label="All tools">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+          <span>Tools</span>
+        </a>
+        <a class="app__brand" href="/" title={siteConfig.title}>
+          thathsara<span>.lk</span>
+        </a>
+      </header>
+
+      <main class="app__main">
+        <slot />
+      </main>
+
+      <footer class="app__foot">
+        Runs entirely in your browser. Nothing is sent to a server.
+      </footer>
+    </div>
+
+    <style is:global>
+      :root {
+        --t-bg: #eef1fb;
+        --t-surface: #ffffff;
+        --t-surface-2: #f6f7fd;
+        --t-border: #e4e7f2;
+        --t-text: #1b1d2e;
+        --t-muted: #6b7191;
+        --t-faint: #9aa0bf;
+        --t-accent: #6366f1;
+        --t-accent-strong: #4f46e5;
+        --t-accent-soft: #eef0ff;
+        --t-pos: #0ea371;
+        --t-pos-soft: #e3f7ee;
+        --t-neg: #e1395a;
+        --t-neg-soft: #fde8ec;
+        --t-radius: 16px;
+        --t-radius-sm: 10px;
+        --t-shadow: 0 1px 2px rgba(27, 29, 46, 0.04),
+          0 8px 24px -12px rgba(27, 29, 46, 0.18);
+        --t-font: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --t-bg: #101220;
+          --t-surface: #1a1d2e;
+          --t-surface-2: #21243a;
+          --t-border: #2b2f48;
+          --t-text: #edeefb;
+          --t-muted: #a2a8cb;
+          --t-faint: #6f769b;
+          --t-accent: #818cf8;
+          --t-accent-strong: #a5b0ff;
+          --t-accent-soft: #232744;
+          --t-pos: #34d399;
+          --t-pos-soft: #1632312e;
+          --t-neg: #fb7185;
+          --t-neg-soft: #3a1f2a;
+          --t-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+            0 12px 28px -14px rgba(0, 0, 0, 0.6);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--t-font);
+        color: var(--t-text);
+        background: var(--t-bg);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      .app {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1.25rem;
+        max-width: 720px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      .app__back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--t-muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 0.35rem 0.6rem 0.35rem 0.4rem;
+        border-radius: 999px;
+        transition: background 0.15s, color 0.15s;
+      }
+      .app__back:hover {
+        color: var(--t-accent);
+        background: var(--t-accent-soft);
+      }
+
+      .app__brand {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--t-faint);
+        text-decoration: none;
+      }
+      .app__brand span {
+        color: var(--t-accent);
+      }
+
+      .app__main {
+        flex: 1;
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0.5rem 1.25rem 3rem;
+      }
+
+      .app__foot {
+        text-align: center;
+        color: var(--t-faint);
+        font-size: 12.5px;
+        padding: 1.5rem 1.25rem 2.5rem;
+      }
+    </style>
+
+    <script is:inline>
+      // Keep the OS theme-color in sync if the tool itself sets an accent later.
+    </script>
+  </body>
+</html>
