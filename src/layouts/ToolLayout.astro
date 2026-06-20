@@ -2,6 +2,7 @@
 // Standalone, app-like layout for browser tools. Deliberately unrelated to the
 // editorial site chrome: own palette, own shell, no masthead/footer/music.
 import { siteConfig } from "@/lib/site";
+import { toolThemeCss } from "@/lib/toolTheme";
 import HeadMeta from "@/components/HeadMeta.astro";
 import Analytics from "@/components/Analytics.astro";
 
@@ -78,48 +79,14 @@ const socialImageURL = siteURL ? new URL(image, siteURL) : undefined;
       </footer>
     </div>
 
+    <!-- Color tokens come from src/lib/toolTheme.js (shared with the OG cards). -->
+    <style is:global set:html={toolThemeCss()}></style>
+
     <style is:global>
       :root {
-        --t-bg: #eef1fb;
-        --t-surface: #ffffff;
-        --t-surface-2: #f6f7fd;
-        --t-border: #e4e7f2;
-        --t-text: #1b1d2e;
-        --t-muted: #6b7191;
-        --t-faint: #9aa0bf;
-        --t-accent: #6366f1;
-        --t-accent-strong: #4f46e5;
-        --t-accent-soft: #eef0ff;
-        --t-pos: #0ea371;
-        --t-pos-soft: #e3f7ee;
-        --t-neg: #e1395a;
-        --t-neg-soft: #fde8ec;
         --t-radius: 16px;
         --t-radius-sm: 10px;
-        --t-shadow: 0 1px 2px rgba(27, 29, 46, 0.04),
-          0 8px 24px -12px rgba(27, 29, 46, 0.18);
         --t-font: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --t-bg: #101220;
-          --t-surface: #1a1d2e;
-          --t-surface-2: #21243a;
-          --t-border: #2b2f48;
-          --t-text: #edeefb;
-          --t-muted: #a2a8cb;
-          --t-faint: #6f769b;
-          --t-accent: #818cf8;
-          --t-accent-strong: #a5b0ff;
-          --t-accent-soft: #232744;
-          --t-pos: #34d399;
-          --t-pos-soft: #1632312e;
-          --t-neg: #fb7185;
-          --t-neg-soft: #3a1f2a;
-          --t-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
-            0 12px 28px -14px rgba(0, 0, 0, 0.6);
-        }
       }
 
       * {

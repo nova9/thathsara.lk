@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { existsSync, mkdirSync } from "fs";
 import { resolve } from "path";
+import { ogCard as theme } from "../src/lib/toolTheme.js";
 
 // Generates 1200x630 Open Graph / social-share images with ImageMagick.
 // Add an entry here to give another page its own social card, then run:
@@ -12,17 +13,6 @@ import { resolve } from "path";
 const SFNS = "/System/Library/Fonts/SFNS.ttf";
 const SFNS_MONO = "/System/Library/Fonts/SFNSMono.ttf";
 const OUT_DIR = resolve("public/og");
-
-// Tool-shell palette (see src/layouts/ToolLayout.astro dark theme).
-const theme = {
-  bgTop: "#1b1d2e",
-  bgBottom: "#14151f",
-  accent: "#6366f1",
-  accentSoft: "#818cf8",
-  title: "#edeefb",
-  muted: "#a2a8cb",
-  faint: "#6f769b",
-};
 
 const cards = [
   {
