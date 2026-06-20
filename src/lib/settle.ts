@@ -107,24 +107,48 @@ export function formatMoney(cents: number, currency: string): string {
 }
 
 // ── Shareable state ──────────────────────────────────────────────────────────
-// Encode the whole group into a URL-safe base64 string (UTF-8 aware) so a split
-// can travel in a link with no backend.
+// Encode the whole group into a URL-safe string so a split can travel in a link
+// with no backend. The JSON is deflated before base64url encoding to keep links
+// short enough that chat apps linkify the whole URL (long fragments get
+// truncated by their auto-linkifiers).
 
-export function encodeState(state: SplitState): string {
-  const json = JSON.stringify(state);
-  const bytes = new TextEncoder().encode(json);
+function bytesToBase64url(bytes: Uint8Array): string {
   let binary = "";
   for (const b of bytes) binary += String.fromCharCode(b);
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export function decodeState(encoded: string): SplitState | null {
+function base64urlToBytes(b64url: string): Uint8Array {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(b64);
+  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+}
+
+async function deflate(bytes: Uint8Array): Promise<Uint8Array> {
+  const cs = new CompressionStream("deflate-raw");
+  const writer = cs.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+}
+
+async function inflate(bytes: Uint8Array): Promise<Uint8Array> {
+  const ds = new DecompressionStream("deflate-raw");
+  const writer = ds.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+}
+
+export async function encodeState(state: SplitState): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify(state));
+  return bytesToBase64url(await deflate(bytes));
+}
+
+export async function decodeState(encoded: string): Promise<SplitState | null> {
   try {
-    const b64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
-    const binary = atob(b64);
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-    const json = new TextDecoder().decode(bytes);
-    const parsed = JSON.parse(json);
+    const bytes = await inflate(base64urlToBytes(encoded));
+    const parsed = JSON.parse(new TextDecoder().decode(bytes));
     if (!parsed || !Array.isArray(parsed.members) || !Array.isArray(parsed.expenses)) {
       return null;
     }

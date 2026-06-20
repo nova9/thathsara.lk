@@ -12,20 +12,33 @@
     encodeState,
     decodeState,
   } from "@/lib/settle";
+  import { onMount } from "svelte";
 
   const STORAGE_KEY = "split-expenses-v1";
 
-  function loadState(): SplitState {
-    const hash = location.hash.slice(1);
-    if (hash) {
-      const fromUrl = decodeState(hash);
-      if (fromUrl) return fromUrl;
-    }
+  // Decoding a shared link is async (it inflates a compressed payload), so we
+  // can't read the hash during synchronous setup. Capture it now, before the
+  // persistence effect rewrites the URL, and hydrate from it in onMount.
+  const initialHash =
+    typeof location !== "undefined" ? location.hash.slice(1) : "";
+
+  function loadLocal(): SplitState {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = decodeState(encodeState(JSON.parse(raw)));
-        if (parsed) return parsed;
+        const parsed = JSON.parse(raw);
+        if (
+          parsed &&
+          Array.isArray(parsed.members) &&
+          Array.isArray(parsed.expenses)
+        ) {
+          return {
+            members: parsed.members,
+            expenses: parsed.expenses,
+            currency:
+              typeof parsed.currency === "string" ? parsed.currency : "$",
+          };
+        }
       }
     } catch {
       /* ignore */
@@ -33,7 +46,7 @@
     return emptyState();
   }
 
-  const initial = loadState();
+  const initial = loadLocal();
 
   // ── Core reactive state ──────────────────────────────────────────────────
   let members = $state<Member[]>(initial.members);
@@ -48,6 +61,24 @@
   let selected = $state<Record<string, boolean>>(
     Object.fromEntries(initial.members.map((m) => [m.id, true])),
   );
+
+  // Gate URL persistence until we've read the shared hash, so the effect below
+  // doesn't overwrite the incoming link before it's decoded.
+  let hydrated = $state(false);
+
+  onMount(async () => {
+    if (initialHash) {
+      const fromUrl = await decodeState(initialHash);
+      if (fromUrl) {
+        members = fromUrl.members;
+        expenses = fromUrl.expenses;
+        currency = fromUrl.currency;
+        payerId = fromUrl.members[0]?.id ?? "";
+        selected = Object.fromEntries(fromUrl.members.map((m) => [m.id, true]));
+      }
+    }
+    hydrated = true;
+  });
 
   let toast = $state("");
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -74,7 +105,16 @@
     } catch {
       /* ignore */
     }
-    history.replaceState(null, "", `${location.pathname}#${encodeState(state)}`);
+    if (!hydrated) return;
+    let cancelled = false;
+    encodeState(state).then((enc) => {
+      if (!cancelled) {
+        history.replaceState(null, "", `${location.pathname}#${enc}`);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   });
 
   // ── Actions ──────────────────────────────────────────────────────────────
@@ -140,11 +180,8 @@
   }
 
   async function share() {
-    const url = `${location.origin}${location.pathname}#${encodeState({
-      members,
-      expenses,
-      currency,
-    })}`;
+    const enc = await encodeState({ members, expenses, currency });
+    const url = `${location.origin}${location.pathname}#${enc}`;
     try {
       await navigator.clipboard.writeText(url);
       showToast("Share link copied to clipboard ✓");
