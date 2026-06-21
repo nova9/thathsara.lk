@@ -1,4 +1,8 @@
+packages:
+  - 'sync-server'
+
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   sharp: true
+  workerd: true

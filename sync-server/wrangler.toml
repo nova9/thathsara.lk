@@ -1,0 +1,14 @@
+name = "split-sync"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+
+# Durable Object that holds each room's document and websockets.
+[[durable_objects.bindings]]
+name = "SPLIT_ROOM"
+class_name = "SplitRoom"
+
+# SQLite-backed Durable Objects are the type available on the Workers Free plan
+# and are required for WebSocket Hibernation.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SplitRoom"]

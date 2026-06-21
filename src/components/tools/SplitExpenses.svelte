@@ -9,12 +9,18 @@
     settle,
     toCents,
     formatMoney,
-    encodeState,
     decodeState,
   } from "@/lib/settle";
-  import { onMount } from "svelte";
+  import { createSplitDoc, type SplitDoc } from "@/lib/splitDoc";
+  import type { WebsocketProvider } from "y-websocket";
+  import { onMount, onDestroy } from "svelte";
 
   const STORAGE_KEY = "split-expenses-v1";
+
+  // Sync server (Cloudflare Worker + Durable Object). Override per-environment
+  // via PUBLIC_SPLIT_SYNC_URL; otherwise use the production endpoint.
+  const SYNC_URL =
+    import.meta.env.PUBLIC_SPLIT_SYNC_URL ?? "wss://split-sync.thathsara.lk";
 
   // Decoding a shared link is async (it inflates a compressed payload), so we
   // can't read the hash during synchronous setup. Capture it now, before the
@@ -68,22 +74,83 @@
   // ── Search ───────────────────────────────────────────────────────────────
   let search = $state("");
 
-  // Gate URL persistence until we've read the shared hash, so the effect below
-  // doesn't overwrite the incoming link before it's decoded.
+  // Gate the localStorage cache until the doc has hydrated, so we don't write an
+  // empty state over real data during startup.
   let hydrated = $state(false);
 
+  // ── Collaborative document (Yjs) ─────────────────────────────────────────
+  // `sdoc` is the source of truth. The reactive members/expenses/currency above
+  // are a read-only mirror, refreshed by refresh() whenever the doc changes
+  // (local edit, undo, or a teammate's change arriving over the network).
+  let sdoc: SplitDoc | undefined;
+  let ws: WebsocketProvider | undefined;
+  let teardown: (() => void) | undefined;
+
+  let room = $state<string | null>(null);
+  let online = $state(false);
+  let peers = $state(0);
+  let canUndo = $state(false);
+  let canRedo = $state(false);
+
+  function parseRoom(hash: string): string | null {
+    const m = /(?:^|&)room=([\w-]+)/.exec(hash);
+    return m ? m[1] : null;
+  }
+
+  function refresh() {
+    if (!sdoc) return;
+    const s = sdoc.read();
+    members = s.members;
+    expenses = s.expenses;
+    currency = s.currency;
+    canUndo = sdoc.canUndo();
+    canRedo = sdoc.canRedo();
+    // A payer/participant may have been added or removed (possibly by a
+    // teammate); keep the form coherent and default new people to "included".
+    if (!members.some((m) => m.id === payerId)) payerId = members[0]?.id ?? "";
+    selected = Object.fromEntries(
+      members.map((m) => [m.id, selected[m.id] ?? true]),
+    );
+  }
+
+  async function joinRoom(id: string) {
+    if (!sdoc || ws) return;
+    room = id;
+    ws = await sdoc.connectRoom(SYNC_URL, id);
+    ws.on("status", (e: { status: string }) => (online = e.status === "connected"));
+    ws.awareness.setLocalState({ joined: Date.now() });
+    const countPeers = () => (peers = ws!.awareness.getStates().size);
+    ws.awareness.on("change", countPeers);
+    countPeers();
+  }
+
   onMount(async () => {
-    if (initialHash) {
-      const fromUrl = await decodeState(initialHash);
-      if (fromUrl) {
-        members = fromUrl.members;
-        expenses = fromUrl.expenses;
-        currency = fromUrl.currency;
-        payerId = fromUrl.members[0]?.id ?? "";
-        selected = Object.fromEntries(fromUrl.members.map((m) => [m.id, true]));
-      }
-    }
+    sdoc = createSplitDoc();
+    teardown = sdoc.subscribe(refresh);
+
+    room = parseRoom(initialHash);
+    // Legacy one-way share links carried the whole state compressed in the hash.
+    const legacy = !room && initialHash ? await decodeState(initialHash) : null;
+
+    // Persist locally per room so different trips never bleed into each other.
+    const idb = await sdoc.connectPersistence(
+      room ? `split-room-${room}` : STORAGE_KEY,
+    );
+    await idb.whenSynced;
+
+    // Fill a fresh doc once: from a legacy link, otherwise from old local data.
+    sdoc.seedIfEmpty(legacy ?? loadLocal());
+
+    if (room) await joinRoom(room);
+
+    refresh();
     hydrated = true;
+  });
+
+  onDestroy(() => {
+    teardown?.();
+    ws?.destroy();
+    sdoc?.destroy();
   });
 
   let toast = $state("");
@@ -121,70 +188,13 @@
   });
 
   // ── Undo / redo ──────────────────────────────────────────────────────────
-  // History tracks only the core ledger (people, expenses, currency) — not the
-  // form fields or search box. Snapshots are plain deep clones; `restoring`
-  // suppresses the recorder while we replay one, so navigating history doesn't
-  // record itself as a new step.
-  type Snapshot = { members: Member[]; expenses: Expense[]; currency: string };
-  let past: Snapshot[] = [];
-  let future: Snapshot[] = [];
-  let current: Snapshot | null = null;
-  let restoring = false;
-  let canUndo = $state(false);
-  let canRedo = $state(false);
-
-  $effect(() => {
-    // Reading every field deeply makes any ledger edit re-run this recorder.
-    const snap: Snapshot = {
-      members: $state.snapshot(members) as Member[],
-      expenses: $state.snapshot(expenses) as Expense[],
-      currency,
-    };
-    if (!hydrated) return;
-    if (restoring) {
-      restoring = false;
-      return;
-    }
-    if (current) past.push(current);
-    current = snap;
-    future = [];
-    canUndo = past.length > 0;
-    canRedo = false;
-  });
-
-  // Assign fresh clones so reactive state never shares references with the
-  // stored snapshots (a later edit would otherwise mutate history in place).
-  function applySnapshot(snap: Snapshot) {
-    members = snap.members.map((m) => ({ ...m }));
-    expenses = snap.expenses.map((e) => ({
-      ...e,
-      participantIds: [...e.participantIds],
-    }));
-    currency = snap.currency;
-    if (!members.some((m) => m.id === payerId)) payerId = members[0]?.id ?? "";
-    selected = Object.fromEntries(
-      members.map((m) => [m.id, selected[m.id] ?? true]),
-    );
-  }
-
+  // Backed by Yjs' UndoManager, so it rewinds only *your own* edits, never a
+  // teammate's. canUndo/canRedo are refreshed by refresh() above.
   function undo() {
-    if (!current || past.length === 0) return;
-    future.unshift(current);
-    current = past.pop()!;
-    restoring = true;
-    applySnapshot(current);
-    canUndo = past.length > 0;
-    canRedo = true;
+    sdoc?.undo();
   }
-
   function redo() {
-    if (!current || future.length === 0) return;
-    past.push(current);
-    current = future.shift()!;
-    restoring = true;
-    applySnapshot(current);
-    canUndo = true;
-    canRedo = future.length > 0;
+    sdoc?.redo();
   }
 
   // Ctrl/Cmd+Z to undo, +Shift to redo. Skipped while a text field is focused
@@ -202,48 +212,33 @@
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // ── Persist to localStorage + keep the URL shareable ─────────────────────
+  // Cache the latest solo state in localStorage purely for an instant first
+  // paint next visit. In a room, IndexedDB + the server are the real store.
   $effect(() => {
+    if (!hydrated || room) return;
     const state: SplitState = { members, expenses, currency };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       /* ignore */
     }
-    if (!hydrated) return;
-    let cancelled = false;
-    encodeState(state).then((enc) => {
-      if (!cancelled) {
-        history.replaceState(null, "", `${location.pathname}#${enc}`);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
   });
 
   // ── Actions ──────────────────────────────────────────────────────────────
+  // All ledger mutations go through the doc; refresh() mirrors the result back.
   function addMember() {
     const name = newName.trim();
     if (!name) return;
-    const id = makeId();
-    members.push({ id, name });
-    selected[id] = true;
-    if (!payerId) payerId = id;
+    const id = sdoc?.addMember(name);
+    if (id) {
+      selected[id] = true;
+      if (!payerId) payerId = id;
+    }
     newName = "";
   }
 
   function removeMember(id: string) {
-    members = members.filter((m) => m.id !== id);
-    expenses = expenses
-      .filter((e) => e.payerId !== id)
-      .map((e) => ({
-        ...e,
-        participantIds: e.participantIds.filter((p) => p !== id),
-      }))
-      .filter((e) => e.participantIds.length > 0);
-    delete selected[id];
-    if (payerId === id) payerId = members[0]?.id ?? "";
+    sdoc?.removeMember(id);
   }
 
   function addExpense() {
@@ -265,50 +260,45 @@
       return;
     }
 
-    expenses.push({
-      id: makeId(),
-      desc: desc.trim(),
-      payerId,
-      amountCents,
-      participantIds,
-    });
+    sdoc?.addExpense({ desc: desc.trim(), payerId, amountCents, participantIds });
     desc = "";
     amount = "";
   }
 
   function removeExpense(id: string) {
-    expenses = expenses.filter((e) => e.id !== id);
+    sdoc?.removeExpense(id);
+  }
+
+  function setCurrency(value: string) {
+    sdoc?.setCurrency(value);
   }
 
   function setAll(value: boolean) {
     for (const m of members) selected[m.id] = value;
   }
 
+  // Start (or copy) a live collaboration room. Starting one keeps the current
+  // ledger and pushes it to the server, so teammates who open the link see it.
   async function share() {
-    const enc = await encodeState({ members, expenses, currency });
-    const url = `${location.origin}${location.pathname}#${enc}`;
+    if (!room) {
+      const id = `${makeId()}${makeId()}`;
+      history.replaceState(null, "", `${location.pathname}#room=${id}`);
+      await joinRoom(id);
+    }
+    const url = `${location.origin}${location.pathname}#room=${room}`;
     try {
       await navigator.clipboard.writeText(url);
-      showToast("Share link copied to clipboard ✓");
+      showToast("Collaboration link copied. Share it with the group ✓");
     } catch {
-      history.replaceState(null, "", url);
       showToast("Link is in the address bar — copy it.");
     }
   }
 
   function reset() {
     if (!confirm("Clear all people and expenses?")) return;
-    members = [];
-    expenses = [];
-    currency = "$";
+    sdoc?.reset();
     selected = {};
     payerId = "";
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-    history.replaceState(null, "", location.pathname);
   }
 </script>
 
@@ -552,11 +542,28 @@
     </section>
   {/if}
 
+  {#if room}
+    <div class="collab" class:collab--on={online} aria-live="polite">
+      <span class="collab__dot"></span>
+      <span class="collab__text">
+        {online ? "Live" : "Connecting…"} · {peers}
+        {peers === 1 ? "device here" : "devices here"}
+      </span>
+      <span class="collab__hint">Everyone with the link edits this trip together.</span>
+    </div>
+  {/if}
+
   <!-- Toolbar -->
   <div class="toolbar">
     <label class="cur-field">
       <span>Currency</span>
-      <input class="input input--sym" type="text" maxlength="3" bind:value={currency} />
+      <input
+        class="input input--sym"
+        type="text"
+        maxlength="3"
+        value={currency}
+        oninput={(e) => setCurrency(e.currentTarget.value)}
+      />
     </label>
     <div class="toolbar__actions">
       <button
@@ -600,7 +607,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"></path>
         </svg>
-        Copy link
+        {room ? "Copy invite" : "Collaborate"}
       </button>
       <button class="btn btn--ghost" type="button" onclick={reset}>Reset</button>
     </div>
@@ -1116,6 +1123,38 @@
   .bal-tag--zero {
     color: var(--t-faint);
     background: var(--t-surface-2);
+  }
+
+  /* Collaboration status */
+  .collab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-sm);
+    background: var(--t-surface-2);
+    font-size: 13px;
+    color: var(--t-muted);
+  }
+  .collab__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--t-faint);
+    flex-shrink: 0;
+  }
+  .collab--on .collab__dot {
+    background: var(--t-pos);
+    box-shadow: 0 0 0 3px var(--t-pos-soft);
+  }
+  .collab__text {
+    font-weight: 600;
+    color: var(--t-text);
+  }
+  .collab__hint {
+    color: var(--t-faint);
   }
 
   /* Toolbar */
