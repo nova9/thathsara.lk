@@ -20,6 +20,8 @@ interface Props {
   // Emit og:image width/height/alt alongside the image.
   ogImageSize?: boolean;
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
+  // Override the default site favicon with a single SVG (e.g. per-tool icon).
+  favicon?: string;
 }
 
 const {
@@ -35,23 +37,30 @@ const {
   themeColorDark,
   ogImageSize = false,
   structuredData,
+  favicon,
 } = Astro.props;
 ---
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link
-  rel="icon"
-  type="image/svg+xml"
-  href={`/favicon.svg?v=${packageJson.version}`}
-/>
-<link
-  rel="icon"
-  type="image/png"
-  sizes="48x48"
-  href={`/favicon.png?v=${packageJson.version}`}
-/>
-{siteURL && <link rel="apple-touch-icon" href={new URL("/favicon.png", siteURL)} />}
+{favicon ? (
+  <link rel="icon" type="image/svg+xml" href={`${favicon}?v=${packageJson.version}`} />
+) : (
+  <>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href={`/favicon.svg?v=${packageJson.version}`}
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href={`/favicon.png?v=${packageJson.version}`}
+    />
+    {siteURL && <link rel="apple-touch-icon" href={new URL("/favicon.png", siteURL)} />}
+  </>
+)}
 {canonicalURL && <link rel="canonical" href={canonicalURL} />}
 
 <title>{pageTitle}</title>

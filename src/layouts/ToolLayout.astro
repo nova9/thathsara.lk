@@ -13,6 +13,7 @@ interface Props {
   keywords?: string[];
   image?: string;
   structuredData?: Record<string, unknown> | Record<string, unknown>[];
+  favicon?: string;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   keywords,
   image = "/favicon.png",
   structuredData,
+  favicon,
 } = Astro.props;
 const pageTitle = title ? `${title} · Tools` : "Tools";
 const pageDescription = description ?? "Small tools that run in your browser.";
@@ -43,6 +45,7 @@ const socialImageURL = siteURL ? new URL(image, siteURL) : undefined;
       siteURL={siteURL}
       socialImageURL={socialImageURL}
       keywords={keywords}
+      favicon={favicon}
       themeColorLight={toolTheme.light.accent}
       themeColorDark={toolTheme.dark.bg}
       ogImageSize
