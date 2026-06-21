@@ -120,6 +120,88 @@
     });
   });
 
+  // ── Undo / redo ──────────────────────────────────────────────────────────
+  // History tracks only the core ledger (people, expenses, currency) — not the
+  // form fields or search box. Snapshots are plain deep clones; `restoring`
+  // suppresses the recorder while we replay one, so navigating history doesn't
+  // record itself as a new step.
+  type Snapshot = { members: Member[]; expenses: Expense[]; currency: string };
+  let past: Snapshot[] = [];
+  let future: Snapshot[] = [];
+  let current: Snapshot | null = null;
+  let restoring = false;
+  let canUndo = $state(false);
+  let canRedo = $state(false);
+
+  $effect(() => {
+    // Reading every field deeply makes any ledger edit re-run this recorder.
+    const snap: Snapshot = {
+      members: $state.snapshot(members) as Member[],
+      expenses: $state.snapshot(expenses) as Expense[],
+      currency,
+    };
+    if (!hydrated) return;
+    if (restoring) {
+      restoring = false;
+      return;
+    }
+    if (current) past.push(current);
+    current = snap;
+    future = [];
+    canUndo = past.length > 0;
+    canRedo = false;
+  });
+
+  // Assign fresh clones so reactive state never shares references with the
+  // stored snapshots (a later edit would otherwise mutate history in place).
+  function applySnapshot(snap: Snapshot) {
+    members = snap.members.map((m) => ({ ...m }));
+    expenses = snap.expenses.map((e) => ({
+      ...e,
+      participantIds: [...e.participantIds],
+    }));
+    currency = snap.currency;
+    if (!members.some((m) => m.id === payerId)) payerId = members[0]?.id ?? "";
+    selected = Object.fromEntries(
+      members.map((m) => [m.id, selected[m.id] ?? true]),
+    );
+  }
+
+  function undo() {
+    if (!current || past.length === 0) return;
+    future.unshift(current);
+    current = past.pop()!;
+    restoring = true;
+    applySnapshot(current);
+    canUndo = past.length > 0;
+    canRedo = true;
+  }
+
+  function redo() {
+    if (!current || future.length === 0) return;
+    past.push(current);
+    current = future.shift()!;
+    restoring = true;
+    applySnapshot(current);
+    canUndo = true;
+    canRedo = future.length > 0;
+  }
+
+  // Ctrl/Cmd+Z to undo, +Shift to redo. Skipped while a text field is focused
+  // so the browser's native text undo still works as you type.
+  $effect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+      const el = e.target as HTMLElement | null;
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+      e.preventDefault();
+      if (e.shiftKey) redo();
+      else undo();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   // ── Persist to localStorage + keep the URL shareable ─────────────────────
   $effect(() => {
     const state: SplitState = { members, expenses, currency };
@@ -477,6 +559,32 @@
       <input class="input input--sym" type="text" maxlength="3" bind:value={currency} />
     </label>
     <div class="toolbar__actions">
+      <button
+        class="btn btn--soft btn--icon"
+        type="button"
+        onclick={undo}
+        disabled={!canUndo}
+        aria-label="Undo"
+        title="Undo (Ctrl/Cmd+Z)"
+      >
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 14 4 9l5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M4 9h11a5 5 0 0 1 0 10h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button
+        class="btn btn--soft btn--icon"
+        type="button"
+        onclick={redo}
+        disabled={!canRedo}
+        aria-label="Redo"
+        title="Redo (Ctrl/Cmd+Shift+Z)"
+      >
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m15 14 5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M20 9H9a5 5 0 0 0 0 10h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
       <button class="btn btn--soft" type="button" onclick={share}>
         <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
@@ -763,6 +871,18 @@
   .btn:active {
     transform: translateY(1px);
   }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .btn--icon {
+    padding: 0.7rem 0.8rem;
+  }
+  .btn--icon .btn__icon {
+    width: 18px;
+    height: 18px;
+  }
   .btn__icon {
     width: 16px;
     height: 16px;
@@ -1020,6 +1140,8 @@
   }
   .toolbar__actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 0.5rem;
   }
 
