@@ -965,14 +965,20 @@
     margin-top: 0.5rem;
   }
 
+  @media (max-width: 600px) {
+    .split {
+      gap: 0.8rem;
+    }
+    .hero {
+      padding-top: 0.25rem;
+    }
+    .card {
+      padding: 1rem 0.85rem;
+    }
+  }
+
   @media (max-width: 480px) {
-    .inline {
-      flex-wrap: wrap;
-    }
     .money {
-      flex: 1;
-    }
-    .inline .btn--primary {
       flex: 1;
     }
   }
