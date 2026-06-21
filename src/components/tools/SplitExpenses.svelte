@@ -65,6 +65,9 @@
     Object.fromEntries(initial.members.map((m) => [m.id, true])),
   );
 
+  // ── Search ───────────────────────────────────────────────────────────────
+  let search = $state("");
+
   // Gate URL persistence until we've read the shared hash, so the effect below
   // doesn't overwrite the incoming link before it's decoded.
   let hydrated = $state(false);
@@ -99,6 +102,23 @@
   const showResults = $derived(ready && expenses.length > 0);
 
   const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "?";
+
+  // Filter the ledger by spender (payer name), amount, or description.
+  const filteredExpenses = $derived.by(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return expenses;
+    return expenses.filter((e) => {
+      const haystack = [
+        e.desc,
+        nameOf(e.payerId),
+        formatMoney(e.amountCents, currency),
+        (e.amountCents / 100).toFixed(2),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  });
 
   // ── Persist to localStorage + keep the URL shareable ─────────────────────
   $effect(() => {
@@ -337,32 +357,59 @@
       </form>
 
       {#if expenses.length}
-        <ul class="ledger">
-          {#each expenses as e (e.id)}
-            <li>
-              <div>
-                <div class="ledger__desc">{e.desc || "Expense"}</div>
-                <div class="ledger__sub">
-                  {nameOf(e.payerId)} paid · split {e.participantIds.length} way{e
-                    .participantIds.length === 1
-                    ? ""
-                    : "s"}
+        <div class="search">
+          <svg
+            class="search__icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input
+            class="input search__input"
+            type="search"
+            placeholder="Search by person, amount, or description…"
+            autocomplete="off"
+            bind:value={search}
+          />
+        </div>
+
+        {#if filteredExpenses.length}
+          <ul class="ledger">
+            {#each filteredExpenses as e (e.id)}
+              <li>
+                <div>
+                  <div class="ledger__desc">{e.desc || "Expense"}</div>
+                  <div class="ledger__sub">
+                    {nameOf(e.payerId)} paid · split {e.participantIds.length} way{e
+                      .participantIds.length === 1
+                      ? ""
+                      : "s"}
+                  </div>
                 </div>
-              </div>
-              <div class="ledger__right">
-                <span class="ledger__amt"
-                  >{formatMoney(e.amountCents, currency)}</span
-                >
-                <button
-                  class="ledger__del"
-                  type="button"
-                  aria-label="Delete expense"
-                  onclick={() => removeExpense(e.id)}>×</button
-                >
-              </div>
-            </li>
-          {/each}
-        </ul>
+                <div class="ledger__right">
+                  <span class="ledger__amt"
+                    >{formatMoney(e.amountCents, currency)}</span
+                  >
+                  <button
+                    class="ledger__del"
+                    type="button"
+                    aria-label="Delete expense"
+                    onclick={() => removeExpense(e.id)}>×</button
+                  >
+                </div>
+              </li>
+            {/each}
+          </ul>
+        {:else}
+          <p class="hint">No expenses match “{search}”.</p>
+        {/if}
       {/if}
     </section>
   {/if}
@@ -789,10 +836,32 @@
     opacity: 1;
   }
 
+  /* Search */
+  .search {
+    position: relative;
+    margin-top: 1.1rem;
+  }
+  .search__icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--t-faint);
+    pointer-events: none;
+  }
+  .search__input {
+    padding-left: 2.3rem;
+  }
+  .search__input::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+
   /* Ledger */
   .ledger {
     list-style: none;
-    margin: 1.1rem 0 0;
+    margin: 0.6rem 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
