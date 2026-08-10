@@ -9,33 +9,6 @@ class DashAudio extends HTMLElement {
     this.appendChild(this.audio);
     this.shakaPlayer = null;
     this.shakaPromise = null;
-    this.analyser = null;
-    // Safari routes Shaka's MSE/DASH audio outside the Web Audio graph, so the
-    // AnalyserNode reads all zeros. Force the progressive fallback file there.
-    this.preferProgressive = /apple/i.test(navigator.vendor);
-  }
-
-  ensureAnalyser() {
-    if (this.analyser) return this.analyser;
-
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    this.audioCtx = new Ctx();
-    this.sourceNode = this.audioCtx.createMediaElementSource(this.audio);
-    this.analyser = this.audioCtx.createAnalyser();
-    this.analyser.fftSize = 256;
-    this.analyser.smoothingTimeConstant = 0.8;
-    this.sourceNode.connect(this.analyser);
-    this.analyser.connect(this.audioCtx.destination);
-    this._freq = new Uint8Array(this.analyser.frequencyBinCount);
-    return this.analyser;
-  }
-
-  getLevel() {
-    if (!this.analyser) return 0;
-    this.analyser.getByteFrequencyData(this._freq);
-    let sum = 0;
-    for (let i = 0; i < this._freq.length; i++) sum += this._freq[i];
-    return sum / (this._freq.length * 255);
   }
 
   async getShaka() {
@@ -88,7 +61,6 @@ class DashAudio extends HTMLElement {
   }
 
   async loadTrack(manifestUrl, fallbackUrl) {
-    if (this.preferProgressive) manifestUrl = null;
     if (!manifestUrl) {
       this.destroyShaka();
       this.audio.src = fallbackUrl;
@@ -129,8 +101,6 @@ class DashAudio extends HTMLElement {
   }
 
   play() {
-    this.ensureAnalyser();
-    if (this.audioCtx?.state === "suspended") this.audioCtx.resume();
     return this.audio.play();
   }
 

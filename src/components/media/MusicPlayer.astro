@@ -149,25 +149,11 @@ const tracks = await getMusicTracks();
   }
 
   #music-toggle {
-    position: relative;
     width: 3rem;
     height: 3rem;
     svg {
       width: 24px;
       height: 24px;
-    }
-
-    /* Ring that expands and brightens with the audio level (--pulse: 0..1),
-       set per-frame from JS. No transition so it tracks the beat. */
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2px solid var(--color-primary, #888);
-      transform: scale(calc(1 + var(--pulse, 0) * 0.7));
-      opacity: var(--pulse, 0);
-      pointer-events: none;
     }
   }
 
@@ -399,7 +385,6 @@ const tracks = await getMusicTracks();
     scrollTimeout: ReturnType<typeof setTimeout> | null;
     isAtBottom: boolean;
     volume: number;
-    pulseRaf: number | null;
 
     constructor(panel: HTMLElement) {
       this.panel = panel;
@@ -432,7 +417,6 @@ const tracks = await getMusicTracks();
       this.isLoading = false;
       this.scrollTimeout = null;
       this.isAtBottom = false;
-      this.pulseRaf = null;
 
       const storedVolume = musicVolume.get();
       this.volume =
@@ -471,12 +455,10 @@ const tracks = await getMusicTracks();
         this.isLoading = false;
         this.isPlaying = true;
         this.updateUI();
-        this.startPulse();
       });
       this.audio.addEventListener("pause", () => {
         this.isPlaying = false;
         this.updateUI();
-        this.stopPulse();
       });
       this.audio.addEventListener("waiting", () => {
         this.isLoading = true;
@@ -502,27 +484,6 @@ const tracks = await getMusicTracks();
     setInfo(track: Track) {
       this.titleElement.textContent = track.title;
       this.artistElement.textContent = track.artist;
-    }
-
-    startPulse() {
-      if (this.pulseRaf) return;
-      const tick = () => {
-        if (this.audio.paused) {
-          this.stopPulse();
-          return;
-        }
-        this.btn.style.setProperty("--pulse", String(this.audio.getLevel()));
-        this.pulseRaf = requestAnimationFrame(tick);
-      };
-      this.pulseRaf = requestAnimationFrame(tick);
-    }
-
-    stopPulse() {
-      if (this.pulseRaf) {
-        cancelAnimationFrame(this.pulseRaf);
-        this.pulseRaf = null;
-      }
-      this.btn.style.setProperty("--pulse", "0");
     }
 
     adjustVolume(delta: number) {
@@ -553,11 +514,6 @@ const tracks = await getMusicTracks();
         this.audio.pause();
         return;
       }
-      // Capture the user-activation gesture synchronously. Once we await the
-      // Shaka manifest load, the gesture is gone and Safari/Chrome will reject
-      // the later play(). The first call rejects (no src yet) — we ignore it;
-      // it marks the element as user-activated for the real play() below.
-      const primer = this.audio.play().catch(() => {});
       if (!this.isTrackLoaded && this.tracks.length > 0) {
         this.isLoading = true;
         this.updateUI();
@@ -568,7 +524,6 @@ const tracks = await getMusicTracks();
         this.isLoading = true;
         this.updateUI();
       }
-      await primer;
       this.audio
         .play()
         .catch((e: unknown) => console.error("Audio playback prevented:", e));
@@ -576,14 +531,12 @@ const tracks = await getMusicTracks();
 
     async playNext() {
       if (this.tracks.length === 0) return;
-      const primer = this.audio.play().catch(() => {});
       this.currentTrackIndex =
         (this.currentTrackIndex + 1) % this.tracks.length;
       const track = this.tracks[this.currentTrackIndex];
       await this.loadTrack(track);
       this.isTrackLoaded = true;
       this.setInfo(track);
-      await primer;
       this.audio
         .play()
         .catch((e: unknown) => console.error("Audio playback prevented:", e));
