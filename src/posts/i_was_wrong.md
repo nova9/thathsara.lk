@@ -2,6 +2,7 @@
 title: I Was Wrong
 tags: ["Sexuality", "Consciousness", "Realization"]
 date: 2026-08-12
+featured: true
 ---
 
 Just a quick note to say that I was wrong about fighting our sexuality. It can't be done. There's a state where you don't try to suppress it but still don't act on it. I will not
